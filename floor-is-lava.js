@@ -1,4 +1,4 @@
-var panSensitivity = 0.01;
+var panSensitivity = 0.001;
 
 var basicMaterial = new THREE.MeshBasicMaterial({
     color: 0x333333,
@@ -200,12 +200,10 @@ function onMouseUp(event) {
 }
 
 function onMouseMove(event) {
-    if (isMouseDown) {
         var dx = panSensitivity * event.movementX;
         var dy = panSensitivity * event.movementY;
         firstPersonCamera.rotation.y += dx;
         firstPersonCamera.rotation.x += dy;
-    }
 }
 
 function update() {
