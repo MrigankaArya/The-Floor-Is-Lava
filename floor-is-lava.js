@@ -1,7 +1,7 @@
 var panSensitivity = 0.01;
 
 var basicMaterial = new THREE.MeshBasicMaterial({
-    color: 0xBBBBBB,
+    color: 0x333333,
     side: THREE.DoubleSide
 });
 
@@ -25,7 +25,7 @@ var playerView = {
     width: 0.499,
     height: 1.0,
     background: new THREE.Color().setRGB(0.1, 0.1, 0.1),
-    eye: [80, 20, 80],
+    eye: [40, 20, 40],
     up: [0, 1, 0],
     fov: 45,
     updateCamera: function(camera, scene, mouseX, mouseY) {}
@@ -43,10 +43,17 @@ function resetCamera(camera, view) {
     camera.lookAtPoint = origin;
 }
 
-var camera = new THREE.PerspectiveCamera(playerView.fov, 1, 0.1, 1000); // view angle, aspect ratio, near, far
-camera.rotation.order = "YXZ"; //need for pitch/yaw to maintain horizon
-resetCamera(camera, playerView);
-scene.add(camera);
+function attachPlayerToCamera(camera) {
+    var geometry = new THREE.BoxGeometry(1, 1, 2);
+    var mesh = new THREE.Mesh(geometry, basicMaterial);
+    camera.add(mesh);
+}
+
+var firstPersonCamera = new THREE.PerspectiveCamera(playerView.fov, 1, 2, 1000); // view angle, aspect ratio, near, far
+firstPersonCamera.rotation.order = "YXZ"; //need for pitch/yaw to maintain horizon
+resetCamera(firstPersonCamera, playerView);
+attachPlayerToCamera(firstPersonCamera);
+scene.add(firstPersonCamera);
 
 //uncomment to debug using orbit controls
 //var controls = new THREE.OrbitControls(camera);
@@ -54,8 +61,8 @@ scene.add(camera);
 // ADAPT TO WINDOW RESIZE
 function resize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+    firstPersonCamera.aspect = window.innerWidth / window.innerHeight;
+    firstPersonCamera.updateProjectionMatrix();
 }
 
 // EVENT LISTENER RESIZE
@@ -147,16 +154,15 @@ function addGroundPlane() {
     var plane = new THREE.Mesh(planeGeometry, basicMaterial);
     var rotateX90 = new THREE.Matrix4().makeRotationX(Math.PI / 2);
     plane.setMatrix(rotateX90);
+    plane.position.y = -0.1;
     scene.add(plane);
 }
 
 addGrid();
 addAxes();
-//addGroundPlane();
+addGroundPlane();
 
 var keyboard = new THREEx.KeyboardState();
-var grid_state = true;
-var key;
 keyboard.domElement.addEventListener('keydown', onKeyDown);
 keyboard.domElement.addEventListener('keyup', onKeyUp);
 window.addEventListener('mousedown', onMouseDown);
@@ -197,14 +203,14 @@ function onMouseMove(event) {
     if (isMouseDown) {
         var dx = panSensitivity * event.movementX;
         var dy = panSensitivity * event.movementY;
-        camera.rotation.y += dx;
-        camera.rotation.x += dy;
+        firstPersonCamera.rotation.y += dx;
+        firstPersonCamera.rotation.x += dy;
     }
 }
 
 function update() {
     requestAnimationFrame(update);
-    renderer.render(scene, camera);
+    renderer.render(scene, firstPersonCamera);
 }
 
 update();
