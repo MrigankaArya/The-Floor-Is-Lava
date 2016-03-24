@@ -43,13 +43,8 @@ function resetCamera(camera, view) {
     camera.lookAtPoint = origin;
 }
 
-function transformCamera(camera, transformMatrix) {
-    var current = camera.matrix;
-    var final = new THREE.Matrix4().multiplyMatrices(current, transformMatrix);
-    camera.setMatrix(final);
-}
-
 var camera = new THREE.PerspectiveCamera(playerView.fov, 1, 0.1, 1000); // view angle, aspect ratio, near, far
+camera.rotation.order = "YXZ"; //need for pitch/yaw to maintain horizon
 resetCamera(camera, playerView);
 scene.add(camera);
 
@@ -202,10 +197,8 @@ function onMouseMove(event) {
     if (isMouseDown) {
         var dx = panSensitivity * event.movementX;
         var dy = panSensitivity * event.movementY;
-        var yaw = new THREE.Matrix4().makeRotationY(dx);
-        var pitch = new THREE.Matrix4().makeRotationX(dy);
-        var pitchAndYaw = new THREE.Matrix4().multiplyMatrices(pitch, yaw);
-        transformCamera(camera, pitchAndYaw);
+        camera.rotation.y += dx;
+        camera.rotation.x += dy;
     }
 }
 
