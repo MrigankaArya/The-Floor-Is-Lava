@@ -17,9 +17,32 @@ renderer.setClearColor(0xFFFFFF); // white background colour
 canvas.appendChild(renderer.domElement);
 
 // SETUP CAMERA
-var camera = new THREE.PerspectiveCamera(30, 1, 0.1, 1000); // view angle, aspect ratio, near, far
-camera.position.set(45, 20, 40);
-camera.lookAt(scene.position);
+var playerView = {
+    left: 0,
+    bottom: 0,
+    width: 0.499,
+    height: 1.0,
+    background: new THREE.Color().setRGB(0.1, 0.1, 0.1),
+    eye: [80, 20, 80],
+    up: [0, 1, 0],
+    fov: 45,
+    updateCamera: function(camera, scene, mouseX, mouseY) {}
+};
+
+function resetCamera(camera, view) {
+    camera.position.x = view.eye[0];
+    camera.position.y = view.eye[1];
+    camera.position.z = view.eye[2];
+    camera.up.x = view.up[0];
+    camera.up.y = view.up[1];
+    camera.up.z = view.up[2];
+    var origin = new THREE.Vector3(0, 0, 0);
+    camera.lookAt(origin);
+    camera.lookAtPoint = origin;
+}
+
+var camera = new THREE.PerspectiveCamera(playerView.fov, 1, 0.1, 1000); // view angle, aspect ratio, near, far
+resetCamera(camera, playerView);
 scene.add(camera);
 
 // SETUP ORBIT CONTROLS OF THE CAMERA
