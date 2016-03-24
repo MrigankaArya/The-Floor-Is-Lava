@@ -1,3 +1,5 @@
+var panSensitivity = 0.01;
+
 var basicMaterial = new THREE.MeshBasicMaterial({
     color: 0xBBBBBB,
     side: THREE.DoubleSide
@@ -41,12 +43,18 @@ function resetCamera(camera, view) {
     camera.lookAtPoint = origin;
 }
 
+function transformCamera(camera, transformMatrix) {
+    var current = camera.matrix;
+    var final = new THREE.Matrix4().multiplyMatrices(current, transformMatrix);
+    camera.setMatrix(final);
+}
+
 var camera = new THREE.PerspectiveCamera(playerView.fov, 1, 0.1, 1000); // view angle, aspect ratio, near, far
 resetCamera(camera, playerView);
 scene.add(camera);
 
-// SETUP ORBIT CONTROLS OF THE CAMERA
-var controls = new THREE.OrbitControls(camera);
+//uncomment to debug using orbit controls
+//var controls = new THREE.OrbitControls(camera);
 
 // ADAPT TO WINDOW RESIZE
 function resize() {
@@ -90,7 +98,6 @@ function buildAxis(src, dst, colorHex, dashed) {
     var axis = new THREE.Line(geom, mat, THREE.LinePieces);
 
     return axis;
-
 }
 
 function addAxes() {
@@ -152,11 +159,14 @@ addGrid();
 addAxes();
 //addGroundPlane();
 
-
 var keyboard = new THREEx.KeyboardState();
 var grid_state = true;
 var key;
 keyboard.domElement.addEventListener('keydown', onKeyDown);
+keyboard.domElement.addEventListener('keyup', onKeyUp);
+window.addEventListener('mousedown', onMouseDown);
+window.addEventListener('mouseup', onMouseUp);
+window.addEventListener('mousemove', onMouseMove);
 
 function onKeyDown(event) {
     console.log(event.code);
@@ -169,6 +179,33 @@ function onKeyDown(event) {
         console.log("s!");
     } else if (keyboard.eventMatches(event, "d")) { // Reveal/Hide helper grid
         console.log("d!");
+    }
+}
+
+function onKeyUp(event) {
+    console.log(event.code);
+}
+
+var isMouseDown = false;
+
+function onMouseDown(event) {
+    console.log("mouse down");
+    isMouseDown = true;
+}
+
+function onMouseUp(event) {
+    console.log("mouse up");
+    isMouseDown = false;
+}
+
+function onMouseMove(event) {
+    if (isMouseDown) {
+        var dx = panSensitivity * event.movementX;
+        var dy = panSensitivity * event.movementY;
+        var yaw = new THREE.Matrix4().makeRotationY(dx);
+        var pitch = new THREE.Matrix4().makeRotationX(dy);
+        var pitchAndYaw = new THREE.Matrix4().multiplyMatrices(pitch, yaw);
+        transformCamera(camera, pitchAndYaw);
     }
 }
 
