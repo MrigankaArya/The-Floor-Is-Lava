@@ -1,9 +1,119 @@
 var panSensitivity = 0.001;
 
+// LIGHTING UNIFORMS
+var lightColor = new THREE.Color(1, 1, 1);
+var ambientColor = new THREE.Color(0.4, 0.4, 0.4);
+var lightPosition = new THREE.Vector3(70, 100, 70);
+
+var litColor = new THREE.Color(0.7, 0.4, 0.6);
+var unLitColor = new THREE.Color(0.15, 0.2, 0.6);
+var outlineColor = new THREE.Color(0.04, 0.1, 0.15);
+
+var kAmbient = 0.4;
+var kDiffuse = 0.8;
+var kSpecular = 0.8;
+var shininess = 10.0;
+
+//MATERIALS
 var basicMaterial = new THREE.MeshBasicMaterial({
     color: 0x333333,
     side: THREE.DoubleSide
 });
+
+var toonMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+        litColor: {
+            type: 'c',
+            value: litColor
+        },
+        unLitColor: {
+            type: 'c',
+            value: unLitColor
+        },
+        outlineColor: {
+            type: 'c',
+            value: outlineColor
+        },
+        lightColor: {
+            type: 'c',
+            value: lightColor
+        },
+        ambientColor: {
+            type: 'c',
+            value: ambientColor
+        },
+        lightPosition: {
+            type: 'v3',
+            value: lightPosition
+        },
+        kAmbient: {
+            type: 'f',
+            value: kAmbient
+        },
+        kDiffuse: {
+            type: 'f',
+            value: kDiffuse
+        },
+        kSpecular: {
+            type: 'f',
+            value: kSpecular
+        },
+        shininess: {
+            type: 'f',
+            value: shininess
+        },
+    },
+});
+
+var blinnPhongMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+        lightColor: {
+            type: 'c',
+            value: lightColor
+        },
+        ambientColor: {
+            type: 'c',
+            value: ambientColor
+        },
+        lightPosition: {
+            type: 'v3',
+            value: lightPosition
+        },
+        kAmbient: {
+            type: 'f',
+            value: kAmbient
+        },
+        kDiffuse: {
+            type: 'f',
+            value: kDiffuse
+        },
+        kSpecular: {
+            type: 'f',
+            value: kSpecular
+        },
+        shininess: {
+            type: 'f',
+            value: shininess
+        }
+    },
+});
+// LOAD SHADERS
+var shaderFiles = [
+    'glsl/blinnPhong.vs.glsl',
+    'glsl/blinnPhong.fs.glsl',
+    'glsl/toon.vs.glsl',
+    'glsl/toon.fs.glsl'
+];
+
+new THREE.SourceLoader().load(shaderFiles, function(shaders) {
+    blinnPhongMaterial.vertexShader = shaders['glsl/blinnPhong.vs.glsl'];
+    blinnPhongMaterial.fragmentShader = shaders['glsl/blinnPhong.fs.glsl'];
+    blinnPhongMaterial.needsUpdate = true;
+    toonMaterial.vertexShader = shaders['glsl/toon.vs.glsl'];
+    toonMaterial.fragmentShader = shaders['glsl/toon.fs.glsl'];
+    toonMaterial.needsUpdate = true;
+})
+
 
 // ASSIGNMENT-SPECIFIC API EXTENSION
 THREE.Object3D.prototype.setMatrix = function(a) {
@@ -205,6 +315,17 @@ function addGroundPlane() {
     plane.position.y = -0.1;
     scene.add(plane);
 }
+
+function addBoxes() {
+    for (var i = 0; i < 10; i++) {
+        var geometry = new THREE.TorusKnotGeometry(1, 0.5, 32, 6, 4, 3, 1);
+        var mesh = new THREE.Mesh(geometry, toonMaterial);
+        mesh.position.y = i * 10;
+        scene.add(mesh);
+    }
+}
+
+addBoxes();
 
 addGrid();
 addAxes();
