@@ -1,5 +1,7 @@
 var panSensitivity = 0.001;
 var levelLength = 100;
+var levelWidth = 50;
+var levelHeight = 15;
 var playerHeight = 3;
 // LIGHTING UNIFORMS
 var lightColor = new THREE.Color(1, 1, 1);
@@ -304,21 +306,41 @@ function addGrid() {
         color: 0xBBBBBB
     });
     var grid = new THREE.Line(gridGeometry, gridMaterial, THREE.LinePieces);
+    grid.position.y += 0.1
     scene.add(grid);
 }
 
 var groundPlane;
 
-function addGroundPlane() {
-    var planeGeometry = new THREE.PlaneBufferGeometry(50, levelLength, 1);
-    var plane = new THREE.Mesh(planeGeometry, basicMaterial);
-    var rotateX90 = new THREE.Matrix4().makeRotationX(Math.PI / 2);
-    plane.setMatrix(rotateX90);
-    plane.position.y = -0.1;
+function addRoom() {
+    function makeRoomSurface(width, height, transformMatrix) {
+        var planeGeometry = new THREE.PlaneBufferGeometry(width, height, 1);
+        var plane = new THREE.Mesh(planeGeometry, basicMaterial);
+        plane.setMatrix(transformMatrix);
+        scene.add(plane);
+        return plane;
+    }
+
+    var plane = makeRoomSurface(levelWidth, levelLength, new THREE.Matrix4().makeRotationX(Math.PI / 2));
     groundPlane = plane;
-    scene.add(plane);
+
+    var leftTransform = new THREE.Matrix4().makeTranslation(0, levelHeight / 2, -levelWidth / 2);
+    var leftRightRotate = new THREE.Matrix4().makeRotationY(Math.PI / 2);
+    var leftWall = makeRoomSurface(levelLength, levelHeight, new THREE.Matrix4().multiplyMatrices(leftRightRotate, leftTransform));
+
+    var rightTransform = new THREE.Matrix4().makeTranslation(0, levelHeight / 2, levelWidth / 2);
+    var rightWall = makeRoomSurface(levelLength, levelHeight, new THREE.Matrix4().multiplyMatrices(leftRightRotate, rightTransform));
+
+    var backTransform = new THREE.Matrix4().makeTranslation(0, levelHeight / 2, -levelLength / 2);
+    var backWall = makeRoomSurface(levelWidth, levelHeight, backTransform);
+
+    var frontTransform = new THREE.Matrix4().makeTranslation(0, levelHeight / 2, levelLength / 2);
+    var frontWall = makeRoomSurface(levelWidth, levelHeight, frontTransform);
 }
 
+addGrid();
+addAxes();
+addRoom();
 
 //INITIATE OBSTACLES
 var obstacles = [];
@@ -343,10 +365,6 @@ obstacles.sort(function(a, b) {
 obstacles.forEach(function(ob) {
     console.log(ob.position.z)
 });
-
-addGrid();
-addAxes();
-addGroundPlane();
 
 var cursorOffsetX = -1;
 var cursorOffsetY = -1;
