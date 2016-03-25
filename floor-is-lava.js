@@ -135,7 +135,7 @@ var playerView = {
     width: 0.499,
     height: 1.0,
     background: new THREE.Color().setRGB(0.1, 0.1, 0.1),
-    eye: [0, 20, levelLength/2 - 10],
+    eye: [0, 20, levelLength / 2 - 10],
     up: [0, 1, 0],
     fov: 45,
     updateCamera: function(camera, scene, mouseX, mouseY) {}
@@ -308,6 +308,7 @@ function addGrid() {
 }
 
 var groundPlane;
+
 function addGroundPlane() {
     var planeGeometry = new THREE.PlaneBufferGeometry(50, levelLength, 1);
     var plane = new THREE.Mesh(planeGeometry, basicMaterial);
@@ -375,10 +376,13 @@ function onKeyDown(event) {
         keys[keyUsed] = true;
         if (keys.w == true && keys.s == true) {
             if (keyUsed == "s") {
+
                 keys.w = false;
             } else {
                 keys.s = false;
             }
+            firstPersonCamera.velocity.z = 0;
+
         }
 
         if (keys.a == true && keys.d == true) {
@@ -387,11 +391,12 @@ function onKeyDown(event) {
             } else {
                 keys.a = false;
             }
+            firstPersonCamera.velocity.x = 0;
         }
     } else if (match(" ")) {
         if (!isFalling) {
             firstPersonCamera.velocity.y = 0.1;
-            var translateUpSlightly = new THREE.Matrix4().makeTranslation(0, 1, 0); 
+            var translateUpSlightly = new THREE.Matrix4().makeTranslation(0, 1, 0);
             //need to do this because diff in update() function will not prevent us from sinking into the floor slightly
             var jumpStartMatrix = new THREE.Matrix4().multiplyMatrices(firstPersonCamera.matrix, translateUpSlightly);
             firstPersonCamera.setMatrix(jumpStartMatrix);
@@ -408,8 +413,14 @@ function onKeyUp(event) {
     var keyUsed;
     if (keyUsed = match("w") || match("a") || match("s") || match("d")) {
         keys[keyUsed] = false;
-        firstPersonCamera.velocity.x = 0;
-        firstPersonCamera.velocity.z = 0;
+
+        if (!keys.w && !keys.s) {
+            firstPersonCamera.velocity.z = 0;
+        }
+        if (!keys.a && !keys.d) {
+            firstPersonCamera.velocity.x = 0;
+
+        }
     }
 }
 
@@ -434,15 +445,16 @@ var posNewY = 508;
 var oldDx = 0;
 var isOutBounds = false;
 var mouseMoving = false;
-function onMouseMove(event) {  
+
+function onMouseMove(event) {
 
     mouseMoving = true;
-    var diffX = event.clientX-posNewX;
-    var diffY = event.clientY-posNewY;  
+    var diffX = event.clientX - posNewX;
+    var diffY = event.clientY - posNewY;
 
     var dx = panSensitivity * diffX;
     var dy = panSensitivity * diffY;
-   
+
 
     posNewY = event.clientY;
     posNewX = event.clientX;
@@ -450,7 +462,7 @@ function onMouseMove(event) {
     firstPersonCamera.rotation.y += dx;
     firstPersonCamera.rotation.x += dy;
 
-    if(event.clientX >= (screen.width - 100) || event.clientX ==0){
+    if (event.clientX >= (screen.width - 100) || event.clientX == 0) {
         isOutBounds = true;
         mouseMoving = true;
         return;
@@ -464,10 +476,10 @@ function update() {
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
 
-    var diff = firstPersonCamera.position.y - (groundPlane.position.y + playerHeight/2);
+    var diff = firstPersonCamera.position.y - (groundPlane.position.y + playerHeight / 2);
     if (diff > 0) {
         firstPersonCamera.fall();
-        isFalling = true;      
+        isFalling = true;
     } else {
         isFalling = false;
     }
@@ -488,8 +500,8 @@ function update() {
         firstPersonCamera.slideX(true);
     }
 
-    
-    if(isOutBounds && mouseMoving){
+
+    if (isOutBounds && mouseMoving) {
         console.log("HI FUCKO");
         firstPersonCamera.rotation.y += oldDx;
     }
@@ -497,4 +509,3 @@ function update() {
 }
 
 update();
-
