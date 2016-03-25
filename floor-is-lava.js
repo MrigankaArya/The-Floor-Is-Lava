@@ -25,7 +25,7 @@ var playerView = {
     width: 0.499,
     height: 1.0,
     background: new THREE.Color().setRGB(0.1, 0.1, 0.1),
-    eye: [40, 20, 40],
+    eye: [40, 100, 40],
     up: [0, 1, 0],
     fov: 45,
     updateCamera: function(camera, scene, mouseX, mouseY) {}
@@ -41,6 +41,7 @@ function resetCamera(camera, view) {
     var origin = new THREE.Vector3(0, 0, 0);
     camera.lookAt(origin);
     camera.lookAtPoint = origin;
+    camera.velocity = new THREE.Vector3(0, 0, 0);
 }
 
 function attachPlayerToCamera(camera) {
@@ -49,10 +50,21 @@ function attachPlayerToCamera(camera) {
     camera.add(mesh);
 }
 
+function addGravityToPlayer(camera) {
+    camera.gravity = -0.00098;
+    camera.fall = function() {
+        this.velocity.y += this.gravity;
+        var fallTranslation = new THREE.Matrix4().makeTranslation(0, this.velocity.y, 0);
+        var postFallPos = new THREE.Matrix4().multiplyMatrices(fallTranslation, this.matrix);
+        this.setMatrix(postFallPos);
+    }
+}
+
 var firstPersonCamera = new THREE.PerspectiveCamera(playerView.fov, 1, 2, 1000); // view angle, aspect ratio, near, far
 firstPersonCamera.rotation.order = "YXZ"; //need for pitch/yaw to maintain horizon
 resetCamera(firstPersonCamera, playerView);
 attachPlayerToCamera(firstPersonCamera);
+addGravityToPlayer(firstPersonCamera);
 scene.add(firstPersonCamera);
 
 //uncomment to debug using orbit controls
@@ -150,7 +162,7 @@ function addGrid() {
 }
 
 function addGroundPlane() {
-    var planeGeometry = new THREE.PlaneGeometry(100, 100, 1);
+    var planeGeometry = new THREE.PlaneBufferGeometry(100, 100, 1);
     var plane = new THREE.Mesh(planeGeometry, basicMaterial);
     var rotateX90 = new THREE.Matrix4().makeRotationX(Math.PI / 2);
     plane.setMatrix(rotateX90);
@@ -173,13 +185,9 @@ function onKeyDown(event) {
     console.log(event.code);
     // TO-DO: BIND KEYS TO YOUR CONTROLS      
     if (keyboard.eventMatches(event, "w")) { // Reveal/Hide helper grid
-        console.log("w!");
     } else if (keyboard.eventMatches(event, "a")) { // Reveal/Hide helper grid
-        console.log("a!");
     } else if (keyboard.eventMatches(event, "s")) { // Reveal/Hide helper grid
-        console.log("s!");
     } else if (keyboard.eventMatches(event, "d")) { // Reveal/Hide helper grid
-        console.log("d!");
     }
 }
 
@@ -209,6 +217,7 @@ function onMouseMove(event) {
 function update() {
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
+    firstPersonCamera.fall();
 }
 
 update();
