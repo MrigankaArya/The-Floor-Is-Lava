@@ -41,7 +41,6 @@ function resetCamera(camera, view) {
     var origin = new THREE.Vector3(0, 0, 0);
     camera.lookAt(origin);
     camera.lookAtPoint = origin;
-    camera.velocity = new THREE.Vector3(0, 0, 0);
 }
 
 function attachPlayerToCamera(camera) {
@@ -50,9 +49,10 @@ function attachPlayerToCamera(camera) {
     camera.add(mesh);
 }
 
-function addGravityToPlayer(camera) {
-    camera.gravity = -0.00098;
-    camera.fall = function() {
+function addGravity(obj) {
+    obj.velocity = new THREE.Vector3(0, 0, 0);
+    obj.gravity = -0.00098;
+    obj.fall = function() {
         this.velocity.y += this.gravity;
         var fallTranslation = new THREE.Matrix4().makeTranslation(0, this.velocity.y, 0);
         var postFallPos = new THREE.Matrix4().multiplyMatrices(fallTranslation, this.matrix);
@@ -64,7 +64,7 @@ var firstPersonCamera = new THREE.PerspectiveCamera(playerView.fov, 1, 2, 1000);
 firstPersonCamera.rotation.order = "YXZ"; //need for pitch/yaw to maintain horizon
 resetCamera(firstPersonCamera, playerView);
 attachPlayerToCamera(firstPersonCamera);
-addGravityToPlayer(firstPersonCamera);
+addGravity(firstPersonCamera);
 scene.add(firstPersonCamera);
 
 //uncomment to debug using orbit controls
@@ -209,22 +209,31 @@ function onMouseUp(event) {
     isMouseDown = false;
 }
 
-function onMouseMove(event) {        
-        var dx = panSensitivity * event.movementX;
-        var dy = panSensitivity * event.movementY;
+function onMouseMove(event) {  
+    var moveX = event.movementX;
+    var moveY = event.movementY;  
 
-        if(firstPersonCamera.rotation.y+dx <1 && firstPersonCamera.rotation.y+dx >-1){
-            firstPersonCamera.rotation.y += dx;
-        }
-        if(firstPersonCamera.rotation.x+dy <1 && firstPersonCamera.rotation.x+dy >-1){
-           firstPersonCamera.rotation.x += dy;
-       }
+    if(event.movementX > 100)
+        moveX = 0;
+    else if(event.movementX < -100)
+        moveX = 0;
+
+    if(event.movementY > 100)
+        moveY = 0;
+    else if(event.movementY<-100)
+        moveY = 0;
+
+    var dx = panSensitivity * moveX;
+    var dy = panSensitivity * moveY;
+            
+    firstPersonCamera.rotation.y += dx;
+    firstPersonCamera.rotation.x += dy;
 }
 
 function update() {
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
-    firstPersonCamera.fall();
+    // firstPersonCamera.fall();
 }
 
 update();
