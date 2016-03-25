@@ -40,6 +40,7 @@ function resetCamera(camera, view) {
     camera.up.z = view.up[2];
     var origin = new THREE.Vector3(0, 0, 0);
     camera.lookAt(origin);
+    camera.velocity = new THREE.Vector3(0, 0, 0);
     camera.lookAtPoint = origin;
 }
 
@@ -50,7 +51,10 @@ function attachPlayerToCamera(camera) {
 }
 
 function addGravity(obj) {
-    obj.velocity = new THREE.Vector3(0, 0, 0);
+    if (obj.velocity == null) {
+        obj.velocity = new THREE.Vector3(0, 0, 0);
+    }
+
     obj.gravity = -0.00098;
     obj.fall = function() {
         this.velocity.y += this.gravity;
@@ -60,11 +64,43 @@ function addGravity(obj) {
     }
 }
 
+function addHorizontalAccel(obj) {
+    if (obj.velocity == null) {
+        obj.velocity = new THREE.Vector3(0, 0, 0);
+    }
+
+    obj.horizontalAccelX = 0.06;
+    obj.horizontalAccelZ = 0.06;
+    obj.slideX = function(isForward) {
+        if (isForward) {
+            this.horizontalAccelX = Math.abs(this.horizontalAccelX)
+        } else {
+            this.horizontalAccelX = -Math.abs(this.horizontalAccelX);
+        }
+        this.velocity.x += this.horizontalAccelX;
+        var slideTranslation = new THREE.Matrix4().makeTranslation(this.velocity.x, 0, 0);
+        var postSlideTranslation = new THREE.Matrix4().multiplyMatrices(slideTranslation, this.matrix);
+        this.setMatrix(postSlideTranslation);
+    }
+    obj.slideZ = function(isForward) {
+        if (isForward) {
+            this.horizontalAccelZ = Math.abs(this.horizontalAccelZ)
+        } else {
+            this.horizontalAccelZ = -Math.abs(this.horizontalAccelZ);
+        }
+        this.velocity.z += this.horizontalAccelZ;
+        var slideTranslation = new THREE.Matrix4().makeTranslation(0, 0, this.velocity.z);
+        var postSlideTranslation = new THREE.Matrix4().multiplyMatrices(slideTranslation, this.matrix);
+        this.setMatrix(postSlideTranslation);
+    }
+}
+
 var firstPersonCamera = new THREE.PerspectiveCamera(playerView.fov, 1, 2, 1000); // view angle, aspect ratio, near, far
 firstPersonCamera.rotation.order = "YXZ"; //need for pitch/yaw to maintain horizon
 resetCamera(firstPersonCamera, playerView);
 attachPlayerToCamera(firstPersonCamera);
 addGravity(firstPersonCamera);
+addHorizontalAccel(firstPersonCamera);
 scene.add(firstPersonCamera);
 
 //uncomment to debug using orbit controls
@@ -183,18 +219,53 @@ window.addEventListener('mousedown', onMouseDown);
 window.addEventListener('mouseup', onMouseUp);
 window.addEventListener('mousemove', onMouseMove);
 
+var keys = {
+    w: false,
+    a: false,
+    s: false,
+    d: false
+};
+
 function onKeyDown(event) {
-    console.log(event.code);
-    // TO-DO: BIND KEYS TO YOUR CONTROLS      
-    if (keyboard.eventMatches(event, "w")) { // Reveal/Hide helper grid
-    } else if (keyboard.eventMatches(event, "a")) { // Reveal/Hide helper grid
-    } else if (keyboard.eventMatches(event, "s")) { // Reveal/Hide helper grid
-    } else if (keyboard.eventMatches(event, "d")) { // Reveal/Hide helper grid
+    function match(key) {
+        return keyboard.eventMatches(event, key) ? key : false;
     }
+
+    var keyUsed;
+    if (keyUsed = match("w") || match("a") || match("s") || match("d")) {
+        keys[keyUsed] = true;
+        if (keys.w == true && keys.s == true) {
+            if (keyUsed == "s") {
+                keys.w = false;
+            } else {
+                keys.s = false;
+            }
+        }
+
+        if (keys.a == true && keys.d == true) {
+            if (keyUsed == "a") {
+                keys.d = false;
+            } else {
+                keys.a = false;
+            }
+        }
+    }
+    console.log(keys);
 }
 
 function onKeyUp(event) {
-    console.log(event.code);
+    function match(key) {
+        return keyboard.eventMatches(event, key) ? key : false;
+    }
+
+    var keyUsed;
+    if (keyUsed = match("w") || match("a") || match("s") || match("d")) {
+        keys[keyUsed] = false;
+        firstPersonCamera.velocity.x = 0;
+        firstPersonCamera.velocity.z = 0;
+    }
+    console.log(keys);
+
 }
 
 var isMouseDown = false;
@@ -209,23 +280,23 @@ function onMouseUp(event) {
     isMouseDown = false;
 }
 
-function onMouseMove(event) {  
+function onMouseMove(event) {
     var moveX = event.movementX;
-    var moveY = event.movementY;  
+    var moveY = event.movementY;
 
-    if(event.movementX > 100)
+    if (event.movementX > 100)
         moveX = 0;
-    else if(event.movementX < -100)
+    else if (event.movementX < -100)
         moveX = 0;
 
-    if(event.movementY > 100)
+    if (event.movementY > 100)
         moveY = 0;
-    else if(event.movementY<-100)
+    else if (event.movementY < -100)
         moveY = 0;
 
     var dx = panSensitivity * moveX;
     var dy = panSensitivity * moveY;
-            
+
     firstPersonCamera.rotation.y += dx;
     firstPersonCamera.rotation.x += dy;
 }
@@ -233,7 +304,22 @@ function onMouseMove(event) {
 function update() {
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
-    // firstPersonCamera.fall();
+    firstPersonCamera.fall();
+    if (keys.w) {
+        firstPersonCamera.slideZ(true);
+    }
+
+    if (keys.s) {
+        firstPersonCamera.slideZ(false);
+    }
+
+    if (keys.a) {
+        firstPersonCamera.slideX(true);
+    }
+
+    if (keys.d) {
+        firstPersonCamera.slideX(false);
+    }
 }
 
 update();
