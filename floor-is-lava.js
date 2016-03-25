@@ -162,6 +162,8 @@ addGrid();
 addAxes();
 addGroundPlane();
 
+var cursorOffsetX = -1;
+var cursorOffsetY = -1;
 var keyboard = new THREEx.KeyboardState();
 keyboard.domElement.addEventListener('keydown', onKeyDown);
 keyboard.domElement.addEventListener('keyup', onKeyUp);
@@ -199,11 +201,16 @@ function onMouseUp(event) {
     isMouseDown = false;
 }
 
-function onMouseMove(event) {
+function onMouseMove(event) {        
         var dx = panSensitivity * event.movementX;
         var dy = panSensitivity * event.movementY;
-        firstPersonCamera.rotation.y += dx;
-        firstPersonCamera.rotation.x += dy;
+
+        if(firstPersonCamera.rotation.y+dx <1 && firstPersonCamera.rotation.y+dx >-1){
+            firstPersonCamera.rotation.y += dx;
+        }
+        if(firstPersonCamera.rotation.x+dy <1 && firstPersonCamera.rotation.x+dy >-1){
+           firstPersonCamera.rotation.x += dy;
+       }
 }
 
 function update() {
