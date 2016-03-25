@@ -1,6 +1,6 @@
 var panSensitivity = 0.001;
 var levelLength = 100;
-
+var playerHeight = 3;
 // LIGHTING UNIFORMS
 var lightColor = new THREE.Color(1, 1, 1);
 var ambientColor = new THREE.Color(0.4, 0.4, 0.4);
@@ -135,7 +135,7 @@ var playerView = {
     width: 0.499,
     height: 1.0,
     background: new THREE.Color().setRGB(0.1, 0.1, 0.1),
-    eye: [0, 100, levelLength/2 - 10],
+    eye: [0, 20, levelLength/2 - 10],
     up: [0, 1, 0],
     fov: 45,
     updateCamera: function(camera, scene, mouseX, mouseY) {}
@@ -155,7 +155,7 @@ function resetCamera(camera, view) {
 }
 
 function attachPlayerToCamera(camera) {
-    var geometry = new THREE.BoxGeometry(1, 1, 2);
+    var geometry = new THREE.BoxGeometry(1, playerHeight, 2);
     var mesh = new THREE.Mesh(geometry, basicMaterial);
     camera.add(mesh);
 }
@@ -165,7 +165,7 @@ function addGravity(obj) {
         obj.velocity = new THREE.Vector3(0, 0, 0);
     }
 
-    obj.gravity = -0.00098;
+    obj.gravity = -0.005;
     obj.fall = function() {
         this.velocity.y += this.gravity;
         var fallTranslation = new THREE.Matrix4().makeTranslation(0, this.velocity.y, 0);
@@ -179,8 +179,8 @@ function addHorizontalAccel(obj) {
         obj.velocity = new THREE.Vector3(0, 0, 0);
     }
 
-    obj.horizontalAccelX = 0.06;
-    obj.horizontalAccelZ = 0.06;
+    obj.horizontalAccelX = 0.002;
+    obj.horizontalAccelZ = 0.002;
     obj.slideX = function(isForward) {
         if (isForward) {
             this.horizontalAccelX = Math.abs(this.horizontalAccelX)
@@ -307,12 +307,14 @@ function addGrid() {
     scene.add(grid);
 }
 
+var groundPlane;
 function addGroundPlane() {
     var planeGeometry = new THREE.PlaneBufferGeometry(50, levelLength, 1);
     var plane = new THREE.Mesh(planeGeometry, basicMaterial);
     var rotateX90 = new THREE.Matrix4().makeRotationX(Math.PI / 2);
     plane.setMatrix(rotateX90);
     plane.position.y = -0.1;
+    groundPlane = plane;
     scene.add(plane);
 }
 
@@ -324,7 +326,7 @@ function addToruses() {
     for (var i = 0; i < 10; i++) {
         var geometry = new THREE.TorusKnotGeometry(1, 0.5, 32, 6, 4, 3, 1);
         var mesh = new THREE.Mesh(geometry, toonMaterial);
-        mesh.position.y = i * 10;
+        mesh.position.z += i - 5;
         obstacles.push(mesh);
         scene.add(mesh);
     }
@@ -333,7 +335,13 @@ function addToruses() {
 addToruses();
 
 //Sort obstacles by y position for collision detection
+obstacles.sort(function(a, b) {
+    return a.position.z - b.position.z;
+});
 
+obstacles.forEach(function(ob) {
+    console.log(ob.position.z)
+});
 
 addGrid();
 addAxes();
@@ -354,6 +362,8 @@ var keys = {
     s: false,
     d: false
 };
+
+var isFalling = true;
 
 function onKeyDown(event) {
     function match(key) {
@@ -378,8 +388,16 @@ function onKeyDown(event) {
                 keys.a = false;
             }
         }
+    } else if (match(" ")) {
+        if (!isFalling) {
+            firstPersonCamera.velocity.y = 0.1;
+            var translateUpSlightly = new THREE.Matrix4().makeTranslation(0, 1, 0); 
+            //need to do this because diff in update() function will not prevent us from sinking into the floor slightly
+            var jumpStartMatrix = new THREE.Matrix4().multiplyMatrices(firstPersonCamera.matrix, translateUpSlightly);
+            firstPersonCamera.setMatrix(jumpStartMatrix);
+            isFalling = true;
+        }
     }
-    console.log(keys);
 }
 
 function onKeyUp(event) {
@@ -393,8 +411,6 @@ function onKeyUp(event) {
         firstPersonCamera.velocity.x = 0;
         firstPersonCamera.velocity.z = 0;
     }
-    console.log(keys);
-
 }
 
 var isMouseDown = false;
@@ -448,7 +464,14 @@ function update() {
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
 
-    firstPersonCamera.fall();
+    var diff = firstPersonCamera.position.y - (groundPlane.position.y + playerHeight/2);
+    if (diff > 0) {
+        firstPersonCamera.fall();
+        isFalling = true;      
+    } else {
+        isFalling = false;
+    }
+
     if (keys.w) {
         firstPersonCamera.slideZ(false);
     }
