@@ -1,4 +1,5 @@
 var panSensitivity = 0.001;
+var levelLength = 100;
 
 // LIGHTING UNIFORMS
 var lightColor = new THREE.Color(1, 1, 1);
@@ -114,7 +115,6 @@ new THREE.SourceLoader().load(shaderFiles, function(shaders) {
     toonMaterial.needsUpdate = true;
 })
 
-
 // ASSIGNMENT-SPECIFIC API EXTENSION
 THREE.Object3D.prototype.setMatrix = function(a) {
     this.matrix = a;
@@ -135,7 +135,7 @@ var playerView = {
     width: 0.499,
     height: 1.0,
     background: new THREE.Color().setRGB(0.1, 0.1, 0.1),
-    eye: [40, 100, 40],
+    eye: [0, 100, levelLength/2 - 10],
     up: [0, 1, 0],
     fov: 45,
     updateCamera: function(camera, scene, mouseX, mouseY) {}
@@ -308,7 +308,7 @@ function addGrid() {
 }
 
 function addGroundPlane() {
-    var planeGeometry = new THREE.PlaneBufferGeometry(100, 100, 1);
+    var planeGeometry = new THREE.PlaneBufferGeometry(50, levelLength, 1);
     var plane = new THREE.Mesh(planeGeometry, basicMaterial);
     var rotateX90 = new THREE.Matrix4().makeRotationX(Math.PI / 2);
     plane.setMatrix(rotateX90);
@@ -316,16 +316,24 @@ function addGroundPlane() {
     scene.add(plane);
 }
 
-function addBoxes() {
+
+//INITIATE OBSTACLES
+var obstacles = [];
+
+function addToruses() {
     for (var i = 0; i < 10; i++) {
         var geometry = new THREE.TorusKnotGeometry(1, 0.5, 32, 6, 4, 3, 1);
         var mesh = new THREE.Mesh(geometry, toonMaterial);
         mesh.position.y = i * 10;
+        obstacles.push(mesh);
         scene.add(mesh);
     }
 }
 
-addBoxes();
+addToruses();
+
+//Sort obstacles by y position for collision detection
+
 
 addGrid();
 addAxes();
@@ -442,19 +450,19 @@ function update() {
 
     firstPersonCamera.fall();
     if (keys.w) {
-        firstPersonCamera.slideZ(true);
-    }
-
-    if (keys.s) {
         firstPersonCamera.slideZ(false);
     }
 
+    if (keys.s) {
+        firstPersonCamera.slideZ(true);
+    }
+
     if (keys.a) {
-        firstPersonCamera.slideX(true);
+        firstPersonCamera.slideX(false);
     }
 
     if (keys.d) {
-        firstPersonCamera.slideX(false);
+        firstPersonCamera.slideX(true);
     }
 
     
