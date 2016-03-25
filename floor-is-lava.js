@@ -208,32 +208,49 @@ function onMouseUp(event) {
     console.log("mouse up");
     isMouseDown = false;
 }
+//TODO: Set posNewX and posNewY to center screen coordinates when you start game at center
+//      Follow up todo:  game "START" screen at centered at the center of the screen. Must be dynamic
+//      These values are a local standin for the actual thing. Replace with your screen res to make it actually work
 
+var posNewX = 800;
+var posNewY = 508;
+var oldDx = 0;
+var isOutBounds = false;
+var mouseMoving = false;
 function onMouseMove(event) {  
-    var moveX = event.movementX;
-    var moveY = event.movementY;  
 
-    if(event.movementX > 100)
-        moveX = 0;
-    else if(event.movementX < -100)
-        moveX = 0;
+    mouseMoving = true;
+    var diffX = event.clientX-posNewX;
+    var diffY = event.clientY-posNewY;  
 
-    if(event.movementY > 100)
-        moveY = 0;
-    else if(event.movementY<-100)
-        moveY = 0;
+    var dx = panSensitivity * diffX;
+    var dy = panSensitivity * diffY;
+   
 
-    var dx = panSensitivity * moveX;
-    var dy = panSensitivity * moveY;
-            
+    posNewY = event.clientY;
+    posNewX = event.clientX;
+
     firstPersonCamera.rotation.y += dx;
     firstPersonCamera.rotation.x += dy;
+    console.log(event.clientX);
+    if(event.clientX >= (screen.width - 100) || event.clientX ==0){
+        console.log()
+        isOutBounds = true;
+        mouseMoving = true;
+        return;
+    }
+
+    oldDx = dx;
+    mouseMoving = false;
 }
 
 function update() {
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
     // firstPersonCamera.fall();
+    if(isOutBounds && mouseMoving)
+        firstPersonCamera.rotation.y += oldDx;
 }
 
 update();
+
