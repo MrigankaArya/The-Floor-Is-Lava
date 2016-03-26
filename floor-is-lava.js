@@ -312,15 +312,16 @@ function addGrid() {
 
 var groundPlane;
 
-function addRoom() {
-    function makeRoomSurface(width, height, transformMatrix) {
-        var planeGeometry = new THREE.PlaneGeometry(width, height, 1);
-        var plane = new THREE.Mesh(planeGeometry, toonMaterial);
-        plane.setMatrix(transformMatrix);
-        scene.add(plane);
-        return plane;
-    }
+function makeRoomSurface(width, height, transformMatrix) {
+       var planeGeometry = new THREE.PlaneGeometry(width, height, 1);
+       var plane = new THREE.Mesh(planeGeometry, toonMaterial);
+       plane.setMatrix(transformMatrix);
+       scene.add(plane);
+       return plane;
+}
 
+
+function addRoom() {
     var plane = makeRoomSurface(levelWidth, levelLength, new THREE.Matrix4().makeRotationX(-Math.PI / 2));
     groundPlane = plane;
 
@@ -343,6 +344,86 @@ function addRoom() {
 addGrid();
 addAxes();
 addRoom();
+
+//Adds lava to the floor and deforms it as necessary.
+function addLava() {
+    var lavaGeometry =  new THREE.PlaneGeometry(levelWidth, levelHeight, 100, 100);  //100 segments each 
+    var material = new THREE.MeshBasicMaterial( {color: 0xfff000, side: THREE.DoubleSide} );
+    var lavaPlane = new THREE.Mesh(lavaGeometry, material);
+    var translate = new THREE.Matrix4().makeTranslation(0, 1, 0);
+    var translateAndRotate = new THREE.Matrix4().multiplyMatrices(translate, new THREE.Matrix4().makeRotationX(Math.PI/2));
+    lavaPlane.setMatrix(translateAndRotate);
+    
+    // var pointer = 0;
+    // var terrain = generateTerrain();
+
+    // for(var i=0; i<100; i++){
+    //     for (var j=0; j<100; j++){
+    //         //apply the terrain shit
+    //         lavaPlane.geometry.vertices[pointer].position.z = terrain[i][j];
+    //         pointer++;
+    //     }
+    // }
+
+    // scene.add(lavaPlane);
+
+}
+
+function fractalize(plane){
+    
+}
+
+//where the real magic happens
+function generateTerrain(){
+    var lavaTerrain= new Array();
+
+    for(var i=0; i<101; i++){
+        lavaTerrain[i] = new Array();
+        for(var j=0; j<101; j++)
+            lavaTerrain[i][j] = 0;
+    }
+
+    console.log(lavaTerrain);
+    var variance = 10; //keep tiny for smaller variations
+    
+    var size = 101; //size = #segments + 1
+    
+    for(var i = 100; i >= 2 ; i/=2){
+        var half = i/2;
+        variance/=2;    //scale the variance by half every time
+
+        //generate new square values
+        for(var j =0; j<100; j++){
+            for(var k = 0; k<100; k++){
+                var avg = (lavaTerrain[j][k] + lavaTerrain[j+i][k] + lavaTerrain[j+i][k+i] + lavaTerrain[j][k+i]); //Summing all 4 corners of the cell + averaging them
+                avg += 2*Math.random()*variance - variance; //add some randomization in
+
+                lavaTerrain[j+half][k+half] = avg;    //Assign the new halfway value to the halfway point
+            }
+        }
+
+        //generate the new diamond values
+        for(var x = 0; x <100; x+=half){
+            for(var y = (x+half)%j; y<100; y+=j){
+                //summing the middle left, right, top, and bottom of the diamond and averaging
+                var avg = (lavaTerrain[(x-half+size)%size][y] + lavaTerrain[(x+half+size)%size][y] + lavaTerrain[x][(y-half+size)%size] + lavaTerrain[x][(y+half+size)%size])/4; 
+                avg += 2*Math.random()*variance - variance;
+
+                lavaTerrain[x][y] = avg;
+
+                //edge cases
+                if(x == 0)
+                    lavaTerrain[100][y] = avg;
+                if(y == 0)
+                    lavaTerrain[x][100] = avg;
+            }
+        }
+    }
+    return lavaTerrain;
+}
+
+
+addLava();
 
 //INITIATE OBSTACLES
 var obstacles = [];
@@ -367,6 +448,7 @@ obstacles.sort(function(a, b) {
 obstacles.forEach(function(ob) {
     console.log(ob.position.z)
 });
+
 
 var cursorOffsetX = -1;
 var cursorOffsetY = -1;
@@ -459,7 +541,6 @@ function onMouseUp(event) {
 //TODO: Set posNewX and posNewY to center screen coordinates when you start game at center
 //      Follow up todo:  game "START" screen at centered at the center of the screen. Must be dynamic
 //      These values are a local standin for the actual thing. Replace with your screen res to make it actually work
-
 var posNewX = 800;
 var posNewY = 508;
 var oldDx = 0;
@@ -524,7 +605,6 @@ function update() {
 
 
     if (isOutBounds && mouseMoving) {
-        console.log("HI FUCKO");
         firstPersonCamera.rotation.y += oldDx;
     }
 
