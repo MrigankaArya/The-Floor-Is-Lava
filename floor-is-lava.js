@@ -347,78 +347,87 @@ addRoom();
 
 //Adds lava to the floor and deforms it as necessary.
 function addLava() {
-    var lavaGeometry =  new THREE.PlaneGeometry(levelWidth, levelHeight, 100, 100);  //100 segments each 
+    var lavaGeometry =  new THREE.PlaneGeometry(levelWidth, levelWidth, 129, 129);  //100 segments each 
     var material = new THREE.MeshBasicMaterial( {color: 0xfff000, side: THREE.DoubleSide} );
     var lavaPlane = new THREE.Mesh(lavaGeometry, material);
     var translate = new THREE.Matrix4().makeTranslation(0, 1, 0);
     var translateAndRotate = new THREE.Matrix4().multiplyMatrices(translate, new THREE.Matrix4().makeRotationX(Math.PI/2));
     lavaPlane.setMatrix(translateAndRotate);
     
-    // var pointer = 0;
-    // var terrain = generateTerrain();
+    lavaPlane.geometry.verticesNeedUpdate = true;
+    lavaPlane.dynamic = true;
 
-    // for(var i=0; i<100; i++){
-    //     for (var j=0; j<100; j++){
-    //         //apply the terrain shit
-    //         lavaPlane.geometry.vertices[pointer].position.z = terrain[i][j];
-    //         pointer++;
-    //     }
-    // }
+    var pointer = 0;
+    var terrain = generateTerrain();
+    // generateTerrain();
+    for(var i=0; i<65; i++){
+        for (var j=0; j<65; j++){
+            // apply the terrain shit
+            console.log( lavaPlane.geometry.vertices[pointer]);
+            lavaPlane.geometry.vertices[pointer].z += terrain[i][j];
+            pointer++;
+        }
+    }
 
-    // scene.add(lavaPlane);
+    scene.add(lavaPlane);
 
 }
 
-function fractalize(plane){
-    
-}
 
 //where the real magic happens
 function generateTerrain(){
     var lavaTerrain= new Array();
-
-    for(var i=0; i<101; i++){
+    var segments = 129; //# of segments
+    for(var i=0; i<segments; i++){
         lavaTerrain[i] = new Array();
-        for(var j=0; j<101; j++)
+        for(var j=0; j<segments; j++)
             lavaTerrain[i][j] = 0;
+    }
+    //Set initial values for corners of the terrain
+    lavaTerrain[0][0] = 6;
+    lavaTerrain[0][segments-1] = 6;
+    lavaTerrain[segments-1][0] = 6;
+    lavaTerrain[segments-1][segments-1] = 6;
+
+    console.log(lavaTerrain);
+
+    var varianceDiamond = 8; //keep tiny for smaller variations
+    var varianceSq = 4; //Keep small for smaller variations to make it look more organic
+
+    for(var currSize = segments-1; currSize >1 ; currSize = Math.floor(currSize/2)){
+        //Diamond step (Hopefully)
+        for(var x = 0; x < segments ; x+=currSize)
+        {
+            var midPoint = Math.floor(currSize/2);
+            var avg = (lavaTerrain[x][currSize]+lavaTerrain[x][x]+lavaTerrain[currSize][currSize]+lavaTerrain[currSize][x])/4;
+            console.log(avg);
+            avg += 2*Math.random()*varianceDiamond - varianceDiamond;
+            lavaTerrain[midPoint][midPoint] = avg;
+        }
+
+        //Square Step (Hopefully)
+        for(var y = 0; y < currSize; y+=currSize){
+            var midPoint = Math.floor(currSize/2);
+
+            //I'm sorry for this code it's so ugly jfc
+            var avgLeft = (lavaTerrain[y][y] + lavaTerrain[currSize][y])/2 +2*Math.random()*varianceDiamond - varianceDiamond;
+            var avgRight = (lavaTerrain[y][currSize] + lavaTerrain[currSize][currSize])/2 + 2*Math.random()*varianceDiamond - varianceDiamond;
+            var avgTop = (lavaTerrain[y][y] + lavaTerrain[y][currSize])/2 + 2*Math.random()*varianceDiamond - varianceDiamond;
+            var avgBott = (lavaTerrain[currSize][y] + lavaTerrain[currSize][currSize])/2 + 2*Math.random()*varianceDiamond - varianceDiamond;
+           
+            //Assign the values to the right place
+            lavaTerrain[y][midPoint] = avgTop;
+            lavaTerrain[currSize][midPoint] = avgBott;
+            lavaTerrain[midPoint][y] = avgLeft;
+            lavaTerrain[midPoint][currSize] = avgRight;
+
+            varianceDiamond/=2;    //scale the variance by half every time
+        }
+       
+        
     }
 
     console.log(lavaTerrain);
-    var variance = 10; //keep tiny for smaller variations
-    
-    var size = 101; //size = #segments + 1
-    
-    for(var i = 100; i >= 2 ; i/=2){
-        var half = i/2;
-        variance/=2;    //scale the variance by half every time
-
-        //generate new square values
-        for(var j =0; j<100; j++){
-            for(var k = 0; k<100; k++){
-                var avg = (lavaTerrain[j][k] + lavaTerrain[j+i][k] + lavaTerrain[j+i][k+i] + lavaTerrain[j][k+i]); //Summing all 4 corners of the cell + averaging them
-                avg += 2*Math.random()*variance - variance; //add some randomization in
-
-                lavaTerrain[j+half][k+half] = avg;    //Assign the new halfway value to the halfway point
-            }
-        }
-
-        //generate the new diamond values
-        for(var x = 0; x <100; x+=half){
-            for(var y = (x+half)%j; y<100; y+=j){
-                //summing the middle left, right, top, and bottom of the diamond and averaging
-                var avg = (lavaTerrain[(x-half+size)%size][y] + lavaTerrain[(x+half+size)%size][y] + lavaTerrain[x][(y-half+size)%size] + lavaTerrain[x][(y+half+size)%size])/4; 
-                avg += 2*Math.random()*variance - variance;
-
-                lavaTerrain[x][y] = avg;
-
-                //edge cases
-                if(x == 0)
-                    lavaTerrain[100][y] = avg;
-                if(y == 0)
-                    lavaTerrain[x][100] = avg;
-            }
-        }
-    }
     return lavaTerrain;
 }
 
