@@ -3,19 +3,6 @@ var levelLength = 100;
 var levelWidth = 50;
 var levelHeight = 15;
 var playerHeight = 3;
-// LIGHTING UNIFORMS
-var lightColor = new THREE.Color(1, 0.3, 0.3);
-var ambientColor = new THREE.Color(0.4, 0.4, 0.4);
-var lightPosition = new THREE.Vector3(70, 100, 70);
-
-var litColor = new THREE.Color(0.7, 0.4, 0.6);
-var unLitColor = new THREE.Color(0.15, 0.2, 0.6);
-var outlineColor = new THREE.Color(0.04, 0.1, 0.15);
-
-var kAmbient = 0.4;
-var kDiffuse = 0.8;
-var kSpecular = 0.8;
-var shininess = 10.0;
 
 //MATERIALS
 var basicMaterial = new THREE.MeshBasicMaterial({
@@ -23,83 +10,9 @@ var basicMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide
 });
 
-var toonMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-        litColor: {
-            type: 'c',
-            value: litColor
-        },
-        unLitColor: {
-            type: 'c',
-            value: unLitColor
-        },
-        outlineColor: {
-            type: 'c',
-            value: outlineColor
-        },
-        lightColor: {
-            type: 'c',
-            value: lightColor
-        },
-        ambientColor: {
-            type: 'c',
-            value: ambientColor
-        },
-        lightPosition: {
-            type: 'v3',
-            value: lightPosition
-        },
-        kAmbient: {
-            type: 'f',
-            value: kAmbient
-        },
-        kDiffuse: {
-            type: 'f',
-            value: kDiffuse
-        },
-        kSpecular: {
-            type: 'f',
-            value: kSpecular
-        },
-        shininess: {
-            type: 'f',
-            value: shininess
-        },
-    },
-});
-
-var blinnPhongMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-        lightColor: {
-            type: 'c',
-            value: lightColor
-        },
-        ambientColor: {
-            type: 'c',
-            value: ambientColor
-        },
-        lightPosition: {
-            type: 'v3',
-            value: lightPosition
-        },
-        kAmbient: {
-            type: 'f',
-            value: kAmbient
-        },
-        kDiffuse: {
-            type: 'f',
-            value: kDiffuse
-        },
-        kSpecular: {
-            type: 'f',
-            value: kSpecular
-        },
-        shininess: {
-            type: 'f',
-            value: shininess
-        }
-    },
-});
+var toonMaterial = new THREE.ShaderMaterial(toonSpec);
+var blinnPhongMaterial = new THREE.ShaderMaterial(blinnPhongSpec);
+var blinnPhongMaterial2 = new THREE.ShaderMaterial(blinnPhongSpec2);
 // LOAD SHADERS
 var shaderFiles = [
     'glsl/blinnPhong.vs.glsl',
@@ -495,7 +408,50 @@ function addToruses() {
     }
 }
 
-addToruses();
+function makeCube(xscale, yscale, zscale, material) {
+  var unitCube = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), material);
+  unitCube.setMatrix(new THREE.Matrix4().makeScale(xscale, yscale, zscale));
+  return unitCube;
+}
+
+function translateBefore(obj, x, y, z) {
+    var translate = new THREE.Matrix4().makeTranslation(x, y, z);
+    obj.setMatrix(new THREE.Matrix4().multiplyMatrices(translate, obj.matrix));
+}
+
+function translateAfter(obj, x, y, z) {
+    var translate = new THREE.Matrix4().makeTranslation(x, y, z);
+    obj.setMatrix(new THREE.Matrix4().multiplyMatrices(obj.matrix, translate));
+}
+
+function makeChair(height, legsize, floorToSeatHeight, seatWidth, seatHeight, material) {
+    var chair = new THREE.Object3D();
+    var seat = makeCube(seatWidth, seatHeight, seatWidth, material);
+
+    function makeLeg(x, z) {
+        var leg = makeCube(legsize, floorToSeatHeight / seatHeight, legsize / seatWidth, material);
+        translateBefore(leg, x*(seatWidth / 2 - legsize) / seatWidth, (-floorToSeatHeight / 2) / seatHeight, z*(seatWidth / 2 - legsize) / seatWidth);
+        seat.add(leg);
+    }
+
+    makeLeg(1, 1);
+    makeLeg(1, -1);
+    makeLeg(-1, 1);
+    makeLeg(-1, -1);
+
+    var back = makeCube(seatWidth/seatWidth, (height-floorToSeatHeight)/seatHeight, (legsize)/seatWidth, material);
+    scene.add(back);
+    translateBefore(back, 0, ((height - floorToSeatHeight) / 2) / seatHeight, -(seatWidth / 2 - legsize) / seatWidth);
+    seat.add(back);
+
+    chair.add(seat);
+    return chair;
+}
+
+var chair = makeChair(6, 0.2, 3, 2, 0.5, blinnPhongMaterial2);
+translateAfter(chair, 0, 5, 0);
+scene.add(chair);
+//addToruses();
 
 //Detects collision between the player and the objects. Replace toruses with boxes because this is an awkward hitbox
 function detectCollision(){
@@ -673,7 +629,7 @@ function update() {
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
 
-    var diff = firstPersonCamera.position.y - (groundPlane.position.y + playerHeight / 2 + 1);
+    var diff = firstPersonCamera.position.y - (groundPlane.position.y + playerHeight / 2 + 1.5);
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
 
     detectCollision();
