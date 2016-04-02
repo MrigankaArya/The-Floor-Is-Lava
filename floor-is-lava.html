@@ -3,11 +3,31 @@
     <meta charset="UTF-8">
     <title>CPSC 314 Project 3 January 2016</title>
     <style>
-      body { margin: 0; } canvas { width: 100%;
-          height: 100% }
+      body { 
+        margin: 0; 
+      } 
+      
+      canvas { 
+        width: 100%;
+        height: 100% 
+      }
+
+      #fps {
+        background: #000000;
+        color: #00FF77;
+        font-family: sans-serif;
+        padding: 0.5em;
+      }
+
+      #fps-count {
+        display: inline-block;
+      }
       </style>
   </head>
   <body>
+    <div id="fps">
+      frames per second: <div id="fps-count">0</div>
+    </div>
     <div id="canvas"></div>
     <script src="js/three.js"></script>
     <script src="js/OBJLoader.js"></script>

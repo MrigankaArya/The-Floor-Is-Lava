@@ -621,7 +621,21 @@ function onMouseMove(event) {
     mouseMoving = false;
 }
 
+var lastTime = new Date();
+var numFrames = 0;
+var thresholdFrames = 25;
 function update() {
+    if (numFrames < thresholdFrames) {
+        numFrames++;
+    } else {
+        numFrames = 0;
+        var currentTime = new Date();
+        var timePassed = currentTime - lastTime;
+        var fps = thresholdFrames/(timePassed/1000);
+        document.getElementById("fps-count").innerHTML = Math.floor(fps);
+        lastTime = currentTime;
+    }
+
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
 
