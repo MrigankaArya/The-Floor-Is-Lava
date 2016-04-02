@@ -172,6 +172,8 @@ function addGravity(obj) {
     obj.gravity = -0.005;
     obj.fall = function() {
         this.velocity.y += this.gravity;
+        // console.log(this.velocity.y);
+        // this.velocity.y = Math.max(this.velocity.y, -0.7); //terminal velocity
         var fallTranslation = new THREE.Matrix4().makeTranslation(0, this.velocity.y, 0);
         var postFallPos = new THREE.Matrix4().multiplyMatrices(fallTranslation, this.matrix);
         this.setMatrix(postFallPos);
@@ -644,10 +646,19 @@ function onMouseMove(event) {
     mouseMoving = false;
 }
 
+//For FPS
 var lastTime = new Date();
 var numFrames = 0;
 var thresholdFrames = 25;
+
+//For Health
+var hearts = $(".heart");
+var healthCount = hearts.length;
+var isInLava = false;
+var startTimeInLava;
+var secondsBeforeHealthDecrease = 2;
 function update() {
+    //Compute FPS
     if (numFrames < thresholdFrames) {
         numFrames++;
     } else {
@@ -657,7 +668,7 @@ function update() {
         var fps = thresholdFrames/(timePassed/1000);
         document.getElementById("fps-count").innerHTML = Math.floor(fps);
         lastTime = currentTime;
-    }
+    }    
 
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
@@ -667,6 +678,34 @@ function update() {
 
     detectCollision();
     
+    // Update health
+    if (diff <= 0 && isInLava == false) {
+        isInLava = true;
+        healthCount--;
+        hearts[healthCount].remove();
+        startTimeInLava = new Date();
+    }
+
+    if (diff > 0) {
+        isInLava = false;
+    }
+
+    if (isInLava == true) {
+        var currentTimeInLava = new Date();
+        var secondsPassedInLava = (currentTimeInLava - startTimeInLava);
+        var secondsPassedInLava = secondsPassedInLava/1000;
+        if (secondsPassedInLava > secondsBeforeHealthDecrease) {
+            if (healthCount == 0) {
+                console.log("YOU LOST");
+            } else {
+                startTimeInLava = currentTimeInLava;
+                healthCount--;
+                hearts[healthCount].remove();
+                console.log("HERE");
+            }
+        }
+    }
+
     if (diff > 0) {
         firstPersonCamera.fall();
         isFalling = true;
@@ -674,6 +713,8 @@ function update() {
         isFalling = false;
     }
 
+
+    //Player controls
     if (keys.w) {
         firstPersonCamera.slideZ(false);
     }
