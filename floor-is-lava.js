@@ -157,10 +157,12 @@ function resetCamera(camera, view) {
 }
 
 function attachPlayerToCamera(camera) {
-    var geometry = new THREE.BoxGeometry(1, playerHeight, 2);
+    var geometry = new THREE.BoxGeometry(1, playerHeight, 3);
     var mesh = new THREE.Mesh(geometry, basicMaterial);
     camera.add(mesh);
 }
+
+
 
 function addGravity(obj) {
     if (obj.velocity == null) {
@@ -214,6 +216,8 @@ attachPlayerToCamera(firstPersonCamera);
 addGravity(firstPersonCamera);
 addHorizontalAccel(firstPersonCamera);
 scene.add(firstPersonCamera);
+
+
 
 // var camera = new THREE.PerspectiveCamera(30,1,0.1,1000); // view angle, aspect ratio, near, far
 // camera.position.set(45,20,40);
@@ -438,7 +442,7 @@ function generateTerrain(){
 }
 
 
-addLava();
+// addLava();
 
 //INITIATE OBSTACLES
 var obstacles = [];
@@ -454,6 +458,25 @@ function addToruses() {
 }
 
 addToruses();
+
+//Detects collision between the player and the objects. Replace toruses with boxes because this is an awkward hitbox
+function detectCollision(){
+    var geometry = new THREE.BoxGeometry(1, playerHeight, 3);
+    var playerPos = firstPersonCamera.position.clone();
+    for(var vertex = 0; vertex < 8; vertex++){
+        var localV = geometry.vertices[vertex].clone();
+        var globalV = localV.applyMatrix4(firstPersonCamera.matrix);
+        var directionVector = globalV.sub(firstPersonCamera.position)
+        var ray = new THREE.Raycaster(playerPos, directionVector.clone().normalize());
+
+        var collisions = ray.intersectObjects(obstacles);
+        if(collisions.length > 0 && collisions[0].distance < directionVector.length()){
+            console.log("HIT");
+        }
+
+   }
+}
+
 
 //Sort obstacles by y position for collision detection
 obstacles.sort(function(a, b) {
@@ -592,6 +615,8 @@ function update() {
     var diff = firstPersonCamera.position.y - (groundPlane.position.y + playerHeight / 2 + 1);
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
 
+    detectCollision();
+    
     if (diff > 0) {
         firstPersonCamera.fall();
         isFalling = true;
