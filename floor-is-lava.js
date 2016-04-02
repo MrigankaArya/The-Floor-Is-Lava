@@ -4,7 +4,7 @@ var levelWidth = 50;
 var levelHeight = 15;
 var playerHeight = 3;
 // LIGHTING UNIFORMS
-var lightColor = new THREE.Color(1, 1, 1);
+var lightColor = new THREE.Color(1, 0.3, 0.3);
 var ambientColor = new THREE.Color(0.4, 0.4, 0.4);
 var lightPosition = new THREE.Vector3(70, 100, 70);
 
@@ -137,7 +137,7 @@ var playerView = {
     width: 0.499,
     height: 1.0,
     background: new THREE.Color().setRGB(0.1, 0.1, 0.1),
-    eye: [0, 20, levelLength / 2 - 10],
+    eye: [0, 5, levelLength / 2 - 10],
     up: [0, 1, 0],
     fov: 45,
     updateCamera: function(camera, scene, mouseX, mouseY) {}
@@ -437,8 +437,44 @@ function generateTerrain(){
     return lavaTerrain;
 }
 
+var lava;
 
-addLava();
+function addLavaSub() {
+    var planeGeometry = new THREE.PlaneGeometry(levelWidth, levelLength, 1);
+    var plane = new THREE.Mesh(planeGeometry, blinnPhongMaterial);
+    
+    var rot = new THREE.Matrix4().makeRotationX(3*Math.PI / 2);
+    var translateUp = new THREE.Matrix4().makeTranslation(0, 1, 0);
+    var final = new THREE.Matrix4().multiplyMatrices(translateUp, rot);
+    printMatrix("440", rot);
+    plane.setMatrix(final);
+    scene.add(plane);
+    lava = plane;
+    
+}
+
+addLavaSub();
+
+// addLava();
+
+function printMatrix(matName, mat) {
+    console.log(matName + ":");
+    if (mat == null) {
+        console.log("null")
+    } else {
+        for (var row = 0; row < 4; row++) {
+            var rowStart = row * 4;
+            var st = [];
+            for (var col = 0; col < 4; col++) {
+                st.push(mat.elements[rowStart + col]);
+            }
+
+            var str = (row == 0 ? "[" : "") + st.join(", ") + (row == 3 ? "]" : "") + "\n";
+            console.log(str);
+        }
+        console.log(mat.elements[0] + " ");
+    }
+}
 
 //INITIATE OBSTACLES
 var obstacles = [];
