@@ -16,18 +16,38 @@
         background: #000000;
         color: #00FF77;
         font-family: sans-serif;
-        padding: 0.5em;
+        padding: 1em;
       }
 
       #fps-count {
         display: inline-block;
+      }
+      
+      #health {
+        display: inline-block;
+        float: right;
+      }
+
+      .heart {
+        position: relative;
+        top: -0.2em;
+        display: inline-block;
+        height: 1.7em;
       }
       </style>
   </head>
   <body>
     <div id="fps">
       frames per second: <div id="fps-count">0</div>
+      <div id="health">
+      <img class="heart" src="img/heart.png">
+      <img class="heart" src="img/heart.png">
+      <img class="heart" src="img/heart.png">
+      <img class="heart" src="img/heart.png">
+      <img class="heart" src="img/heart.png">
+      </div>
     </div>
+    
     <div id="canvas"></div>
     <script src="js/three.js"></script>
     <script src="js/OBJLoader.js"></script>
