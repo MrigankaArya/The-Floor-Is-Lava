@@ -4,31 +4,7 @@ var levelWidth = 50;
 var levelHeight = 15;
 var playerHeight = 3;
 
-//MATERIALS
-var basicMaterial = new THREE.MeshBasicMaterial({
-    color: 0x333333,
-    side: THREE.DoubleSide
-});
 
-var toonMaterial = new THREE.ShaderMaterial(toonSpec);
-var blinnPhongMaterial = new THREE.ShaderMaterial(blinnPhongSpec);
-var blinnPhongMaterial2 = new THREE.ShaderMaterial(blinnPhongSpec2);
-// LOAD SHADERS
-var shaderFiles = [
-    'glsl/blinnPhong.vs.glsl',
-    'glsl/blinnPhong.fs.glsl',
-    'glsl/toon.vs.glsl',
-    'glsl/toon.fs.glsl'
-];
-
-new THREE.SourceLoader().load(shaderFiles, function(shaders) {
-    blinnPhongMaterial.vertexShader = shaders['glsl/blinnPhong.vs.glsl'];
-    blinnPhongMaterial.fragmentShader = shaders['glsl/blinnPhong.fs.glsl'];
-    blinnPhongMaterial.needsUpdate = true;
-    toonMaterial.vertexShader = shaders['glsl/toon.vs.glsl'];
-    toonMaterial.fragmentShader = shaders['glsl/toon.fs.glsl'];
-    toonMaterial.needsUpdate = true;
-})
 
 // ASSIGNMENT-SPECIFIC API EXTENSION
 THREE.Object3D.prototype.setMatrix = function(a) {
