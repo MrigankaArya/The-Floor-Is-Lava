@@ -681,8 +681,13 @@ function update() {
     // Update health
     if (diff <= 0 && isInLava == false) {
         isInLava = true;
-        healthCount--;
-        hearts[healthCount].remove();
+        console.log(healthCount);
+        if (healthCount == 0) {
+            console.log ("YOU LOST");
+        } else {
+            healthCount--;
+            hearts[healthCount].remove();
+        }
         startTimeInLava = new Date();
     }
 
@@ -701,7 +706,6 @@ function update() {
                 startTimeInLava = currentTimeInLava;
                 healthCount--;
                 hearts[healthCount].remove();
-                console.log("HERE");
             }
         }
     }
