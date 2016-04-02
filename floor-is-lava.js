@@ -516,7 +516,7 @@ function onKeyDown(event) {
             isFalling = true;
         }
     } else if (match("t")) {
-        renderer.render(scene, camera);
+        // renderer.render(scene, camera);
     }
 }
 
@@ -587,6 +587,7 @@ function onMouseMove(event) {
 
 function update() {
     requestAnimationFrame(update);
+    renderer.render(scene, firstPersonCamera);
 
     var diff = firstPersonCamera.position.y - (groundPlane.position.y + playerHeight / 2 + 1);
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
