@@ -215,6 +215,11 @@ addGravity(firstPersonCamera);
 addHorizontalAccel(firstPersonCamera);
 scene.add(firstPersonCamera);
 
+// var camera = new THREE.PerspectiveCamera(30,1,0.1,1000); // view angle, aspect ratio, near, far
+// camera.position.set(45,20,40);
+// camera.lookAt(scene.position);
+// scene.add(camera);
+
 //uncomment to debug using orbit controls
 //var controls = new THREE.OrbitControls(camera);
 
@@ -349,6 +354,7 @@ addRoom();
 function addLava() {
     var lavaGeometry =  new THREE.PlaneGeometry(levelWidth, levelWidth, 129, 129);  //100 segments each 
     var material = new THREE.MeshBasicMaterial( {color: 0xfff000, side: THREE.DoubleSide} );
+;
     var lavaPlane = new THREE.Mesh(lavaGeometry, material);
     var translate = new THREE.Matrix4().makeTranslation(0, 1, 0);
     var translateAndRotate = new THREE.Matrix4().multiplyMatrices(translate, new THREE.Matrix4().makeRotationX(Math.PI/2));
@@ -439,7 +445,7 @@ var obstacles = [];
 
 function addToruses() {
     for (var i = 0; i < 10; i++) {
-        var geometry = new THREE.TorusKnotGeometry(1, 0.5, 32, 6, 4, 3, 1);
+        var geometry = new THREE.TorusKnotGeometry(1, 0.5, 100, 40, 4, 3, 1);
         var mesh = new THREE.Mesh(geometry, toonMaterial);
         mesh.position.z += i - 5;
         obstacles.push(mesh);
@@ -452,10 +458,6 @@ addToruses();
 //Sort obstacles by y position for collision detection
 obstacles.sort(function(a, b) {
     return a.position.z - b.position.z;
-});
-
-obstacles.forEach(function(ob) {
-    console.log(ob.position.z)
 });
 
 
@@ -513,6 +515,8 @@ function onKeyDown(event) {
             firstPersonCamera.setMatrix(jumpStartMatrix);
             isFalling = true;
         }
+    } else if (match("t")) {
+        renderer.render(scene, camera);
     }
 }
 
@@ -530,7 +534,6 @@ function onKeyUp(event) {
         }
         if (!keys.a && !keys.d) {
             firstPersonCamera.velocity.x = 0;
-
         }
     }
 }
@@ -584,7 +587,6 @@ function onMouseMove(event) {
 
 function update() {
     requestAnimationFrame(update);
-    renderer.render(scene, firstPersonCamera);
 
     var diff = firstPersonCamera.position.y - (groundPlane.position.y + playerHeight / 2 + 1);
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane

@@ -11,8 +11,10 @@ void main() {
 	vec3 c = kw*litColor + (1.0 - kw)*unLitColor;
 
 	float outlineDot = dot(interpolatedEyeDirection, interpolatedNormal);
-	if (outlineDot < 0.4) {
-		c = outlineColor;
+	if (outlineDot < 0.4 ||
+		(outlineDot > 0.5 && outlineDot < 0.6) ||
+		(outlineDot > 0.7 && outlineDot < 0.8)) {
+		c = outlineColor / outlineDot;
 	}
 
 	gl_FragColor = vec4(c, 1.0);
