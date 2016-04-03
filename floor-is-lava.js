@@ -3,7 +3,7 @@ var levelLength = 100;
 var levelWidth = 50;
 var levelHeight = 15;
 var playerHeight = 3;
-
+var lavaSpeed = 0.0002;
 
 
 // ASSIGNMENT-SPECIFIC API EXTENSION
@@ -345,7 +345,6 @@ function addLavaSub() {
     plane.setMatrix(final);
     scene.add(plane);
     lava = plane;
-    
 }
 
 addLavaSub();
@@ -617,6 +616,8 @@ var isInLava = false;
 var startTimeInLava;
 var secondsBeforeHealthDecrease = 2;
 function update() {
+    translateBefore(lava, 0, lavaSpeed, 0);
+
     //Compute FPS
     if (numFrames < thresholdFrames) {
         numFrames++;
@@ -632,7 +633,7 @@ function update() {
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
 
-    var diff = firstPersonCamera.position.y - (groundPlane.position.y + playerHeight / 2 + 1.5);
+    var diff = firstPersonCamera.position.y - (groundPlane.position.y + playerHeight / 2 + 5);
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
 
     detectCollision();
