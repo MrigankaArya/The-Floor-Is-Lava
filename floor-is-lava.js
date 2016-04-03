@@ -1,3 +1,7 @@
+function runGame() {
+$("#play").remove();
+$("#instructions").remove();
+
 var panSensitivity = 0.001;
 var levelLength = 100;
 var levelWidth = 50;
@@ -703,3 +707,5 @@ function update() {
 }
 
 update();
+
+}

@@ -34,6 +34,27 @@
         display: inline-block;
         height: 1.7em;
       }
+
+      #play {
+        position: absolute;
+        top: 50%;
+        border-radius: 1em;
+        border-color: #000000;
+        margin: auto;
+        background: #000000;
+        color: #dbc994;
+      }
+
+      .play-wrapper {
+        text-align: center;
+      }
+
+      #instructions {
+        padding: 4em;
+        font-family: sans-serif;
+        text-align: center;
+        color: #888888;
+      }
       </style>
   </head>
   <body>
@@ -47,8 +68,12 @@
       <img class="heart" src="img/heart.png">
       </div>
     </div>
-    
+    <p id="instructions"><em>WASD</em> to move. <em>Spacebar</em> to jump. <em>Mouse</em> to pan camera</p>
+    <div class="play-wrapper">
+      <button id="play" onclick="runGame()"> Play</button>
+    </div>
     <div id="canvas"></div>
+    
     <script src="js/three.js"></script>
     <script src="js/OBJLoader.js"></script>
     <script src="js/SourceLoader.js"></script>
