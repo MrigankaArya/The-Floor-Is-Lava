@@ -424,9 +424,36 @@ function makeChair(height, legsize, floorToSeatHeight, seatWidth, seatHeight, ma
     return chair;
 }
 
-var chair = makeChair(6, 0.2, 3, 2, 0.5, blinnPhongMaterial2);
-translateAfter(chair, 0, 5, 0);
-scene.add(chair);
+function makeChairPyramid() {
+    function make2ChairUnit(verticalDisplacement, hDisplace1, hDisplace2, makeSecond) {
+        var chair = makeChair(2, 0.1, 1, 1, 0.25, blinnPhongMaterial2);
+        translateAfter(chair, hDisplace2, 1 + verticalDisplacement, hDisplace1 + verticalDisplacement/20);
+
+        scene.add(chair);
+        if (makeSecond) {
+            var chair2 = makeChair(2, 0.1, 1, 1, 0.25, blinnPhongMaterial);
+            translateAfter(chair2, hDisplace2, 2.125 + verticalDisplacement, hDisplace1);
+            var rot = new THREE.Matrix4().makeRotationX(Math.PI);
+            chair2.setMatrix(new THREE.Matrix4().multiplyMatrices(chair2.matrix, rot))
+            scene.add(chair2);
+        }
+    }
+
+    for (var i = -2; i <= 2; i++) {
+        for (var j = -2; j <= 2; j++) {
+            var k;
+            console.log("lop");
+            var kMax = Math.min(2 - Math.abs(j), 2 - Math.abs(i));
+            for (k = 0; k < kMax; k++) {
+                make2ChairUnit(k * 2.2, j * 1.1, i * 1.1, true);
+            }
+            make2ChairUnit(k * 2.2, j * 1.1, i * 1.1, false);
+        }
+    }
+
+
+}
+makeChairPyramid();
 //addToruses();
 
 //Detects collision between the player and the objects. Replace toruses with boxes because this is an awkward hitbox
