@@ -63,13 +63,17 @@ function addGravity(obj) {
     }
 
     obj.gravity = -0.005;
-    obj.fall = function() {
-        this.velocity.y += this.gravity;
+    obj.fall = function(bool) {
+        if (bool) {
+            this.velocity.y += this.gravity;
+        } else {
+            this.velocity.y = 0;
+        }
         // console.log(this.velocity.y);
         // this.velocity.y = Math.max(this.velocity.y, -0.7); //terminal velocity
-        var fallTranslation = new THREE.Matrix4().makeTranslation(0, this.velocity.y, 0);
+        /*var fallTranslation = new THREE.Matrix4().makeTranslation(0, this.velocity.y, 0);
         var postFallPos = new THREE.Matrix4().multiplyMatrices(fallTranslation, this.matrix);
-        this.setMatrix(postFallPos);
+        this.setMatrix(postFallPos);*/
     }
 }
 
@@ -87,9 +91,9 @@ function addHorizontalAccel(obj) {
             this.horizontalAccelX = -Math.abs(this.horizontalAccelX);
         }
         this.velocity.x += this.horizontalAccelX;
-        var slideTranslation = new THREE.Matrix4().makeTranslation(this.velocity.x, 0, 0);
+        /*var slideTranslation = new THREE.Matrix4().makeTranslation(this.velocity.x, 0, 0);
         var postSlideTranslation = new THREE.Matrix4().multiplyMatrices(slideTranslation, this.matrix);
-        this.setMatrix(postSlideTranslation);
+        this.setMatrix(postSlideTranslation);*/
     }
     obj.slideZ = function(isForward) {
         if (isForward) {
@@ -98,9 +102,9 @@ function addHorizontalAccel(obj) {
             this.horizontalAccelZ = -Math.abs(this.horizontalAccelZ);
         }
         this.velocity.z += this.horizontalAccelZ;
-        var slideTranslation = new THREE.Matrix4().makeTranslation(0, 0, this.velocity.z);
+        /*var slideTranslation = new THREE.Matrix4().makeTranslation(0, 0, this.velocity.z);
         var postSlideTranslation = new THREE.Matrix4().multiplyMatrices(slideTranslation, this.matrix);
-        this.setMatrix(postSlideTranslation);
+        this.setMatrix(postSlideTranslation);*/
     }
 }
 
@@ -463,6 +467,10 @@ function makeChairPyramid() {
 }
 makeChairPyramid();
 // addToruses();
+firstPersonCamera.constraints = [];
+for (var i = 0; i < 8; i++) {
+    firstPersonCamera.constraints[i] = null;
+}
 
 //Detects collision between the player and the objects. Replace toruses with boxes because this is an awkward hitbox
 function detectCollision(){
@@ -476,9 +484,10 @@ function detectCollision(){
 
         var collisions = ray.intersectObjects(obstacles);
         if(collisions.length > 0 && collisions[0].distance < directionVector.length()){
-            console.log("HIT");
+            firstPersonCamera.constraints[vertex] = collisions[0].face.normal
+        } else {
+            firstPersonCamera.constraints[vertex] = null
         }
-
    }
 }
 
@@ -613,6 +622,24 @@ function onMouseMove(event) {
     mouseMoving = false;
 }
 
+function move(obj) {
+    var velocity = obj.velocity;
+    obj.constraints.forEach(function(constraint) {
+        if (constraint != null && constraint.dot(velocity) < 0) {
+            //Formula for projection of a vector onto a plane is:
+            //a2 = a - [(a dot b)/(b dot b)]b
+            //where b is the vector and a is the normal of the plane
+            var aDotB = constraint.dot(velocity);
+            var bDotB = velocity.dot(velocity);
+            var secondTerm = velocity.multiplyScalar(aDotB/bDotB);
+            obj.velocity = constraint.sub(secondTerm);
+        }
+    })
+    var moveTranslation = new THREE.Matrix4().makeTranslation(obj.velocity.x, obj.velocity.y, obj.velocity.z);
+    var postMoveTranslation = new THREE.Matrix4().multiplyMatrices(moveTranslation, obj.matrix);
+    obj.setMatrix(postMoveTranslation);
+}
+
 //For FPS
 var lastTime = new Date();
 var numFrames = 0;
@@ -625,7 +652,7 @@ var isInLava = false;
 var startTimeInLava;
 var secondsBeforeHealthDecrease = 2;
 function update() {
-    translateBefore(lava, 0, lavaSpeed, 0);
+    //translateBefore(lava, 0, lavaSpeed, 0);
 
     //Compute FPS
     if (numFrames < thresholdFrames) {
@@ -650,9 +677,9 @@ function update() {
     // Update health
     if (diff <= 0 && isInLava == false) {
         isInLava = true;
-        console.log(healthCount);
+        // console.log(healthCount);
         if (healthCount == 0) {
-            console.log ("YOU LOST");
+            // console.log ("YOU LOST");
         } else {
             healthCount--;
             hearts[healthCount].remove();
@@ -670,7 +697,7 @@ function update() {
         var secondsPassedInLava = secondsPassedInLava/1000;
         if (secondsPassedInLava > secondsBeforeHealthDecrease) {
             if (healthCount == 0) {
-                console.log("YOU LOST");
+                // console.log("YOU LOST");
             } else {
                 startTimeInLava = currentTimeInLava;
                 healthCount--;
@@ -680,12 +707,12 @@ function update() {
     }
 
     if (diff > 0) {
-        firstPersonCamera.fall();
         isFalling = true;
     } else {
         isFalling = false;
     }
 
+    firstPersonCamera.fall(isFalling);
 
     //Player controls
     if (keys.w) {
@@ -704,6 +731,7 @@ function update() {
         firstPersonCamera.slideX(true);
     }
 
+    move(firstPersonCamera);
 
     if (isOutBounds && mouseMoving) {
         firstPersonCamera.rotation.y += oldDx;
