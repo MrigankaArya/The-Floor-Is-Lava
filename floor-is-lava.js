@@ -423,7 +423,12 @@ function makeChair(height, legsize, floorToSeatHeight, seatWidth, seatHeight, ma
     translateBefore(back, 0, ((height - floorToSeatHeight) / 2) / seatHeight, -(seatWidth / 2 - legsize) / seatWidth);
     seat.add(back);
 
+    var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
+    var collisionGeometry = new THREE.BoxGeometry(seatWidth+1, height+1, seatWidth+1);
+    var collisionMesh = new THREE.Mesh(collisionGeometry,meshMaterial);
     chair.add(seat);
+    chair.add(collisionMesh);
+    obstacles.push(collisionMesh);
     return chair;
 }
 
@@ -457,7 +462,7 @@ function makeChairPyramid() {
 
 }
 makeChairPyramid();
-//addToruses();
+// addToruses();
 
 //Detects collision between the player and the objects. Replace toruses with boxes because this is an awkward hitbox
 function detectCollision(){
@@ -637,7 +642,7 @@ function update() {
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
 
-    var diff = firstPersonCamera.position.y - (groundPlane.position.y + playerHeight / 2 + 5);
+    var diff = firstPersonCamera.position.y - (groundPlane.position.y + playerHeight / 2 + 1);
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
 
     detectCollision();
