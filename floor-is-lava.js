@@ -234,7 +234,7 @@ function makeRoomSurface(width, height, length, transformMatrix) {
 
 
 function addRoom() {
-    var box = makeRoomSurface(levelWidth, levelLength, 1, new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+    var box = makeRoomSurface(levelWidth, 1, levelLength, new THREE.Matrix4());
     ground = box;
 
     var leftTransform = new THREE.Matrix4().makeTranslation(-levelWidth / 2, levelHeight / 2, 0);
@@ -680,25 +680,23 @@ function update() {
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
 
-    var diff = firstPersonCamera.position.y - (ground.position.y + playerHeight / 2 + 1);
+    var diff = firstPersonCamera.position.y - lava.position.y;
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
-
     detectCollision();
     
     // Update health
-    if (diff <= 0 && isInLava == false) {
-        isInLava = true;
-        // console.log(healthCount);
-        if (healthCount == 0) {
-            // console.log ("YOU LOST");
-        } else {
-            healthCount--;
-            hearts[healthCount].remove();
+    if (diff <= 0.5) {
+        if (isInLava == false) {
+            isInLava = true;
+            if (healthCount == 0) {
+                //TODO: GAME OVER
+            } else {
+                healthCount--;
+                hearts[healthCount].remove();
+            }
+            startTimeInLava = new Date();
         }
-        startTimeInLava = new Date();
-    }
-
-    if (diff > 0) {
+    } else {
         isInLava = false;
     }
 
@@ -717,11 +715,10 @@ function update() {
         }
     }
 
-    if (diff > 0) {
-        isFalling = true;
-    } else {
-        isFalling = false;
-    }
+    //check if we're on a flat surface
+    isFalling = firstPersonCamera.constraints.filter(function(constraint) {
+        return constraint != null && (constraint.x == 0 && constraint.y == 1 && constraint.z == 0);
+    }).length == 0;
 
     firstPersonCamera.fall(isFalling);
 
