@@ -7,7 +7,7 @@ var levelLength = 100;
 var levelWidth = 50;
 var levelHeight = 15;
 var playerHeight = 3;
-var lavaSpeed = 0.0002;
+var lavaSpeed = 0.02;
 
 //INITIATE OBSTACLES
 var obstacles = [];
@@ -72,11 +72,6 @@ function addGravity(obj) {
         } else {
             this.velocity.y = 0;
         }
-        // console.log(this.velocity.y);
-        // this.velocity.y = Math.max(this.velocity.y, -0.7); //terminal velocity
-        /*var fallTranslation = new THREE.Matrix4().makeTranslation(0, this.velocity.y, 0);
-        var postFallPos = new THREE.Matrix4().multiplyMatrices(fallTranslation, this.matrix);
-        this.setMatrix(postFallPos);*/
     }
 }
 
@@ -664,7 +659,7 @@ var isInLava = false;
 var startTimeInLava;
 var secondsBeforeHealthDecrease = 2;
 function update() {
-    //translateBefore(lava, 0, lavaSpeed, 0);
+    translateBefore(lava, 0, lavaSpeed, 0);
     //Compute FPS
     if (numFrames < thresholdFrames) {
         numFrames++;
@@ -684,8 +679,9 @@ function update() {
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
     detectCollision();
     
+    var diffThreshold = 0.5;
     // Update health
-    if (diff <= 0.5) {
+    if (diff <= diffThreshold) {
         if (isInLava == false) {
             isInLava = true;
             if (healthCount == 0) {
@@ -713,15 +709,17 @@ function update() {
                 hearts[healthCount].remove();
             }
         }
+        isFalling = false;
+        translateBefore(firstPersonCamera, 0, lavaSpeed, 0);
+    } else {
+        //check if we're on a flat surface
+        isFalling = firstPersonCamera.constraints.filter(function(constraint) {
+            return constraint != null && (constraint.y > 0);
+        }).length == 0;
     }
 
-    //check if we're on a flat surface
-    isFalling = firstPersonCamera.constraints.filter(function(constraint) {
-        return constraint != null && (constraint.x == 0 && constraint.y == 1 && constraint.z == 0);
-    }).length == 0;
-
     firstPersonCamera.fall(isFalling);
-
+    
     //Player controls
     if (keys.w) {
         firstPersonCamera.slideZ(false);
