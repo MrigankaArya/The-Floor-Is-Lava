@@ -221,36 +221,33 @@ function addGrid() {
     scene.add(grid);
 }
 
-var groundPlane;
+var ground;
 
-function makeRoomSurface(width, height, transformMatrix) {
-    var planeGeometry = new THREE.PlaneGeometry(width, height, 1);
-    var plane = new THREE.Mesh(planeGeometry, toonMaterial);
-    plane.setMatrix(transformMatrix);
-    obstacles.push(plane);
-    scene.add(plane);
-    return plane;
+function makeRoomSurface(width, height, length, transformMatrix) {
+    var boxGeometry = new THREE.BoxGeometry(width, height, length);
+    var box = new THREE.Mesh(boxGeometry, toonMaterial);
+    box.setMatrix(transformMatrix);
+    obstacles.push(box);
+    scene.add(box);
+    return box;
 }
 
 
 function addRoom() {
-    var plane = makeRoomSurface(levelWidth, levelLength, new THREE.Matrix4().makeRotationX(-Math.PI / 2));
-    groundPlane = plane;
+    var box = makeRoomSurface(levelWidth, levelLength, 1, new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+    ground = box;
 
     var leftTransform = new THREE.Matrix4().makeTranslation(-levelWidth / 2, levelHeight / 2, 0);
-    var leftRotate = new THREE.Matrix4().makeRotationY(Math.PI / 2);
-    var leftWall = makeRoomSurface(levelLength, levelHeight, new THREE.Matrix4().multiplyMatrices(leftTransform, leftRotate));
-    
+    var leftWall = makeRoomSurface(1, levelHeight, levelLength, leftTransform);
+
     var rightTransform = new THREE.Matrix4().makeTranslation(levelWidth / 2, levelHeight / 2, 0);
-    var rightRotate = new THREE.Matrix4().makeRotationY(-Math.PI / 2);
-    var rightWall = makeRoomSurface(levelLength, levelHeight, new THREE.Matrix4().multiplyMatrices(rightTransform, rightRotate));
+    var rightWall = makeRoomSurface(1, levelHeight, levelLength, rightTransform);
 
     var backTransform = new THREE.Matrix4().makeTranslation(0, levelHeight / 2, -levelLength / 2);
-    var backWall = makeRoomSurface(levelWidth, levelHeight, backTransform);
+    var backWall = makeRoomSurface(levelWidth, levelHeight, 1, backTransform);
 
     var frontTransform = new THREE.Matrix4().makeTranslation(0, levelHeight / 2, levelLength / 2);
-    var frontRotate = new THREE.Matrix4().makeRotationY(Math.PI);
-    var frontWall = makeRoomSurface(levelWidth, levelHeight, new THREE.Matrix4().multiplyMatrices(frontTransform, frontRotate));
+    var frontWall = makeRoomSurface(levelWidth, levelHeight, 1, frontTransform);
 }
 
 addGrid();
@@ -683,7 +680,7 @@ function update() {
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
 
-    var diff = firstPersonCamera.position.y - (groundPlane.position.y + playerHeight / 2 + 1);
+    var diff = firstPersonCamera.position.y - (ground.position.y + playerHeight / 2 + 1);
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
 
     detectCollision();
