@@ -9,6 +9,9 @@ var levelHeight = 15;
 var playerHeight = 3;
 var lavaSpeed = 0.0002;
 
+//INITIATE OBSTACLES
+var obstacles = [];
+
 
 // ASSIGNMENT-SPECIFIC API EXTENSION
 THREE.Object3D.prototype.setMatrix = function(a) {
@@ -221,11 +224,12 @@ function addGrid() {
 var groundPlane;
 
 function makeRoomSurface(width, height, transformMatrix) {
-       var planeGeometry = new THREE.PlaneGeometry(width, height, 1);
-       var plane = new THREE.Mesh(planeGeometry, toonMaterial);
-       plane.setMatrix(transformMatrix);
-       scene.add(plane);
-       return plane;
+    var planeGeometry = new THREE.PlaneGeometry(width, height, 1);
+    var plane = new THREE.Mesh(planeGeometry, toonMaterial);
+    plane.setMatrix(transformMatrix);
+    obstacles.push(plane);
+    scene.add(plane);
+    return plane;
 }
 
 
@@ -236,7 +240,7 @@ function addRoom() {
     var leftTransform = new THREE.Matrix4().makeTranslation(-levelWidth / 2, levelHeight / 2, 0);
     var leftRotate = new THREE.Matrix4().makeRotationY(Math.PI / 2);
     var leftWall = makeRoomSurface(levelLength, levelHeight, new THREE.Matrix4().multiplyMatrices(leftTransform, leftRotate));
-
+    
     var rightTransform = new THREE.Matrix4().makeTranslation(levelWidth / 2, levelHeight / 2, 0);
     var rightRotate = new THREE.Matrix4().makeRotationY(-Math.PI / 2);
     var rightWall = makeRoomSurface(levelLength, levelHeight, new THREE.Matrix4().multiplyMatrices(rightTransform, rightRotate));
@@ -377,9 +381,6 @@ function printMatrix(matName, mat) {
     }
 }
 
-//INITIATE OBSTACLES
-var obstacles = [];
-
 function addToruses() {
     for (var i = 0; i < 10; i++) {
         var geometry = new THREE.TorusKnotGeometry(1, 0.5, 100, 40, 4, 3, 1);
@@ -396,9 +397,11 @@ function makeCube(xscale, yscale, zscale, material) {
   return unitCube;
 }
 
-var cube = makeCube(4, 4, 4, toonMaterial2);
-obstacles.push(cube);
-scene.add(cube);
+function testCollisionCube() {
+    var cube = makeCube(4, 4, 4, toonMaterial2);
+    obstacles.push(cube);
+    scene.add(cube);
+}
 
 function translateBefore(obj, x, y, z) {
     var translate = new THREE.Matrix4().makeTranslation(x, y, z);
@@ -457,7 +460,6 @@ function makeChairPyramid() {
     for (var i = -2; i <= 2; i++) {
         for (var j = -2; j <= 2; j++) {
             var k;
-            console.log("lop");
             var kMax = Math.min(2 - Math.abs(j), 2 - Math.abs(i));
             for (k = 0; k < kMax; k++) {
                 make2ChairUnit(k * 2.2, j * 1.1, i * 1.1, true);
@@ -469,6 +471,7 @@ function makeChairPyramid() {
 
 }
 //makeChairPyramid();
+testCollisionCube();
 // addToruses();
 firstPersonCamera.constraints = [];
 for (var i = 0; i < 8; i++) {
@@ -581,12 +584,10 @@ function onKeyUp(event) {
 var isMouseDown = false;
 
 function onMouseDown(event) {
-    console.log("mouse down");
     isMouseDown = true;
 }
 
 function onMouseUp(event) {
-    console.log("mouse up");
     isMouseDown = false;
 }
 
@@ -630,23 +631,23 @@ function move(obj) {
     obj.constraints.forEach(function(constraint) {
 
         if (constraint != null && constraint.dot(velocity) < 0) {
-            console.log(constraint);
-            console.log(velocity);
+            // console.log(constraint);
+            // console.log(velocity);
             var negaVelocity = velocity.clone().negate();
-            console.log("NEGATED")
-            console.log(negaVelocity)
+            // console.log("NEGATED")
+            // console.log(negaVelocity)
             
-            console.log("DOTCONSTRAINT")
+            // console.log("DOTCONSTRAINT")
             var cosTheta = negaVelocity.dot(constraint);
-            console.log(cosTheta);
+            // console.log(cosTheta);
 
             var newConstraint = constraint.clone().multiplyScalar(cosTheta);
-            console.log("PROJECTION")
-            console.log(constraint);
+            // console.log("PROJECTION")
+            // console.log(constraint);
             
 
             obj.velocity.add(newConstraint);
-            console.log(obj.velocity);
+            // console.log(obj.velocity);
         }
     })
     var moveTranslation = new THREE.Matrix4().makeTranslation(obj.velocity.x, obj.velocity.y, obj.velocity.z);
