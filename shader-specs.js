@@ -5,6 +5,9 @@ var lightPosition = new THREE.Vector3(70, 100, 70);
 
 var litColor = new THREE.Color(0.7, 0.4, 0.6);
 var unLitColor = new THREE.Color(0.15, 0.2, 0.6);
+var litColor2 = new THREE.Color(0.1, 0.4, 0.9);
+var unLitColor2 = new THREE.Color(0.7, 0.32, 0.6);
+
 var outlineColor = new THREE.Color(0.04, 0.1, 0.15);
 
 var kAmbient = 0.4;
@@ -57,6 +60,51 @@ var toonSpec = {
     },
 };
 
+
+var toonSpec2 = {
+    uniforms: {
+        litColor: {
+            type: 'c',
+            value: litColor2
+        },
+        unLitColor: {
+            type: 'c',
+            value: unLitColor2
+        },
+        outlineColor: {
+            type: 'c',
+            value: outlineColor
+        },
+        lightColor: {
+            type: 'c',
+            value: lightColor
+        },
+        ambientColor: {
+            type: 'c',
+            value: ambientColor
+        },
+        lightPosition: {
+            type: 'v3',
+            value: lightPosition
+        },
+        kAmbient: {
+            type: 'f',
+            value: kAmbient
+        },
+        kDiffuse: {
+            type: 'f',
+            value: kDiffuse
+        },
+        kSpecular: {
+            type: 'f',
+            value: kSpecular
+        },
+        shininess: {
+            type: 'f',
+            value: shininess
+        },
+    },
+};
 
 var blinnPhongSpec = {
     uniforms: {
@@ -131,6 +179,8 @@ var basicMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide
 });
 var toonMaterial = new THREE.ShaderMaterial(toonSpec);
+var toonMaterial2 = new THREE.ShaderMaterial(toonSpec2);
+
 var blinnPhongMaterial = new THREE.ShaderMaterial(blinnPhongSpec);
 var blinnPhongMaterial2 = new THREE.ShaderMaterial(blinnPhongSpec2);
 
@@ -154,4 +204,8 @@ new THREE.SourceLoader().load(shaderFiles, function(shaders) {
     toonMaterial.vertexShader = shaders['glsl/toon.vs.glsl'];
     toonMaterial.fragmentShader = shaders['glsl/toon.fs.glsl'];
     toonMaterial.needsUpdate = true;
+
+    toonMaterial2.vertexShader = shaders['glsl/toon.vs.glsl'];
+    toonMaterial2.fragmentShader = shaders['glsl/toon.fs.glsl'];
+    toonMaterial2.needsUpdate = true;
 })

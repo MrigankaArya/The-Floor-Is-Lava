@@ -30,7 +30,7 @@ var playerView = {
     width: 0.499,
     height: 1.0,
     background: new THREE.Color().setRGB(0.1, 0.1, 0.1),
-    eye: [0, 5, levelLength / 2 - 10],
+    eye: [0, 5, levelLength / 2 - 30],
     up: [0, 1, 0],
     fov: 45,
     updateCamera: function(camera, scene, mouseX, mouseY) {}
@@ -84,13 +84,16 @@ function addHorizontalAccel(obj) {
 
     obj.horizontalAccelX = 0.002;
     obj.horizontalAccelZ = 0.002;
-    obj.slideX = function(isForward) {
+    obj.slideX = function(isForward, isMove) {
         if (isForward) {
             this.horizontalAccelX = Math.abs(this.horizontalAccelX)
         } else {
             this.horizontalAccelX = -Math.abs(this.horizontalAccelX);
         }
         this.velocity.x += this.horizontalAccelX;
+        if (!isMove) {
+            this.velocity.x = 0;
+        }
         /*var slideTranslation = new THREE.Matrix4().makeTranslation(this.velocity.x, 0, 0);
         var postSlideTranslation = new THREE.Matrix4().multiplyMatrices(slideTranslation, this.matrix);
         this.setMatrix(postSlideTranslation);*/
@@ -108,10 +111,10 @@ function addHorizontalAccel(obj) {
     }
 }
 
-var firstPersonCamera = new THREE.PerspectiveCamera(playerView.fov, 1, 2, 1000); // view angle, aspect ratio, near, far
+var firstPersonCamera = new THREE.PerspectiveCamera(playerView.fov, 1, 0.5, 1000); // view angle, aspect ratio, near, far
 firstPersonCamera.rotation.order = "YXZ"; //need for pitch/yaw to maintain horizon
 resetCamera(firstPersonCamera, playerView);
-attachPlayerToCamera(firstPersonCamera);
+//attachPlayerToCamera(firstPersonCamera);
 addGravity(firstPersonCamera);
 addHorizontalAccel(firstPersonCamera);
 scene.add(firstPersonCamera);
@@ -349,7 +352,6 @@ function addLavaSub() {
     var rot = new THREE.Matrix4().makeRotationX(3*Math.PI / 2);
     var translateUp = new THREE.Matrix4().makeTranslation(0, 1, 0);
     var final = new THREE.Matrix4().multiplyMatrices(translateUp, rot);
-    printMatrix("440", rot);
     plane.setMatrix(final);
     scene.add(plane);
     lava = plane;
@@ -396,6 +398,10 @@ function makeCube(xscale, yscale, zscale, material) {
   unitCube.setMatrix(new THREE.Matrix4().makeScale(xscale, yscale, zscale));
   return unitCube;
 }
+
+var cube = makeCube(10, 10, 10, toonMaterial2);
+obstacles.push(cube);
+scene.add(cube);
 
 function translateBefore(obj, x, y, z) {
     var translate = new THREE.Matrix4().makeTranslation(x, y, z);
@@ -465,7 +471,7 @@ function makeChairPyramid() {
 
 
 }
-makeChairPyramid();
+//makeChairPyramid();
 // addToruses();
 firstPersonCamera.constraints = [];
 for (var i = 0; i < 8; i++) {
@@ -483,7 +489,7 @@ function detectCollision(){
         var ray = new THREE.Raycaster(playerPos, directionVector.clone().normalize());
 
         var collisions = ray.intersectObjects(obstacles);
-        if(collisions.length > 0 && collisions[0].distance < directionVector.length()){
+        if(collisions.length > 0 && collisions[0].distance < 5){
             firstPersonCamera.constraints[vertex] = collisions[0].face.normal
         } else {
             firstPersonCamera.constraints[vertex] = null
@@ -626,13 +632,24 @@ function move(obj) {
     var velocity = obj.velocity;
     obj.constraints.forEach(function(constraint) {
         if (constraint != null && constraint.dot(velocity) < 0) {
-            //Formula for projection of a vector onto a plane is:
-            //a2 = a - [(a dot b)/(b dot b)]b
-            //where b is the vector and a is the normal of the plane
-            var aDotB = constraint.dot(velocity);
-            var bDotB = velocity.dot(velocity);
-            var secondTerm = velocity.multiplyScalar(aDotB/bDotB);
-            obj.velocity = constraint.sub(secondTerm);
+            console.log(constraint);
+            console.log(velocity);
+            var negaVelocity = velocity.clone().negate();
+            console.log("NEGATED")
+            console.log(negaVelocity)
+            
+
+            console.log("DOTCONSTRAINT")
+            var cosTheta = negaVelocity.dot(constraint);
+            console.log(cosTheta);
+
+            constraint.multiplyScalar(cosTheta * 1.6);
+            console.log("PROJECTION")
+            console.log(constraint);
+            
+
+            obj.velocity.add(constraint);
+            console.log(obj.velocity);
         }
     })
     var moveTranslation = new THREE.Matrix4().makeTranslation(obj.velocity.x, obj.velocity.y, obj.velocity.z);
@@ -653,7 +670,6 @@ var startTimeInLava;
 var secondsBeforeHealthDecrease = 2;
 function update() {
     //translateBefore(lava, 0, lavaSpeed, 0);
-
     //Compute FPS
     if (numFrames < thresholdFrames) {
         numFrames++;
@@ -716,19 +732,19 @@ function update() {
 
     //Player controls
     if (keys.w) {
-        firstPersonCamera.slideZ(false);
+        firstPersonCamera.slideZ(false, keys.w);
     }
 
     if (keys.s) {
-        firstPersonCamera.slideZ(true);
+        firstPersonCamera.slideZ(true, keys.s);
     }
 
     if (keys.a) {
-        firstPersonCamera.slideX(false);
+        firstPersonCamera.slideX(false, keys.a);
     }
 
     if (keys.d) {
-        firstPersonCamera.slideX(true);
+        firstPersonCamera.slideX(true, keys.d);
     }
 
     move(firstPersonCamera);
