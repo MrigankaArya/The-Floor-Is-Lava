@@ -84,16 +84,13 @@ function addHorizontalAccel(obj) {
 
     obj.horizontalAccelX = 0.002;
     obj.horizontalAccelZ = 0.002;
-    obj.slideX = function(isForward, isMove) {
+    obj.slideX = function(isForward) {
         if (isForward) {
             this.horizontalAccelX = Math.abs(this.horizontalAccelX)
         } else {
             this.horizontalAccelX = -Math.abs(this.horizontalAccelX);
         }
         this.velocity.x += this.horizontalAccelX;
-        if (!isMove) {
-            this.velocity.x = 0;
-        }
         /*var slideTranslation = new THREE.Matrix4().makeTranslation(this.velocity.x, 0, 0);
         var postSlideTranslation = new THREE.Matrix4().multiplyMatrices(slideTranslation, this.matrix);
         this.setMatrix(postSlideTranslation);*/
@@ -399,7 +396,7 @@ function makeCube(xscale, yscale, zscale, material) {
   return unitCube;
 }
 
-var cube = makeCube(10, 10, 10, toonMaterial2);
+var cube = makeCube(4, 4, 4, toonMaterial2);
 obstacles.push(cube);
 scene.add(cube);
 
@@ -489,9 +486,9 @@ function detectCollision(){
         var ray = new THREE.Raycaster(playerPos, directionVector.clone().normalize());
 
         var collisions = ray.intersectObjects(obstacles);
-        if(collisions.length > 0 && collisions[0].distance < 5){
-            firstPersonCamera.constraints[vertex] = collisions[0].face.normal
-        } else {
+        if(collisions.length > 0 && collisions[0].distance < 1){
+            firstPersonCamera.constraints[vertex] = collisions[0].face.normal;
+       } else {
             firstPersonCamera.constraints[vertex] = null
         }
    }
@@ -631,6 +628,7 @@ function onMouseMove(event) {
 function move(obj) {
     var velocity = obj.velocity;
     obj.constraints.forEach(function(constraint) {
+
         if (constraint != null && constraint.dot(velocity) < 0) {
             console.log(constraint);
             console.log(velocity);
@@ -638,17 +636,16 @@ function move(obj) {
             console.log("NEGATED")
             console.log(negaVelocity)
             
-
             console.log("DOTCONSTRAINT")
             var cosTheta = negaVelocity.dot(constraint);
             console.log(cosTheta);
 
-            constraint.multiplyScalar(cosTheta * 1.6);
+            var newConstraint = constraint.clone().multiplyScalar(cosTheta);
             console.log("PROJECTION")
             console.log(constraint);
             
 
-            obj.velocity.add(constraint);
+            obj.velocity.add(newConstraint);
             console.log(obj.velocity);
         }
     })
@@ -732,19 +729,19 @@ function update() {
 
     //Player controls
     if (keys.w) {
-        firstPersonCamera.slideZ(false, keys.w);
+        firstPersonCamera.slideZ(false);
     }
 
     if (keys.s) {
-        firstPersonCamera.slideZ(true, keys.s);
+        firstPersonCamera.slideZ(true);
     }
 
     if (keys.a) {
-        firstPersonCamera.slideX(false, keys.a);
+        firstPersonCamera.slideX(false);
     }
 
     if (keys.d) {
-        firstPersonCamera.slideX(true, keys.d);
+        firstPersonCamera.slideX(true);
     }
 
     move(firstPersonCamera);
