@@ -257,7 +257,6 @@ addAxes();
 addRoom();
 
 function makeWheel(){
-    console.log("ey wat");
     var ringGeometry = new THREE.TorusGeometry(10, 0.2, 16, 100);
     var ringMesh = new THREE.Mesh(ringGeometry, toonMaterial2);
     var transformMatrix = new THREE.Matrix4().makeTranslation(levelWidth/2 - 10, levelHeight/2 - 10, levelLength/2-10);

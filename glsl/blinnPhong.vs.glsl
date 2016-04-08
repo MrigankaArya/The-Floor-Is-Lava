@@ -1,6 +1,7 @@
-uniform vec3 lightColor;
+uniform vec3 lightColors[2];
 uniform vec3 ambientColor;
-uniform vec3 lightPosition;
+uniform int noLights;
+uniform vec3 lightPositions[2];
 uniform float kAmbient;
 uniform float kDiffuse;
 uniform float kSpecular;
