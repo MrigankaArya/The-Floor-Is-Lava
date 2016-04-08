@@ -49,7 +49,7 @@ var playerView = {
     width: 0.499,
     height: 1.0,
     background: new THREE.Color().setRGB(0.1, 0.1, 0.1),
-    eye: [0, 5, levelLength / 2 - 30],
+    eye: [0, 2, levelLength / 2 - 30],
     up: [0, 1, 0],
     fov: 45,
     updateCamera: function(camera, scene, mouseX, mouseY) {}
@@ -435,32 +435,37 @@ function translateAfter(obj, x, y, z) {
 
 function makeChair(height, legsize, floorToSeatHeight, seatWidth, seatHeight, material) {
     var chair = new THREE.Object3D();
-    var seat = makeCube(seatWidth, seatHeight, seatWidth, material);
+    var seat = new THREE.BoxGeometry(seatWidth, seatHeight, seatWidth);
 
     function makeLeg(x, z) {
-        var leg = makeCube(legsize, floorToSeatHeight / seatHeight, legsize / seatWidth, material);
-        translateBefore(leg, x*(seatWidth / 2 - legsize) / seatWidth, (-floorToSeatHeight / 2) / seatHeight, z*(seatWidth / 2 - legsize) / seatWidth);
-        seat.add(leg);
+        var leg = makeCube(legsize, floorToSeatHeight, legsize, material);
+        translateBefore(leg, x*(seatWidth / 2 - legsize), -floorToSeatHeight / 2, z*(seatWidth / 2 - legsize));
+        return leg;
     }
 
-    makeLeg(1, 1);
-    makeLeg(1, -1);
-    makeLeg(-1, 1);
-    makeLeg(-1, -1);
+    // ATTACH LEGS AND A BACK TO THE SEAT
+    var legs = [makeLeg(1, 1), makeLeg(1, -1), makeLeg(-1, 1), makeLeg(-1, -1)];
+    legs.forEach(function(leg) {
+        seat.merge(leg.geometry, leg.matrix);
+    })
 
-    var back = makeCube(seatWidth/seatWidth, (height-floorToSeatHeight)/seatHeight, (legsize)/seatWidth, material);
-    obstacles.push(back);
+    var back = makeCube(seatWidth, height-floorToSeatHeight, legsize, material);
+    translateBefore(back, 0, (height - floorToSeatHeight) / 2, -(seatWidth / 2 - legsize));
+    seat.merge(back.geometry, back.matrix);
 
-    scene.add(back);
-    translateBefore(back, 0, ((height - floorToSeatHeight) / 2) / seatHeight, -(seatWidth / 2 - legsize) / seatWidth);
-    seat.add(back);
-
+    // COLLIDER FOR THE BACK
+    var backCollider = makeCube(seatWidth, height-floorToSeatHeight, legsize, material);
+    translateBefore(backCollider, 0, (height - floorToSeatHeight) / 2, -(seatWidth / 2 - legsize));
+    obstacles.push(backCollider);
+    
+    //CREATE THE CHAIR MESH
+    var chairMesh = new THREE.Mesh(seat, material);
+    chairMesh.add(backCollider);
+    scene.add(chairMesh);
+    
     // var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
-    // var collisionGeometry = new THREE.BoxGeometry(seatWidth+1, height+1, seatWidth+1);
-    // var collisionMesh = new THREE.Mesh(collisionGeometry,meshMaterial);
-    chair.add(seat);
-    // chair.add(collisionMesh);
-    // obstacles.push(collisionMesh);
+    chair.add(chairMesh);
+
     return chair;
 }
 
