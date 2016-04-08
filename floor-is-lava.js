@@ -12,6 +12,12 @@ var lavaSpeed = 0.0000;
 //INITIATE OBSTACLES
 var obstacles = [];
 
+//Any objects that the player can interact with go here eg: lava wheel, pillows etc.
+var interactables = [];
+
+var gameCanvas = $("canvas:first-child");
+var posNewX = gameCanvas.attr("width")/2;
+var posNewY = gameCanvas.attr("height")/2;
 
 // ASSIGNMENT-SPECIFIC API EXTENSION
 THREE.Object3D.prototype.setMatrix = function(a) {
@@ -242,11 +248,22 @@ function addRoom() {
     var frontTransform = new THREE.Matrix4().makeTranslation(0, levelHeight / 2, levelLength / 2);
     var frontWall = makeRoomSurface(levelWidth, levelHeight, 1, frontTransform);
 }
-
 addGrid();
 addAxes();
 addRoom();
 
+function makeWheel(){
+    console.log("ey wat");
+    var ringGeometry = new THREE.TorusGeometry(10, 0.2, 16, 100);
+    var ringMesh = new THREE.Mesh(ringGeometry, toonMaterial2);
+    var transformMatrix = new THREE.Matrix4().makeTranslation(levelWidth/2 - 10, levelHeight/2 - 10, levelLength/2-10);
+    ringMesh.setMatrix(transformMatrix);
+    obstacles.push(ringMesh);
+    interactables.push(ringMesh);
+    scene.add(ringMesh);
+}
+
+makeWheel();
 //Adds lava to the floor and deforms it as necessary.
 function addLava() {
     var lavaGeometry =  new THREE.PlaneGeometry(levelWidth, levelWidth, 129, 129);  //100 segments each 
@@ -516,7 +533,21 @@ function detectCollision(){
    }
 }
 
+//picking ray
+function pickRay(){
+    //use the canvas centre for the picking ray instead of the pointer
+    var center = new THREE.Vector2();
+    center.x = posNewX;
+    center.y = posNewY;
 
+    var pickRayCaster = new THREE.Raycaster();
+    pickRayCaster.setFromCamera(center, firstPersonCamera);
+
+    var intersects  = pickRayCaster.intersectObjects(obstacles);
+    for(var i = 0 ; i< intersects.length; i++){
+        //TODO
+    }
+}
 //Sort obstacles by y position for collision detection
 obstacles.sort(function(a, b) {
     return a.position.z - b.position.z;
@@ -725,6 +756,7 @@ function update() {
     var diff = firstPersonCamera.position.y - lava.position.y;
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
     detectCollision();
+    pickRay();
     
     var diffThreshold = 0.5;
     // Update health
@@ -793,5 +825,5 @@ function update() {
 }
 
 update();
-
+console.log(scene.children)
 }
