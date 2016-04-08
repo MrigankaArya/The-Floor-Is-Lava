@@ -1,7 +1,7 @@
 function runGame() {
 $("#play").remove();
 $("#instructions").remove();
-
+var sidePanDamper = 30000;
 var panSensitivity = 0.001;
 var levelLength = 100;
 var levelWidth = 50;
@@ -654,25 +654,18 @@ var mouseMoving = false;
 
 function onMouseMove(event) {
     mouseMoving = true;
-    var diffX = event.clientX - posNewX;
     var diffY = event.clientY - posNewY;
 
-    var dx = panSensitivity * diffX;
     var dy = panSensitivity * diffY;
 
 
     posNewY = event.clientY;
     posNewX = event.clientX;
 
-    firstPersonCamera.rotation.y += dx;
+    var gameCanvasWidth = gameCanvas.attr("width");
     firstPersonCamera.rotation.x += dy;
 
-    var gameCanvasWidth = gameCanvas.attr("width");
-    console.log("SLDJFLSKDJFKLSD")
-    console.log(gameCanvasWidth);
-    console.log(event.clientX);
-
-    var boundary = 1/4;
+    var boundary = 1/2;
     var inverseBoundary = 1 - boundary;
     var outRight = event.clientX > gameCanvasWidth * inverseBoundary;
 
@@ -690,7 +683,7 @@ function onMouseMove(event) {
             sideDx = (gameCanvasWidth * boundary) - event.clientX;
         }
 
-        sideDx /= 10000;
+        sideDx /= sidePanDamper;
         return;
     }
 
