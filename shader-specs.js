@@ -3,6 +3,9 @@ var lightColor = new THREE.Color(1, 0.3, 0.3);
 var ambientColor = new THREE.Color(0.4, 0.4, 0.4);
 var lightPosition = new THREE.Vector3(70, 100, 70);
 
+var lightColor2 = new THREE.Color(0, 0.3, 1);
+var lightPosition2 = new THREE.Vector3(40, 20, 10);
+
 var litColor = new THREE.Color(0.7, 0.4, 0.6);
 var unLitColor = new THREE.Color(0.15, 0.2, 0.6);
 var litColor2 = new THREE.Color(0.1, 0.4, 0.9);
@@ -10,9 +13,9 @@ var unLitColor2 = new THREE.Color(0.7, 0.32, 0.6);
 
 var outlineColor = new THREE.Color(0.04, 0.1, 0.15);
 
-var kAmbient = 0.4;
-var kDiffuse = 0.8;
-var kSpecular = 0.8;
+var kAmbient = new THREE.Color(0.2, 0.1, 0.1);
+var kDiffuse = new THREE.Color(0.2, 0.1, 0.1);
+var kSpecular = new THREE.Color(0.3, 0.2, 0.5);
 var shininess = 10.0;
 
 var toonSpec = {
@@ -41,25 +44,8 @@ var toonSpec = {
             type: 'v3',
             value: lightPosition
         },
-        kAmbient: {
-            type: 'f',
-            value: kAmbient
-        },
-        kDiffuse: {
-            type: 'f',
-            value: kDiffuse
-        },
-        kSpecular: {
-            type: 'f',
-            value: kSpecular
-        },
-        shininess: {
-            type: 'f',
-            value: shininess
-        },
     },
 };
-
 
 var toonSpec2 = {
     uniforms: {
@@ -86,50 +72,38 @@ var toonSpec2 = {
         lightPosition: {
             type: 'v3',
             value: lightPosition
-        },
-        kAmbient: {
-            type: 'f',
-            value: kAmbient
-        },
-        kDiffuse: {
-            type: 'f',
-            value: kDiffuse
-        },
-        kSpecular: {
-            type: 'f',
-            value: kSpecular
-        },
-        shininess: {
-            type: 'f',
-            value: shininess
-        },
+        }
     },
 };
 
 var blinnPhongSpec = {
     uniforms: {
-        lightColor: {
-            type: 'c',
-            value: lightColor
+        noLights: {
+            type: 'i',
+            value: 1
+        },
+        lightColors: {
+            type: 'fv',
+            value: [1, 0, 0, 0, 0.5, 0.6]
         },
         ambientColor: {
             type: 'c',
             value: ambientColor
         },
-        lightPosition: {
-            type: 'v3',
-            value: lightPosition
+        lightPositions: {
+            type: 'fv',
+            value: [70, 100, 70, -70, -100, -70]
         },
         kAmbient: {
-            type: 'f',
+            type: 'c',
             value: kAmbient
         },
         kDiffuse: {
-            type: 'f',
+            type: 'c',
             value: kDiffuse
         },
         kSpecular: {
-            type: 'f',
+            type: 'c',
             value: kSpecular
         },
         shininess: {
@@ -139,31 +113,34 @@ var blinnPhongSpec = {
     },
 };
 
-
 var blinnPhongSpec2 = {
     uniforms: {
-        lightColor: {
-            type: 'c',
-            value: litColor
+        noLights: {
+            type: 'i',
+            value: 1
+        },
+        lightColors: {
+            type: 'fv',
+            value: [1, 0, 1, 0, 0, 0.2]
         },
         ambientColor: {
             type: 'c',
             value: ambientColor
         },
-        lightPosition: {
-            type: 'v3',
-            value: lightPosition
+        lightPositions: {
+            type: 'fv',
+            value: [70, 100, 70, -70, -100, -70]
         },
         kAmbient: {
-            type: 'f',
+            type: 'c',
             value: kAmbient
         },
         kDiffuse: {
-            type: 'f',
+            type: 'c',
             value: kDiffuse
         },
         kSpecular: {
-            type: 'f',
+            type: 'c',
             value: kSpecular
         },
         shininess: {

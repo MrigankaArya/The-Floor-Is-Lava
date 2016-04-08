@@ -260,6 +260,7 @@ function makeWheel(){
     var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
     // console.log("ey wat");
     var ringGeometry = new THREE.TorusGeometry(0.5, 0.2, 16, 100);
+
     var ringMesh = new THREE.Mesh(ringGeometry, toonMaterial2);
     var transformMatrix = new THREE.Matrix4().makeTranslation(0, 1.5, -49);
     ringMesh.setMatrix(transformMatrix);
