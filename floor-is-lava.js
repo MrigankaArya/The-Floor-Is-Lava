@@ -26,6 +26,8 @@ var renderer = new THREE.WebGLRenderer();
 renderer.setClearColor(0xFFFFFF); // white background colour
 canvas.appendChild(renderer.domElement);
 
+var gameCanvas = $("canvas:first-child");
+
 // SETUP CAMERA
 var playerView = {
     left: 0,
@@ -89,9 +91,6 @@ function addHorizontalAccel(obj) {
             this.horizontalAccelX = -Math.abs(this.horizontalAccelX);
         }
         this.velocity.x += this.horizontalAccelX;
-        /*var slideTranslation = new THREE.Matrix4().makeTranslation(this.velocity.x, 0, 0);
-        var postSlideTranslation = new THREE.Matrix4().multiplyMatrices(slideTranslation, this.matrix);
-        this.setMatrix(postSlideTranslation);*/
     }
     obj.slideZ = function(isForward) {
         if (isForward) {
@@ -100,13 +99,10 @@ function addHorizontalAccel(obj) {
             this.horizontalAccelZ = -Math.abs(this.horizontalAccelZ);
         }
         this.velocity.z += this.horizontalAccelZ;
-        /*var slideTranslation = new THREE.Matrix4().makeTranslation(0, 0, this.velocity.z);
-        var postSlideTranslation = new THREE.Matrix4().multiplyMatrices(slideTranslation, this.matrix);
-        this.setMatrix(postSlideTranslation);*/
     }
 }
 
-var firstPersonCamera = new THREE.PerspectiveCamera(playerView.fov, 1, 0.5, 1000); // view angle, aspect ratio, near, far
+var firstPersonCamera = new THREE.PerspectiveCamera(playerView.fov, 1, 0.3, 1000); // view angle, aspect ratio, near, far
 firstPersonCamera.rotation.order = "YXZ"; //need for pitch/yaw to maintain horizon
 resetCamera(firstPersonCamera, playerView);
 //attachPlayerToCamera(firstPersonCamera);
@@ -129,6 +125,8 @@ function resize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     firstPersonCamera.aspect = window.innerWidth / window.innerHeight;
     firstPersonCamera.updateProjectionMatrix();
+    posNewX = gameCanvas.attr("width")/2;
+    posNewY = gameCanvas.attr("height")/2;
 }
 
 // EVENT LISTENER RESIZE
@@ -390,7 +388,8 @@ function makeCube(xscale, yscale, zscale, material) {
 }
 
 function testCollisionCube() {
-    var cube = makeCube(4, 4, 4, toonMaterial2);
+    var cube = makeCube(10, 10, 10, toonMaterial2);
+    translateBefore(cube, 10, 0, 0);
     obstacles.push(cube);
     scene.add(cube);
 }
@@ -491,7 +490,7 @@ function makeChairPyramid() {
 
 }
 makeChairPyramid();
-// testCollisionCube();
+testCollisionCube();
 // addToruses();
 firstPersonCamera.constraints = [];
 for (var i = 0; i < 8; i++) {
@@ -500,7 +499,7 @@ for (var i = 0; i < 8; i++) {
 
 //Detects collision between the player and the objects. Replace toruses with boxes because this is an awkward hitbox
 function detectCollision(){
-    var geometry = new THREE.BoxGeometry(1, playerHeight, 3);
+    var geometry = new THREE.BoxGeometry(1.5, playerHeight, 3);
     var playerPos = firstPersonCamera.position.clone();
     for(var vertex = 0; vertex < 8; vertex++){
         var localV = geometry.vertices[vertex].clone();
@@ -614,14 +613,15 @@ function onMouseUp(event) {
 //TODO: Set posNewX and posNewY to center screen coordinates when you start game at center
 //      Follow up todo:  game "START" screen at centered at the center of the screen. Must be dynamic
 //      These values are a local standin for the actual thing. Replace with your screen res to make it actually work
-var posNewX = 800;
-var posNewY = 508;
-var oldDx = 0;
+
+var posNewX = gameCanvas.attr("width")/2;
+var posNewY = gameCanvas.attr("height")/2;
+
+var sideDx = 0;
 var isOutBounds = false;
 var mouseMoving = false;
 
 function onMouseMove(event) {
-
     mouseMoving = true;
     var diffX = event.clientX - posNewX;
     var diffY = event.clientY - posNewY;
@@ -636,13 +636,33 @@ function onMouseMove(event) {
     firstPersonCamera.rotation.y += dx;
     firstPersonCamera.rotation.x += dy;
 
-    if (event.clientX >= (screen.width - 100) || event.clientX == 0) {
+    var gameCanvasWidth = gameCanvas.attr("width");
+    console.log("SLDJFLSKDJFKLSD")
+    console.log(gameCanvasWidth);
+    console.log(event.clientX);
+
+    var boundary = 1/4;
+    var inverseBoundary = 1 - boundary;
+    var outRight = event.clientX > gameCanvasWidth * inverseBoundary;
+
+    var outLeft = event.clientX < gameCanvasWidth * boundary;
+    if (outRight || outLeft) {
         isOutBounds = true;
         mouseMoving = true;
+        if (outRight) {
+            console.log("YES")
+            sideDx = (gameCanvasWidth * inverseBoundary) - event.clientX;
+        }
+
+        if (outLeft) {
+            console.log("NO")
+            sideDx = (gameCanvasWidth * boundary) - event.clientX;
+        }
+
+        sideDx /= 10000;
         return;
     }
 
-    oldDx = dx;
     mouseMoving = false;
 }
 
@@ -670,9 +690,8 @@ function move(obj) {
             // console.log(obj.velocity);
         }
     })
-    var moveTranslation = new THREE.Matrix4().makeTranslation(obj.velocity.x, obj.velocity.y, obj.velocity.z);
-    var postMoveTranslation = new THREE.Matrix4().multiplyMatrices(moveTranslation, obj.matrix);
-    obj.setMatrix(postMoveTranslation);
+    
+    translateBefore(obj, obj.velocity.x, obj.velocity.y, obj.velocity.z);
 }
 
 //For FPS
@@ -742,7 +761,7 @@ function update() {
     } else {
         //check if we're on a flat surface
         isFalling = firstPersonCamera.constraints.filter(function(constraint) {
-            return constraint != null && (constraint.y > 0);
+            return constraint != null && (constraint.y > 0.5);
         }).length == 0;
     }
 
@@ -768,7 +787,7 @@ function update() {
     move(firstPersonCamera);
 
     if (isOutBounds && mouseMoving) {
-        firstPersonCamera.rotation.y += oldDx;
+        firstPersonCamera.rotation.y += sideDx;
     }
 
 }
