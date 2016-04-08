@@ -7,7 +7,7 @@ var levelLength = 100;
 var levelWidth = 30;
 var levelHeight = 15;
 var playerHeight = 3;
-var lavaSpeed = 0.0000;
+var lavaSpeed = 0.0002;
 
 //INITIATE OBSTACLES
 var obstacles = [];
@@ -28,14 +28,14 @@ THREE.Object3D.prototype.setMatrix = function(a) {
 // SETUP RENDERER & SCENE
 var canvas = document.getElementById('canvas');
 var scene = new THREE.Scene();
-var renderer = new THREE.WebGLRenderer();
+var renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setClearColor(0xFFFFFF); // white background colour
 canvas.appendChild(renderer.domElement);
 
 var gameCanvas = $("canvas:first-child");
 
 var minimap = document.getElementById('minimap');
-var minimapRenderer = new THREE.WebGLRenderer();
+var minimapRenderer = new THREE.WebGLRenderer({antialias:true});
 minimapRenderer.setClearColor(0xFFFFFF); // white background colour
 minimap.appendChild(minimapRenderer.domElement);
 
@@ -259,13 +259,14 @@ addRoom();
 function makeWheel(){
     var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
     // console.log("ey wat");
-    var ringGeometry = new THREE.TorusGeometry(0.5, 0.2, 16, 100);
+    var ringGeometry = new THREE.TorusGeometry(0.25, 0.1, 16, 100);
 
     var ringMesh = new THREE.Mesh(ringGeometry, toonMaterial2);
     var transformMatrix = new THREE.Matrix4().makeTranslation(0, 1.5, -49);
     ringMesh.setMatrix(transformMatrix);
-    var ringCollider = new THREE.BoxGeometry(1.5,1.5,0.4);
-    var ringColliderMesh = new THREE.Mesh(ringCollider);
+    var ringCollider = new THREE.BoxGeometry(0.9,0.9,0.4);
+    var ringColliderMesh = new THREE.Mesh(ringCollider, meshMaterial);
+    ringColliderMesh.type = "wheel";
     ringColliderMesh.setMatrix(transformMatrix);
     obstacles.push(ringColliderMesh);
     interactables.push(ringColliderMesh);
@@ -546,7 +547,6 @@ function detectCollision(){
 
 //picking ray
 function pickRay(){
-    // console.log("Hi");
     //use the canvas centre for the picking ray instead of the pointer
     var center = new THREE.Vector2();
     center.x = firstPersonCamera.position.x;
@@ -554,12 +554,38 @@ function pickRay(){
 
     var pickRayCaster = new THREE.Raycaster();
     pickRayCaster.setFromCamera(center, firstPersonCamera);
+
+    //Change this number in order to change the distance at which you can interact with the object
     pickRayCaster.far = 150;
     var intersects  = pickRayCaster.intersectObjects(interactables);
-    for(var i = 0 ; i< intersects.length; i++){
-        console.log("ow my face");
+    
+    //Grab the 1st intersected object's type
+    if(intersects.length > 0 )
+        takeAction(intersects[0].object.type);
+
+
+}
+
+
+function takeAction(type){
+
+    switch(type){
+        case "wheel":
+            //lower the lava
+            break;
+        case "ladder":
+            //climb the ladder to the wheel
+            break;
+        case "object":
+            //Pick up the object
+            break;
+        default:
+            //do nothing
+            break;
     }
 }
+
+//For later.
 //Sort obstacles by y position for collision detection
 obstacles.sort(function(a, b) {
     return a.position.z - b.position.z;
