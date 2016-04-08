@@ -4,7 +4,7 @@ $("#instructions").remove();
 var sidePanDamper = 300;
 var panSensitivity = 0.001;
 var levelLength = 100;
-var levelWidth = 50;
+var levelWidth = 30;
 var levelHeight = 15;
 var playerHeight = 3;
 var lavaSpeed = 0.0000;
@@ -15,7 +15,7 @@ var obstacles = [];
 //Any objects that the player can interact with go here eg: lava wheel, pillows etc.
 var interactables = [];
 
-var gameCanvas = $("canvas:first-child");
+var gameCanvas = $("#canvas:first-child");
 var posNewX = gameCanvas.attr("width")/2;
 var posNewY = gameCanvas.attr("height")/2;
 
@@ -33,6 +33,14 @@ renderer.setClearColor(0xFFFFFF); // white background colour
 canvas.appendChild(renderer.domElement);
 
 var gameCanvas = $("canvas:first-child");
+
+var minimap = document.getElementById('minimap');
+var minimapRenderer = new THREE.WebGLRenderer();
+minimapRenderer.setClearColor(0xFFFFFF); // white background colour
+minimap.appendChild(minimapRenderer.domElement);
+
+var minimapCanvas = $("minimap:first-child");
+
 
 // SETUP CAMERA
 var playerView = {
@@ -61,12 +69,10 @@ function resetCamera(camera, view) {
 }
 
 function attachPlayerToCamera(camera) {
-    var geometry = new THREE.BoxGeometry(1, playerHeight, 3);
+    var geometry = new THREE.BoxGeometry(0.4, playerHeight, 0.4);
     var mesh = new THREE.Mesh(geometry, basicMaterial);
     camera.add(mesh);
 }
-
-
 
 function addGravity(obj) {
     if (obj.velocity == null) {
@@ -108,23 +114,21 @@ function addHorizontalAccel(obj) {
     }
 }
 
-var firstPersonCamera = new THREE.PerspectiveCamera(playerView.fov, 1, 0.3, 1000); // view angle, aspect ratio, near, far
+var firstPersonCamera = new THREE.PerspectiveCamera(playerView.fov, 1, 0.5, 1000); // view angle, aspect ratio, near, far
 firstPersonCamera.rotation.order = "YXZ"; //need for pitch/yaw to maintain horizon
 resetCamera(firstPersonCamera, playerView);
-//attachPlayerToCamera(firstPersonCamera);
+attachPlayerToCamera(firstPersonCamera);
 addGravity(firstPersonCamera);
 addHorizontalAccel(firstPersonCamera);
 scene.add(firstPersonCamera);
 
+var minimapCamera = new THREE.OrthographicCamera(levelWidth / -2, levelWidth / 2, levelWidth / 2, levelWidth / -2, 1, 1000);
+minimapCamera.position.set(0, 20, 0);
+minimapCamera.up = new THREE.Vector3(0, 0, -1);
+minimapCamera.lookAt(scene.position);
+minimapCamera.position.z = firstPersonCamera.position.z;
 
-
-// var camera = new THREE.PerspectiveCamera(30,1,0.1,1000); // view angle, aspect ratio, near, far
-// camera.position.set(45,20,40);
-// camera.lookAt(scene.position);
-// scene.add(camera);
-
-//uncomment to debug using orbit controls
-//var controls = new THREE.OrbitControls(camera);
+scene.add(minimapCamera);
 
 // ADAPT TO WINDOW RESIZE
 function resize() {
@@ -674,12 +678,10 @@ function onMouseMove(event) {
         isOutBounds = true;
         mouseMoving = true;
         if (outRight) {
-            console.log("YES")
             sideDx = (gameCanvasWidth * inverseBoundary) - event.clientX;
         }
 
         if (outLeft) {
-            console.log("NO")
             sideDx = (gameCanvasWidth * boundary) - event.clientX;
         }
 
@@ -745,6 +747,8 @@ function update() {
 
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
+    minimapRenderer.render(scene, minimapCamera);
+    minimapCamera.position.z = firstPersonCamera.position.z;
 
     var diff = firstPersonCamera.position.y - lava.position.y;
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
@@ -818,5 +822,4 @@ function update() {
 }
 
 update();
-console.log(scene.children)
 }
