@@ -2,9 +2,9 @@ uniform vec3 lightColors[2];
 uniform vec3 ambientColor;
 uniform int noLights;
 uniform vec3 lightPositions[2];
-uniform float kAmbient;
-uniform float kDiffuse;
-uniform float kSpecular;
+uniform vec3 kAmbient;
+uniform vec3 kDiffuse;
+uniform vec3 kSpecular;
 uniform float shininess;
 
 varying vec3 interpolatedNormal;

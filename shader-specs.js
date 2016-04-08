@@ -13,9 +13,9 @@ var unLitColor2 = new THREE.Color(0.7, 0.32, 0.6);
 
 var outlineColor = new THREE.Color(0.04, 0.1, 0.15);
 
-var kAmbient = 0.4;
-var kDiffuse = 0.8;
-var kSpecular = 0.8;
+var kAmbient = new THREE.Color(0.2, 0.1, 0.1);
+var kDiffuse = new THREE.Color(0.2, 0.1, 0.1);
+var kSpecular = new THREE.Color(0.3, 0.2, 0.5);
 var shininess = 10.0;
 
 var toonSpec = {
@@ -43,22 +43,6 @@ var toonSpec = {
         lightPosition: {
             type: 'v3',
             value: lightPosition
-        },
-        kAmbient: {
-            type: 'f',
-            value: kAmbient
-        },
-        kDiffuse: {
-            type: 'f',
-            value: kDiffuse
-        },
-        kSpecular: {
-            type: 'f',
-            value: kSpecular
-        },
-        shininess: {
-            type: 'f',
-            value: shininess
         },
     },
 };
@@ -88,23 +72,7 @@ var toonSpec2 = {
         lightPosition: {
             type: 'v3',
             value: lightPosition
-        },
-        kAmbient: {
-            type: 'f',
-            value: kAmbient
-        },
-        kDiffuse: {
-            type: 'f',
-            value: kDiffuse
-        },
-        kSpecular: {
-            type: 'f',
-            value: kSpecular
-        },
-        shininess: {
-            type: 'f',
-            value: shininess
-        },
+        }
     },
 };
 
@@ -127,15 +95,15 @@ var blinnPhongSpec = {
             value: [70, 100, 70, -70, -100, -70]
         },
         kAmbient: {
-            type: 'f',
+            type: 'c',
             value: kAmbient
         },
         kDiffuse: {
-            type: 'f',
+            type: 'c',
             value: kDiffuse
         },
         kSpecular: {
-            type: 'f',
+            type: 'c',
             value: kSpecular
         },
         shininess: {
@@ -144,7 +112,6 @@ var blinnPhongSpec = {
         }
     },
 };
-
 
 var blinnPhongSpec2 = {
     uniforms: {
@@ -165,15 +132,15 @@ var blinnPhongSpec2 = {
             value: [70, 100, 70, -70, -100, -70]
         },
         kAmbient: {
-            type: 'f',
+            type: 'c',
             value: kAmbient
         },
         kDiffuse: {
-            type: 'f',
+            type: 'c',
             value: kDiffuse
         },
         kSpecular: {
-            type: 'f',
+            type: 'c',
             value: kSpecular
         },
         shininess: {
