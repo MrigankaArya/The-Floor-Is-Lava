@@ -257,13 +257,19 @@ addAxes();
 addRoom();
 
 function makeWheel(){
-    console.log("ey wat");
-    var ringGeometry = new THREE.TorusGeometry(10, 0.2, 16, 100);
+    var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
+    // console.log("ey wat");
+    var ringGeometry = new THREE.TorusGeometry(0.5, 0.2, 16, 100);
     var ringMesh = new THREE.Mesh(ringGeometry, toonMaterial2);
-    var transformMatrix = new THREE.Matrix4().makeTranslation(levelWidth/2 - 10, levelHeight/2 - 10, levelLength/2-10);
+    var transformMatrix = new THREE.Matrix4().makeTranslation(0, 1.5, -49);
     ringMesh.setMatrix(transformMatrix);
-    obstacles.push(ringMesh);
-    interactables.push(ringMesh);
+    var ringCollider = new THREE.BoxGeometry(1.5,1.5,0.4);
+    var ringColliderMesh = new THREE.Mesh(ringCollider);
+    ringColliderMesh.setMatrix(transformMatrix);
+    obstacles.push(ringColliderMesh);
+    interactables.push(ringColliderMesh);
+    // console.log(interactables);
+    scene.add(ringColliderMesh);
     scene.add(ringMesh);
 }
 
@@ -539,17 +545,18 @@ function detectCollision(){
 
 //picking ray
 function pickRay(){
+    // console.log("Hi");
     //use the canvas centre for the picking ray instead of the pointer
     var center = new THREE.Vector2();
-    center.x = posNewX;
-    center.y = posNewY;
+    center.x = firstPersonCamera.position.x;
+    center.y = firstPersonCamera.position.y;
 
     var pickRayCaster = new THREE.Raycaster();
     pickRayCaster.setFromCamera(center, firstPersonCamera);
-
-    var intersects  = pickRayCaster.intersectObjects(obstacles);
+    pickRayCaster.far = 150;
+    var intersects  = pickRayCaster.intersectObjects(interactables);
     for(var i = 0 ; i< intersects.length; i++){
-        //TODO
+        console.log("ow my face");
     }
 }
 //Sort obstacles by y position for collision detection
