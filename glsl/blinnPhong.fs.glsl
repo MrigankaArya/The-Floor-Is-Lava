@@ -30,6 +30,10 @@ void main() {
 		//Specular: ks*Il*(h*n)^kse
 		vec3 specularIllumination = lightColors[i] * vec3(kSpecular * pow(max(dot(halfwayVector, interpolatedNormal), 0.0), shininess));
 		finalIllumination += (ambientIllumination + diffuseIllumination + specularIllumination);
+
+		if (dot(halfwayVector, interpolatedNormal) > -0.5) {
+			finalIllumination += vec3(0, 0.1, 0.1);
+		}
 	}
 
 	gl_FragColor = vec4(finalIllumination, 1.0);
