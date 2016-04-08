@@ -1,7 +1,7 @@
 function runGame() {
 $("#play").remove();
 $("#instructions").remove();
-var sidePanDamper = 30000;
+var sidePanDamper = 300;
 var panSensitivity = 0.001;
 var levelLength = 100;
 var levelWidth = 50;
@@ -665,7 +665,7 @@ function onMouseMove(event) {
     var gameCanvasWidth = gameCanvas.attr("width");
     firstPersonCamera.rotation.x += dy;
 
-    var boundary = 1/2;
+    var boundary = 1/100;
     var inverseBoundary = 1 - boundary;
     var outRight = event.clientX > gameCanvasWidth * inverseBoundary;
 
