@@ -42,7 +42,7 @@ var playerView = {
     width: 0.499,
     height: 1.0,
     background: new THREE.Color().setRGB(0.1, 0.1, 0.1),
-    eye: [0, 2, levelLength / 2 - 40],
+    eye: [0, 5, levelLength / 2 - 40],
     up: [0, 1, 0],
     fov: 45,
     updateCamera: function(camera, scene, mouseX, mouseY) {}
@@ -212,31 +212,35 @@ function makeRoomSurface(width, height, length, transformMatrix) {
     var box = new THREE.Mesh(boxGeometry, toonMaterial);
     box.setMatrix(transformMatrix);
     obstacles.push(box);
-    scene.add(box);
     return box;
 }
 
 
-function addRoom() {
-    var box = makeRoomSurface(levelWidth, groundHeight, levelLength, new THREE.Matrix4());
+function makeRoom() {
+    var box = makeRoomSurface(levelWidth + 1, groundHeight, levelLength + 1, new THREE.Matrix4());
     ground = box;
 
     var leftTransform = new THREE.Matrix4().makeTranslation(-levelWidth / 2, levelHeight / 2, 0);
     var leftWall = makeRoomSurface(1, levelHeight, levelLength, leftTransform);
+    ground.add(leftWall);
 
     var rightTransform = new THREE.Matrix4().makeTranslation(levelWidth / 2, levelHeight / 2, 0);
     var rightWall = makeRoomSurface(1, levelHeight, levelLength, rightTransform);
+    ground.add(rightWall);
 
     var backTransform = new THREE.Matrix4().makeTranslation(0, levelHeight / 2, -levelLength / 2);
     var backWall = makeRoomSurface(levelWidth, levelHeight, 1, backTransform);
+    ground.add(backWall);
 
     var frontTransform = new THREE.Matrix4().makeTranslation(0, levelHeight / 2, levelLength / 2);
     var frontWall = makeRoomSurface(levelWidth, levelHeight, 1, frontTransform);
+    ground.add(frontWall);
+    return ground;
 }
 addGrid();
 addAxes();
-addRoom();
-
+var room = makeRoom();
+scene.add(room);
 var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
 
 function makeWheel(){
@@ -423,11 +427,42 @@ function makeCube(xscale, yscale, zscale, material) {
   return unitCube;
 }
 
-function testCollisionCube() {
-    var cube = makeCube(10, 10, 10, toonMaterial2);
-    translateBefore(cube, 10, 0, 0);
+function addStartPlatform() {
+    var cube = makeCube(4, playerView.eye[1] - 0.5, 4, toonMaterial2);
+    translateBefore(cube, playerView.eye[0], 0, playerView.eye[2]);
     obstacles.push(cube);
     scene.add(cube);
+}
+
+
+function addShelf(width, height, length, thickness) {
+    var box = makeRoomSurface(width + 1, thickness, length + 1, new THREE.Matrix4());
+
+    var levels = [0, 1, 2, 3];
+    levels.forEach(function(level) {
+        var x = (-width / 2) + (level * width / (levels.length - 1));
+        var transform = new THREE.Matrix4().makeTranslation(x, height / 2, 0);
+        var wall = makeRoomSurface(1, height, length, transform);
+        box.add(wall);
+        obstacles.push(wall);
+    })
+
+    var backTransform = new THREE.Matrix4().makeTranslation(0, height / 2, -length / 2);
+    var backWall = makeRoomSurface(width + 1, height, 1, backTransform);
+    box.add(backWall);
+    obstacles.push(backWall);
+    var frontTransform = new THREE.Matrix4().makeTranslation(0, height / 2, length / 2);
+    var frontWall = makeRoomSurface(width + 1, height, 1, frontTransform);
+    box.add(frontWall);
+    obstacles.push(frontWall);
+    scene.add(box);
+    obstacles.push(box);
+    translateAfter(box, 0, height/2, 20);
+    var rot = new THREE.Matrix4().makeRotationZ(Math.PI/2);
+    box.applyMatrix(new THREE.Matrix4().multiplyMatrices(box.matrix, rot));
+    var rot2 = new THREE.Matrix4().makeRotationY(Math.PI/4);
+    //box.applyMatrix(new THREE.Matrix4().multiplyMatrices(box.matrix, rot2));
+    
 }
 
 function translateBefore(obj, x, y, z) {
@@ -542,14 +577,15 @@ function makeChairPyramid() {
     return pyramid;
 }
 
-var chairPyra = makeChairPyramid();
-scene.add(chairPyra);
+// var chairPyra = makeChairPyramid();
+// scene.add(chairPyra);
 
-var chairPyra2 = makeChairPyramid();
-chairPyra2.position.z = 40;
-scene.add(chairPyra2);
+// var chairPyra2 = makeChairPyramid();
+// chairPyra2.position.z = 40;
+// scene.add(chairPyra2);
 
-testCollisionCube();
+addShelf(1, 2, 3, 0.1);
+addStartPlatform();
 // addToruses();
 firstPersonCamera.constraints = [];
 for (var i = 0; i < 8; i++) {
