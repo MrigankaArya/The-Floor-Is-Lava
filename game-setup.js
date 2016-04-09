@@ -5,6 +5,7 @@ var levelWidth = 30;
 var levelHeight = 15;
 var playerHeight = 3;
 var lavaSpeed = 0.0002;
+var secondsBeforeHealthDecrease = 0.5;
 
 //INITIATE OBSTACLES
 var obstacles = [];

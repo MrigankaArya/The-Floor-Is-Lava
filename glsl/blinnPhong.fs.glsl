@@ -38,13 +38,15 @@ void main() {
 		vec3 shadow = vec3(0, 0.2, 0.2);
 
 		float dotResult = dot(halfwayVector, interpolatedNormal);
-		
 		if (dotResult < -0.5) {
 			finalIllumination -= shadow;
 		} else {
 
 		}
 	}
-
+	float outlineDeterminant = dot(interpolatedEyeDirection, interpolatedNormal);
+	if (outlineDeterminant < 0.1) {
+		finalIllumination = vec3(1, 0, 0);
+	}
 	gl_FragColor = vec4(finalIllumination, 1.0);
 }

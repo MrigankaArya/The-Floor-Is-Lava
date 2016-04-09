@@ -62,6 +62,13 @@
         color: #dbc994;
       }
 
+      #reload {
+        border-radius: 1em;
+        border-color: #ffff00;
+        background: #000000;
+        color: #ffff00;
+      }
+
       .play-wrapper {
         text-align: center;
       }
@@ -71,6 +78,24 @@
         font-family: sans-serif;
         text-align: center;
         color: #888888;
+      }
+
+      #lost {
+        position: absolute;
+        bottom: 1em;
+        width: 100%;
+        padding-top: 15%;
+        padding-bottom: 15%;
+        text-align: center;
+        background-color: #000000;
+        color: #ffffff;
+        font-family: sans-serif;
+        font-size: 1em;
+        opacity: 0.8;
+      }
+
+      #lava-height {
+        display: inline-block;
       }
       </style>
   </head>
@@ -92,7 +117,11 @@
       <button hidden id="play" onclick="runGame()"> Play</button>
     </div>
     <div id="canvas"></div>
-    
+    <div hidden id="lost">
+        You lost :( 
+        The lava got to a height of <div id="lava-height"></div>!
+        <p><button id="reload" onclick="window.location.reload()">Restart Game</button></p>
+    </div>
     <script src="js/three.js"></script>
     <script src="js/OBJLoader.js"></script>
     <script src="js/SourceLoader.js"></script>

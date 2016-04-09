@@ -1,7 +1,7 @@
 function runGame() {
 $("#play").remove();
 $("#instructions").remove();
-
+var gameLost = false;
 
 // SETUP RENDERER & SCENE
 var canvas = document.getElementById('canvas');
@@ -33,11 +33,31 @@ resize();
 var cursorOffsetX = -1;
 var cursorOffsetY = -1;
 var keyboard = new THREEx.KeyboardState();
-keyboard.domElement.addEventListener('keydown', onKeyDown);
-keyboard.domElement.addEventListener('keyup', onKeyUp);
-window.addEventListener('mousedown', onMouseDown);
-window.addEventListener('mouseup', onMouseUp);
-window.addEventListener('mousemove', onMouseMove);
+
+function addListeners() {
+    keyboard.domElement.addEventListener('keydown', onKeyDown);
+    keyboard.domElement.addEventListener('keyup', onKeyUp);
+    window.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('mousemove', onMouseMove);
+}
+
+addListeners();
+
+function removeListeners() {
+    window.removeEventListener('mousedown', onMouseDown);
+    window.removeEventListener('mouseup', onMouseUp);
+    window.removeEventListener('mousemove', onMouseMove);
+    keyboard.domElement.removeEventListener('keydown', onKeyDown);
+    keyboard.domElement.removeEventListener('keyup', onKeyUp);
+    keys.w = false;
+    keys.a = false;
+    keys.s = false;
+    keys.d = false;
+    isMouseDown = false;
+    console.log("removed listeners");
+
+}
 
 var keys = {
     w: false,
@@ -200,6 +220,17 @@ function move(obj) {
     translateBefore(obj, obj.velocity.x, obj.velocity.y, obj.velocity.z);
 }
 
+function initiateLostGame() {
+    removeListeners();
+
+    //stop them from moving if they're still pressing a key down
+    firstPersonCamera.velocity = new THREE.Vector3(0, 0, 0); 
+    $("#lost").removeAttr("hidden");
+    $("#lava-height").text(Math.floor(lava.position.y));
+}
+
+
+
 //For FPS
 var lastTime = new Date();
 var numFrames = 0;
@@ -210,9 +241,10 @@ var hearts = $(".heart");
 var healthCount = hearts.length;
 var isInLava = false;
 var startTimeInLava;
-var secondsBeforeHealthDecrease = 2;
 function update() {
-    translateBefore(lava, 0, lavaSpeed, 0);
+    if (!gameLost) {
+        translateBefore(lava, 0, lavaSpeed, 0);
+    }
     //Compute FPS
     if (numFrames < thresholdFrames) {
         numFrames++;
@@ -241,7 +273,11 @@ function update() {
         if (isInLava == false) {
             isInLava = true;
             if (healthCount == 0) {
-                //TODO: GAME OVER
+                if (gameLost != true) {
+                    initiateLostGame();
+                    gameLost = true;
+                    return;
+                }
             } else {
                 healthCount--;
                 hearts[healthCount].remove();
@@ -258,7 +294,11 @@ function update() {
         var secondsPassedInLava = secondsPassedInLava/1000;
         if (secondsPassedInLava > secondsBeforeHealthDecrease) {
             if (healthCount == 0) {
-                // console.log("YOU LOST");
+                if (gameLost != true) {
+                    initiateLostGame();
+                    gameLost = true;
+                    return;
+                }
             } else {
                 startTimeInLava = currentTimeInLava;
                 healthCount--;
