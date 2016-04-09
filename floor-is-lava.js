@@ -142,10 +142,6 @@ function onMouseUp(event) {
     // mouseDrag = false;
 }
 
-//TODO: Set posNewX and posNewY to center screen coordinates when you start game at center
-//      Follow up todo:  game "START" screen at centered at the center of the screen. Must be dynamic
-//      These values are a local standin for the actual thing. Replace with your screen res to make it actually work
-
 var posNewX = gameCanvas.attr("width")/2;
 var posNewY = gameCanvas.attr("height")/2;
 

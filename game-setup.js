@@ -240,11 +240,22 @@ addRoom();
 var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
 
 function makeWheel(){
-    var ringGeometry = new THREE.TorusGeometry(0.25, 0.1, 16, 100);
+    var radius = 0.5; // radius of wheel
+    var tube = 0.05; // radius of wheel's tube
+    var ringGeometry = new THREE.TorusGeometry(radius, tube, 16, 100);
     var ringMesh = new THREE.Mesh(ringGeometry, toonMaterial2);
+
+    var spokes = [1, 2, 3, 4, 5];
+    spokes.forEach(function(spokeNumber) {
+        var wheelSpoke = new THREE.Mesh(new THREE.CylinderGeometry(tube, tube, radius * 2, 8), toonMaterial2);
+        var rotAmount = (spokeNumber / (spokes.length)) * Math.PI;
+        wheelSpoke.applyMatrix(new THREE.Matrix4().makeRotationZ(rotAmount));
+        ringMesh.add(wheelSpoke);
+    })
+
     var transformMatrix = new THREE.Matrix4().makeTranslation(0, 1.5, -49);
     ringMesh.setMatrix(transformMatrix);
-    var ringCollider = new THREE.BoxGeometry(0.9,0.9,0.4);
+    var ringCollider = new THREE.BoxGeometry(radius * 2 + 1, radius * 2 + 1, 0.4);
     var ringColliderMesh = new THREE.Mesh(ringCollider, meshMaterial);
     ringColliderMesh.type = "wheel";
     ringColliderMesh.setMatrix(transformMatrix);
@@ -534,6 +545,9 @@ function makeChairPyramid() {
 var chairPyra = makeChairPyramid();
 scene.add(chairPyra);
 
+var chairPyra2 = makeChairPyramid();
+chairPyra2.position.z = 40;
+scene.add(chairPyra2);
 
 testCollisionCube();
 // addToruses();
