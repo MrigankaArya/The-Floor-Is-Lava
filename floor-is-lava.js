@@ -452,13 +452,16 @@ function makeChair(height, legsize, floorToSeatHeight, seatWidth, seatHeight, ma
     var seat = new THREE.BoxGeometry(seatWidth, seatHeight, seatWidth);
 
     function makeLeg(x, z) {
-        var leg = makeCube(legsize, floorToSeatHeight, legsize, material);
+        //need to multiply by 1.1 because of the subdivide making the legs look smaller
+        var leg = makeCube(legsize, floorToSeatHeight * 1.1, legsize, material);
         translateBefore(leg, x*(seatWidth / 2 - legsize), -floorToSeatHeight / 2, z*(seatWidth / 2 - legsize));
         return leg;
     }
 
     // ATTACH LEGS AND A BACK TO THE SEAT
-    var legs = [makeLeg(1, 1), makeLeg(1, -1), makeLeg(-1, 1), makeLeg(-1, -1)];
+    //need to make dist smaller than 1 because of the subdivide making the legs look smaller
+    var dist = 0.7;
+    var legs = [makeLeg(dist, dist), makeLeg(dist, -dist), makeLeg(-dist, dist), makeLeg(-dist, -dist)];
     legs.forEach(function(leg) {
         seat.merge(leg.geometry, leg.matrix);
     })
@@ -467,17 +470,27 @@ function makeChair(height, legsize, floorToSeatHeight, seatWidth, seatHeight, ma
     translateBefore(back, 0, (height - floorToSeatHeight) / 2, -(seatWidth / 2 - legsize));
     seat.merge(back.geometry, back.matrix);
 
+    var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
     // COLLIDER FOR THE BACK
-    var backCollider = makeCube(seatWidth, height-floorToSeatHeight, legsize, material);
+    var backCollider = makeCube(seatWidth, height-floorToSeatHeight, legsize, meshMaterial);
     translateBefore(backCollider, 0, (height - floorToSeatHeight) / 2, -(seatWidth / 2 - legsize));
     obstacles.push(backCollider);
     
+    
+
+    var modifier = new THREE.SubdivisionModifier(3); //# subdivides
+    seat.mergeVertices();
+    // seat.computeFaceNormals();
+    // seat.computeVertexNormals();
+
+    modifier.modify(seat);
+
     //CREATE THE CHAIR MESH
     var chairMesh = new THREE.Mesh(seat, material);
     chairMesh.add(backCollider);
+    
     scene.add(chairMesh);
     
-    // var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
     chair.add(chairMesh);
 
     return chair;

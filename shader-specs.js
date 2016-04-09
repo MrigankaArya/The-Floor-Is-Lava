@@ -13,10 +13,16 @@ var unLitColor2 = new THREE.Color(0.7, 0.32, 0.6);
 
 var outlineColor = new THREE.Color(0.04, 0.1, 0.15);
 
-var kAmbient = new THREE.Color(0.2, 0.1, 0.1);
-var kDiffuse = new THREE.Color(0.2, 0.1, 0.1);
-var kSpecular = new THREE.Color(0.3, 0.2, 0.5);
+var kAmbient = new THREE.Color(1, 1, 0.7);
+var kDiffuse = new THREE.Color(1, 0.6, 0.7);
+var kSpecular = new THREE.Color(1, 1, 1);
 var shininess = 10.0;
+
+var textureLoader = new THREE.TextureLoader();
+
+var chairTex = textureLoader.load("textures/checkerboard.jpg");
+chairTex.wrapS = THREE.RepeatWrapping;
+chairTex.wrapT = THREE.RepeatWrapping;
 
 var toonSpec = {
     uniforms: {
@@ -78,9 +84,9 @@ var toonSpec2 = {
 
 var blinnPhongSpec = {
     uniforms: {
-        noLights: {
-            type: 'i',
-            value: 1
+        surfaceTexture: {
+            type: "t",
+            value: chairTex
         },
         lightColors: {
             type: 'fv',
@@ -115,9 +121,9 @@ var blinnPhongSpec = {
 
 var blinnPhongSpec2 = {
     uniforms: {
-        noLights: {
-            type: 'i',
-            value: 1
+        surfaceTexture: {
+            type: "t",
+            value: chairTex
         },
         lightColors: {
             type: 'fv',
