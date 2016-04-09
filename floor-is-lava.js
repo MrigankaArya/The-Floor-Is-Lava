@@ -1,6 +1,3 @@
-function runGame() {
-$("#play").remove();
-$("#instructions").remove();
 var sidePanDamper = 300;
 var panSensitivity = 0.001;
 var levelLength = 100;
@@ -15,15 +12,17 @@ var obstacles = [];
 //Any objects that the player can interact with go here eg: lava wheel, pillows etc.
 var interactables = [];
 
-var gameCanvas = $("#canvas:first-child");
-var posNewX = gameCanvas.attr("width")/2;
-var posNewY = gameCanvas.attr("height")/2;
 
 // ASSIGNMENT-SPECIFIC API EXTENSION
 THREE.Object3D.prototype.setMatrix = function(a) {
     this.matrix = a;
     this.matrix.decompose(this.position, this.quaternion, this.scale);
 }
+
+function runGame() {
+$("#play").remove();
+$("#instructions").remove();
+
 
 // SETUP RENDERER & SCENE
 var canvas = document.getElementById('canvas');
@@ -454,7 +453,7 @@ function makeChair(height, legsize, floorToSeatHeight, seatWidth, seatHeight, ma
     function makeLeg(x, z) {
         //need to multiply by 1.1 because of the subdivide making the legs look smaller
         var leg = makeCube(legsize, floorToSeatHeight * 1.1, legsize, material);
-        translateBefore(leg, x*(seatWidth / 2 - legsize), -floorToSeatHeight / 2, z*(seatWidth / 2 - legsize));
+        translateBefore(leg, x*(seatWidth / 2 - legsize), -floorToSeatHeight / 2 + 0.05, z*(seatWidth / 2 - legsize));
         return leg;
     }
 
