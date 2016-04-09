@@ -66,7 +66,7 @@
         text-align: center;
       }
 
-      #instructions {
+      #instructions, #loading {
         padding: 4em;
         font-family: sans-serif;
         text-align: center;
@@ -88,7 +88,8 @@
     <div id="minimap"></div>
     <p id="instructions">The floor is lava!<br><em>WASD</em> to move. <em>Spacebar</em> to jump. <em>Mouse</em> to pan camera</p>
     <div class="play-wrapper">
-      <button id="play" onclick="runGame()"> Play</button>
+      <p id="loading">Loading...</p>
+      <button hidden id="play" onclick="runGame()"> Play</button>
     </div>
     <div id="canvas"></div>
     
@@ -100,6 +101,7 @@
     <script src="js/SubdivisionModifier.js"></script> <!-- https://github.com/mrdoob/three.js/blob/master/examples/js/modifiers/SubdivisionModifier.js -->
     <script src="js/jquery.min.js"></script>
     <script src="shader-specs.js"></script>
+    <script src="game-setup.js"></script>
     <script src="floor-is-lava.js"></script>
 </body>
 </html>
