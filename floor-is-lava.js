@@ -256,11 +256,11 @@ addGrid();
 addAxes();
 addRoom();
 
+var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
+
 function makeWheel(){
-    var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
     // console.log("ey wat");
     var ringGeometry = new THREE.TorusGeometry(0.25, 0.1, 16, 100);
-
     var ringMesh = new THREE.Mesh(ringGeometry, toonMaterial2);
     var transformMatrix = new THREE.Matrix4().makeTranslation(0, 1.5, -49);
     ringMesh.setMatrix(transformMatrix);
@@ -275,6 +275,20 @@ function makeWheel(){
     scene.add(ringMesh);
 }
 
+function makeInteractable(){
+    var objGeometry = new THREE.BoxGeometry(0.3,0.3,0.3);
+    var objMesh = new THREE.Mesh(objGeometry, toonMaterial2);
+    var transformMatrix = new THREE.Matrix4().makeTranslation(0,1.3, -30);
+
+    objMesh.setMatrix(transformMatrix);
+
+    objMesh.type = "object";
+    obstacles.push(objMesh);
+    interactables.push(objMesh);
+    scene.add(objMesh);
+}
+
+makeInteractable();
 makeWheel();
 //Adds lava to the floor and deforms it as necessary.
 function addLava() {
@@ -550,40 +564,39 @@ function detectCollision(){
    }
 }
 
+var mouse = new THREE.Vector2(), INTERSECTED;
+var lavaReverse = false;
+var objectDrag = false;
+var mouseDrag = false;
 //picking ray
 function pickRay(){
-    //use the canvas centre for the picking ray instead of the pointer
-    var center = new THREE.Vector2();
-    center.x = firstPersonCamera.position.x;
-    center.y = firstPersonCamera.position.y;
-
     var pickRayCaster = new THREE.Raycaster();
-    pickRayCaster.setFromCamera(center, firstPersonCamera);
+    pickRayCaster.setFromCamera(mouse, firstPersonCamera);
 
     //Change this number in order to change the distance at which you can interact with the object
-    pickRayCaster.far = 150;
+    pickRayCaster.far = 3;
     var intersects  = pickRayCaster.intersectObjects(interactables);
-    
     //Grab the 1st intersected object's type
-    if(intersects.length > 0 )
-        takeAction(intersects[0].object.type);
-
-
+    if(intersects.length >  0)
+        takeAction(intersects[0].object);
 }
 
-
-function takeAction(type){
-
+function takeAction(obj){
+    var type = obj.type;
     switch(type){
         case "wheel":
-            //lower the lava
+            //Reverse Lava flow
+            if(lavaReverse){
+                translateBefore(lava, 0, -lavaSpeed*10, 0);
+            }
             break;
         case "ladder":
             //climb the ladder to the wheel
             break;
         case "object":
             //Pick up the object
-            break;
+          break;
+                
         default:
             //do nothing
             break;
@@ -676,12 +689,18 @@ function onKeyUp(event) {
 
 var isMouseDown = false;
 
+
 function onMouseDown(event) {
     isMouseDown = true;
+    lavaReverse = true;
+    objectDrag = true;
+    mouseDrag = true;
 }
 
+//Uncomment later
 function onMouseUp(event) {
     isMouseDown = false;
+    mouseDrag = false;
 }
 
 //TODO: Set posNewX and posNewY to center screen coordinates when you start game at center
@@ -696,6 +715,8 @@ var isOutBounds = false;
 var mouseMoving = false;
 
 function onMouseMove(event) {
+    mouse.x = (event.clientX/window.innerWidth)*2-1;
+    mouse.y = -(event.clientY/window.innerHeight)*2+1;
     mouseMoving = true;
     var diffY = event.clientY - posNewY;
 
