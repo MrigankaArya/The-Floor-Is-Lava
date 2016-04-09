@@ -192,24 +192,19 @@ function move(obj) {
     obj.constraints.forEach(function(constraint) {
         
         if (constraint != null) {
-            //First we have to get the constraint in the coordinates of the player. Constraints are defined in world coordinates and player velocity is defined in player coordinates. They are also normals, so we must take the transpose(inverse(player.matrix))
-            console.log(" ")
-            console.log("===========")
-            console.log("CONSTRAINT")
-            console.log(constraint);
-            var playerNormalMatrix = new THREE.Matrix4().getInverse(player.matrix).transpose();
+            //First we have to get the constraint, which is a normal, in the coordinates of the player. 
+            //Constraints are defined in world coordinates and player velocity is defined in player coordinates. 
+            //The matrix for normals (Q) is transpose(inverse(<matrix for vertices>(M)))
+            //We want to have a matrix Q(world->player), so we should use M(world->player). This means inverse(player.matrix).
+            //Therefore, the matrix to convert the constraints into player coordinates is transpose(inverse(inverse(player.matrix))) = transpose(player.matrix)
+            
+            var playerNormalMatrix = new THREE.Matrix4().copy(player.matrixWorld).transpose();
             var pConstraint = constraint.clone().applyMatrix4(playerNormalMatrix);
-            pConstraint.x *= -1
-            console.log("P-CONSTRAINT")
-            console.log(pConstraint)
-            console.log("VELOCITY");
-            console.log(velocity);
-
+            
             if (pConstraint.dot(velocity) < 0) {
+                //This code adjust the velocity to slide along faces we've collided with
                 var negaVelocity = velocity.clone().negate();
-
                 var cosTheta = negaVelocity.dot(pConstraint);
-
                 var newConstraint = pConstraint.multiplyScalar(cosTheta);
 
                 obj.velocity.add(newConstraint);

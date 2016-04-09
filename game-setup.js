@@ -1,4 +1,4 @@
-var debug = true;
+var debug = false;
 
 var GameStateEnum = {
     playing: 0,
@@ -44,11 +44,15 @@ var playerView = {
     width: 0.499,
     height: 1.0,
     background: new THREE.Color().setRGB(0.1, 0.1, 0.1),
-    eye: [0, 4, 4],
+    eye: [0, 0, 0],
     up: [0, 1, 0],
     fov: 45,
     updateCamera: function(camera, scene, mouseX, mouseY) {}
 };
+
+if (debug) {
+    playerView.eye = [0, 4, 4];
+}
 
 function resetCamera(camera, view) {
     camera.position.x = view.eye[0];
