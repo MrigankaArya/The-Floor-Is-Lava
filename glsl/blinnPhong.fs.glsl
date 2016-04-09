@@ -8,6 +8,8 @@ uniform vec3 kDiffuse;
 uniform vec3 kSpecular;
 uniform float shininess;
 uniform sampler2D surfaceTexture;
+uniform float u_scale;
+uniform float v_scale;
 
 varying vec2 vUv;
 varying vec3 interpolatedNormal;
@@ -45,8 +47,8 @@ void main() {
 		}
 	}
 	float outlineDeterminant = dot(interpolatedEyeDirection, interpolatedNormal);
-	if (outlineDeterminant < 0.1) {
-		finalIllumination = vec3(1, 0, 0);
-	}
+	// if (outlineDeterminant < 0.1) {
+	// 	finalIllumination = vec3(1, 0, 0);
+	// }
 	gl_FragColor = vec4(finalIllumination, 1.0);
 }
