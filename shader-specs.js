@@ -115,6 +115,14 @@ var blinnPhongSpec = {
         shininess: {
             type: 'f',
             value: shininess
+        },
+        u_scale: {
+            type: 'f',
+            value: 6
+        },
+        v_scale: {
+            type: 'f',
+            value: 2
         }
     },
 };
@@ -152,6 +160,14 @@ var blinnPhongSpec2 = {
         shininess: {
             type: 'f',
             value: shininess
+        },
+        u_scale: {
+            type: 'f',
+            value: 5
+        },
+        v_scale: {
+            type: 'f',
+            value: 2
         }
     },
 };
