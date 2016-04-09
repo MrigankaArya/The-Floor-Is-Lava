@@ -317,7 +317,8 @@ function update() {
             }
         }
         isFalling = false;
-        if (firstPersonCamera.position.y > ground.position.y + groundHeight/2 + playerHeight/2) {
+
+        if (gameState != GameStateEnum.won || (firstPersonCamera.position.y > ground.position.y + groundHeight/2 + playerHeight/2)) {
             translateBefore(firstPersonCamera, 0, lavaSpeed, 0);
         }
     } else {
