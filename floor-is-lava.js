@@ -212,7 +212,7 @@ function move(obj) {
         }
     })
     
-    translateBefore(obj, obj.velocity.x, obj.velocity.y, obj.velocity.z);
+    translateAfter(playerContainer, obj.velocity.x, obj.velocity.y, obj.velocity.z);
 }
 
 function updateLavaHeightStat() {

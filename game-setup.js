@@ -14,7 +14,7 @@ var levelWidth = 30;
 var levelHeight = 15;
 var playerHeight = 3;
 var lavaSpeed = 0.0002;
-var secondsBeforeHealthDecrease = 0.5;
+var secondsBeforeHealthDecrease = 0500;
 
 //INITIATE OBSTACLES
 var obstacles = [];
@@ -113,7 +113,10 @@ resetCamera(firstPersonCamera, playerView);
 attachPlayerToCamera(firstPersonCamera);
 addGravity(firstPersonCamera);
 addHorizontalAccel(firstPersonCamera);
-scene.add(firstPersonCamera);
+
+var playerContainer = new THREE.Object3D();
+playerContainer.add(firstPersonCamera);
+scene.add(playerContainer)
 
 var minimapCamera = new THREE.OrthographicCamera(levelWidth / -2, levelWidth / 2, levelWidth / 2, levelWidth / -2, 1, 1000);
 minimapCamera.position.set(0, 20, 0);
