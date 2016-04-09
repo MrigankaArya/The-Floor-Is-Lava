@@ -1,3 +1,5 @@
+var debug = true;
+
 var GameStateEnum = {
     playing: 0,
     won: 1,
@@ -12,7 +14,7 @@ var panSensitivity = 0.001;
 var levelLength = 100;
 var levelWidth = 30;
 var levelHeight = 15;
-var playerHeight = 3;
+var playerHeight = 0.5;
 var lavaSpeed = 0.0002;
 var secondsBeforeHealthDecrease = 0500;
 
@@ -42,7 +44,7 @@ var playerView = {
     width: 0.499,
     height: 1.0,
     background: new THREE.Color().setRGB(0.1, 0.1, 0.1),
-    eye: [0, 2, levelLength / 2 - 40],
+    eye: [0, 4, 4],
     up: [0, 1, 0],
     fov: 45,
     updateCamera: function(camera, scene, mouseX, mouseY) {}
@@ -59,12 +61,6 @@ function resetCamera(camera, view) {
     camera.lookAt(origin);
     camera.velocity = new THREE.Vector3(0, 0, 0);
     camera.lookAtPoint = origin;
-}
-
-function attachPlayerToCamera(camera) {
-    var geometry = new THREE.BoxGeometry(0.2, playerHeight, 0.2);
-    var mesh = new THREE.Mesh(geometry, basicMaterial);
-    camera.add(mesh);
 }
 
 function addGravity(obj) {
@@ -110,19 +106,22 @@ function addHorizontalAccel(obj) {
 var firstPersonCamera = new THREE.PerspectiveCamera(playerView.fov, 1, 0.2, 1000); // view angle, aspect ratio, near, far
 firstPersonCamera.rotation.order = "YXZ"; //need for pitch/yaw to maintain horizon
 resetCamera(firstPersonCamera, playerView);
-attachPlayerToCamera(firstPersonCamera);
-addGravity(firstPersonCamera);
-addHorizontalAccel(firstPersonCamera);
+var geometry = new THREE.BoxGeometry(0.2, playerHeight, 0.2);
+var player = new THREE.Mesh(geometry, basicMaterial);
 
-var playerContainer = new THREE.Object3D();
-playerContainer.add(firstPersonCamera);
-scene.add(playerContainer)
+player.add(firstPersonCamera);
+
+addGravity(player);
+addHorizontalAccel(player);
+player.setMatrix(new THREE.Matrix4().makeTranslation(0, 2, levelLength / 2 - 40));
+
+scene.add(player);
 
 var minimapCamera = new THREE.OrthographicCamera(levelWidth / -2, levelWidth / 2, levelWidth / 2, levelWidth / -2, 1, 1000);
 minimapCamera.position.set(0, 20, 0);
 minimapCamera.up = new THREE.Vector3(0, 0, -1);
 minimapCamera.lookAt(scene.position);
-minimapCamera.position.z = firstPersonCamera.position.z;
+minimapCamera.position.z = player.position.z;
 
 scene.add(minimapCamera);
 
@@ -240,7 +239,14 @@ addGrid();
 addAxes();
 addRoom();
 
-var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
+var matSpec = {
+    transparent: true,
+    opacity: 0
+};
+if (debug) {
+    matSpec.opacity = 0.5;
+}
+var transparentMaterial = new THREE.MeshBasicMaterial(matSpec);
 
 function makeWheel(){
     var radius = 0.5; // radius of wheel
@@ -259,7 +265,7 @@ function makeWheel(){
     var transformMatrix = new THREE.Matrix4().makeTranslation(0, 1.5, -49);
     ringMesh.setMatrix(transformMatrix);
     var ringCollider = new THREE.BoxGeometry(radius * 2 + 1, radius * 2 + 1, 0.4);
-    var ringColliderMesh = new THREE.Mesh(ringCollider, meshMaterial);
+    var ringColliderMesh = new THREE.Mesh(ringCollider, transparentMaterial);
     ringColliderMesh.type = "wheel";
     ringColliderMesh.setMatrix(transformMatrix);
     obstacles.push(ringColliderMesh);
@@ -406,7 +412,6 @@ function printMatrix(matName, mat) {
             var str = (row == 0 ? "[" : "") + st.join(", ") + (row == 3 ? "]" : "") + "\n";
             console.log(str);
         }
-        console.log(mat.elements[0] + " ");
     }
 }
 
@@ -466,9 +471,8 @@ function makeChair(height, legsize, floorToSeatHeight, seatWidth, seatHeight, ma
     translateBefore(back, 0, (height - floorToSeatHeight) / 2, -(seatWidth / 2 - legsize));
     seat.merge(back.geometry, back.matrix);
 
-    var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
     // COLLIDER FOR THE BACK
-    var backCollider = makeCube(seatWidth, height-floorToSeatHeight, legsize, meshMaterial);
+    var backCollider = makeCube(seatWidth, height-floorToSeatHeight, legsize, transparentMaterial);
     translateBefore(backCollider, 0, (height - floorToSeatHeight) / 2, -(seatWidth / 2 - legsize));
     obstacles.push(backCollider);
     
@@ -476,9 +480,9 @@ function makeChair(height, legsize, floorToSeatHeight, seatWidth, seatHeight, ma
 
     var modifier = new THREE.SubdivisionModifier(3); //# subdivides
     seat.mergeVertices();
-
-    modifier.modify(seat);
-
+    if (!debug) {
+        modifier.modify(seat);
+    }
     //CREATE THE CHAIR MESH
     var chairMesh = new THREE.Mesh(seat, material);
     chairMesh.add(backCollider);
@@ -524,20 +528,20 @@ function makeChairPyramid() {
     }
 
     // CREATE COLLISION MESHES
-    var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
+
     var collisionGeometry = new THREE.BoxGeometry((seatWidth * 1.1) * 5, (floorToSeatHeight + seatHeight)* 2, (seatWidth * 1.1) * 5);
-    var collisionMesh = new THREE.Mesh(collisionGeometry, meshMaterial);
+    var collisionMesh = new THREE.Mesh(collisionGeometry, transparentMaterial);
     obstacles.push(collisionMesh);
     pyramid.add(collisionMesh);
     
     var collisionGeometry2 = new THREE.BoxGeometry((seatWidth * 1.1) * 3, (height + seatHeight + floorToSeatHeight * 1.1)* 2, (seatWidth * 1.1) * 3);
-    var collisionMesh2 = new THREE.Mesh(collisionGeometry2, meshMaterial);
+    var collisionMesh2 = new THREE.Mesh(collisionGeometry2, transparentMaterial);
     translateAfter(collisionMesh2, 0, 0, 0.1 * seatWidth);
     obstacles.push(collisionMesh2);
     pyramid.add(collisionMesh2);
 
     var collisionGeometry3 = new THREE.BoxGeometry(seatWidth * 1.1, (2* height + 2*seatHeight + floorToSeatHeight * 1.1)* 2, seatWidth * 1.1);
-    var collisionMesh3 = new THREE.Mesh(collisionGeometry3, meshMaterial);
+    var collisionMesh3 = new THREE.Mesh(collisionGeometry3, transparentMaterial);
     translateAfter(collisionMesh3, 0, 0, 0.2 * seatWidth);
     obstacles.push(collisionMesh3);
     pyramid.add(collisionMesh3);
@@ -554,26 +558,33 @@ scene.add(chairPyra2);
 
 testCollisionCube();
 // addToruses();
-firstPersonCamera.constraints = [];
+player.constraints = [];
 for (var i = 0; i < 8; i++) {
-    firstPersonCamera.constraints[i] = null;
+    player.constraints[i] = null;
 }
 
 //Detects collision between the player and the objects. Replace toruses with boxes because this is an awkward hitbox
 function detectCollision(){
     var geometry = new THREE.BoxGeometry(playerHeight, playerHeight, playerHeight);
-    var playerPos = firstPersonCamera.position.clone();
+
+    var playerPos = player.position.clone();
     for(var vertex = 0; vertex < 8; vertex++){
         var localV = geometry.vertices[vertex].clone();
-        var globalV = localV.applyMatrix4(firstPersonCamera.matrix);
-        var directionVector = globalV.sub(firstPersonCamera.position)
+
+        var globalV = localV.applyMatrix4(player.matrix);
+        var directionVector = globalV.sub(player.position)
+        
+
         var ray = new THREE.Raycaster(playerPos, directionVector.clone().normalize());
 
         var collisions = ray.intersectObjects(obstacles);
-        if(collisions.length > 0 && collisions[0].distance < 1){
-            firstPersonCamera.constraints[vertex] = collisions[0].face.normal;
+        if(collisions.length > 0 && collisions[0].distance < 0.5){
+            var normal = collisions[0].face.normal;
+            if (player.constraints.indexOf(normal) == -1) { //only add if not already there
+                player.constraints[vertex] = normal;
+            }
        } else {
-            firstPersonCamera.constraints[vertex] = null
+            player.constraints[vertex] = null
         }
    }
 }

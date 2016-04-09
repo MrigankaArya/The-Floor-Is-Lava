@@ -82,7 +82,7 @@ function onKeyDown(event) {
             } else {
                 keys.s = false;
             }
-            firstPersonCamera.velocity.z = 0;
+            player.velocity.z = 0;
 
         }
 
@@ -92,15 +92,15 @@ function onKeyDown(event) {
             } else {
                 keys.a = false;
             }
-            firstPersonCamera.velocity.x = 0;
+            player.velocity.x = 0;
         }
     } else if (match(" ")) {
         if (!isFalling) {
-            firstPersonCamera.velocity.y = 0.1;
+            player.velocity.y = 0.1;
             var translateUpSlightly = new THREE.Matrix4().makeTranslation(0, 1, 0);
             //need to do this because diff in update() function will not prevent us from sinking into the floor slightly
-            var jumpStartMatrix = new THREE.Matrix4().multiplyMatrices(firstPersonCamera.matrix, translateUpSlightly);
-            firstPersonCamera.setMatrix(jumpStartMatrix);
+            var jumpStartMatrix = new THREE.Matrix4().multiplyMatrices(player.matrix, translateUpSlightly);
+            player.setMatrix(jumpStartMatrix);
             isFalling = true;
         }
     } else if (match("t")) {
@@ -118,10 +118,10 @@ function onKeyUp(event) {
         keys[keyUsed] = false;
 
         if (!keys.w && !keys.s) {
-            firstPersonCamera.velocity.z = 0;
+            player.velocity.z = 0;
         }
         if (!keys.a && !keys.d) {
-            firstPersonCamera.velocity.x = 0;
+            player.velocity.x = 0;
         }
     }
 }
@@ -163,7 +163,7 @@ function onMouseMove(event) {
 
     var gameCanvasWidth = gameCanvas.attr("width");
     firstPersonCamera.rotation.x += dy;
-
+    //rotate the camera, not the player. This way player always parallel to horizon, making the move() function more straightforward to implement
     var boundary = 1/100;
     var inverseBoundary = 1 - boundary;
     var outRight = event.clientX > gameCanvasWidth * inverseBoundary;
@@ -190,29 +190,35 @@ function onMouseMove(event) {
 function move(obj) {
     var velocity = obj.velocity;
     obj.constraints.forEach(function(constraint) {
+        
+        if (constraint != null) {
+            //First we have to get the constraint in the coordinates of the player. Constraints are defined in world coordinates and player velocity is defined in player coordinates. They are also normals, so we must take the transpose(inverse(player.matrix))
+            console.log(" ")
+            console.log("===========")
+            console.log("CONSTRAINT")
+            console.log(constraint);
+            var playerNormalMatrix = new THREE.Matrix4().getInverse(player.matrix).transpose();
+            var pConstraint = constraint.clone().applyMatrix4(playerNormalMatrix);
+            pConstraint.x *= -1
+            console.log("P-CONSTRAINT")
+            console.log(pConstraint)
+            console.log("VELOCITY");
+            console.log(velocity);
 
-        if (constraint != null && constraint.dot(velocity) < 0) {
-            // console.log(constraint);
-            // console.log(velocity);
-            var negaVelocity = velocity.clone().negate();
-            // console.log("NEGATED")
-            // console.log(negaVelocity)
-            
-            // console.log("DOTCONSTRAINT")
-            var cosTheta = negaVelocity.dot(constraint);
-            // console.log(cosTheta);
+            if (pConstraint.dot(velocity) < 0) {
+                var negaVelocity = velocity.clone().negate();
 
-            var newConstraint = constraint.clone().multiplyScalar(cosTheta);
-            // console.log("PROJECTION")
-            // console.log(constraint);
-            
+                var cosTheta = negaVelocity.dot(pConstraint);
 
-            obj.velocity.add(newConstraint);
-            // console.log(obj.velocity);
+                var newConstraint = pConstraint.multiplyScalar(cosTheta);
+
+                obj.velocity.add(newConstraint);
+                // console.log(obj.velocity);
+            }
         }
     })
     
-    translateAfter(playerContainer, obj.velocity.x, obj.velocity.y, obj.velocity.z);
+    translateAfter(player, obj.velocity.x, obj.velocity.y, obj.velocity.z);
 }
 
 function updateLavaHeightStat() {
@@ -223,7 +229,7 @@ function initiateLostGame() {
     removeListeners();
 
     //stop them from moving if they're still pressing a key down
-    firstPersonCamera.velocity = new THREE.Vector3(0, 0, 0); 
+    player.velocity = new THREE.Vector3(0, 0, 0); 
     $("#lost").removeAttr("hidden");
     updateLavaHeightStat()
 }
@@ -248,7 +254,7 @@ var startTimeInLava;
 var lavaFlushedOut = false;
 function update() {
     translateBefore(lava, 0, lavaSpeed, 0);
-    
+
     if (gameState == GameStateEnum.won && lava.position.y < ground.position.y && !lavaFlushedOut) {
         lavaFlushedOut = true;
         initiateWonGame();
@@ -268,9 +274,9 @@ function update() {
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
     minimapRenderer.render(scene, minimapCamera);
-    minimapCamera.position.z = firstPersonCamera.position.z;
+    minimapCamera.position.z = player.position.z;
 
-    var diff = firstPersonCamera.position.y - lava.position.y;
+    var diff = player.position.y - lava.position.y;
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
     detectCollision();
     
@@ -286,8 +292,10 @@ function update() {
                     return;
                 }
             } else if (gameState != GameStateEnum.won) {
-                healthCount--;
-                hearts[healthCount].remove();
+                if (!debug) {
+                    healthCount--;
+                    hearts[healthCount].remove();                    
+                }
             }
             startTimeInLava = new Date();
         }
@@ -308,45 +316,49 @@ function update() {
                 }
             } else if (gameState != GameStateEnum.won) {
                 startTimeInLava = currentTimeInLava;
-                healthCount--;
-                hearts[healthCount].remove();
+                if (!debug) {
+                    healthCount--;
+                    hearts[healthCount].remove();                    
+                }
             }
         }
         isFalling = false;
 
-        if (gameState != GameStateEnum.won || (firstPersonCamera.position.y > ground.position.y + groundHeight/2 + playerHeight/2)) {
-            translateBefore(firstPersonCamera, 0, lavaSpeed, 0);
+        if (gameState != GameStateEnum.won || (player.position.y > ground.position.y + groundHeight/2 + playerHeight/2)) {
+            translateBefore(player, 0, lavaSpeed, 0);
         }
     } else {
         //check if we're on a flat surface
-        isFalling = firstPersonCamera.constraints.filter(function(constraint) {
+        isFalling = player.constraints.filter(function(constraint) {
             return constraint != null && (constraint.y > 0.5);
         }).length == 0;
     }
 
-    firstPersonCamera.fall(isFalling);
+    player.fall(isFalling);
     
     //Player controls
     if (keys.w) {
-        firstPersonCamera.slideZ(false);
+        player.slideZ(false);
     }
 
     if (keys.s) {
-        firstPersonCamera.slideZ(true);
+        player.slideZ(true);
     }
 
     if (keys.a) {
-        firstPersonCamera.slideX(false);
+        player.slideX(false);
     }
 
     if (keys.d) {
-        firstPersonCamera.slideX(true);
+        player.slideX(true);
     }
 
-    move(firstPersonCamera);
+    move(player);
 
     if (isOutBounds && mouseMoving) {
-        firstPersonCamera.rotation.y += sideDx;
+        //DO NOT modify player.rotation.y manually. It will not rotate past -90 or 90 degrees. 
+        var panRot = new THREE.Matrix4().makeRotationY(sideDx);
+        player.setMatrix(new THREE.Matrix4().multiplyMatrices(player.matrix, panRot));
     }
 
 }
