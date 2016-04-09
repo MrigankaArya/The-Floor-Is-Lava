@@ -1,7 +1,6 @@
 function runGame() {
 $("#play").remove();
 $("#instructions").remove();
-var gameLost = false;
 
 // SETUP RENDERER & SCENE
 var canvas = document.getElementById('canvas');
@@ -132,15 +131,15 @@ var isMouseDown = false;
 
 function onMouseDown(event) {
     isMouseDown = true;
-    lavaReverse = true;
-    objectDrag = true;
-    mouseDrag = true;
+    pickRay();
+    // objectDrag = true;
+    // mouseDrag = true;
 }
 
 //Uncomment later
 function onMouseUp(event) {
     isMouseDown = false;
-    mouseDrag = false;
+    // mouseDrag = false;
 }
 
 //TODO: Set posNewX and posNewY to center screen coordinates when you start game at center
@@ -220,16 +219,24 @@ function move(obj) {
     translateBefore(obj, obj.velocity.x, obj.velocity.y, obj.velocity.z);
 }
 
+function updateLavaHeightStat() {
+    $(".lava-height").text(Math.floor(lava.position.y));
+}
+
 function initiateLostGame() {
     removeListeners();
 
     //stop them from moving if they're still pressing a key down
     firstPersonCamera.velocity = new THREE.Vector3(0, 0, 0); 
     $("#lost").removeAttr("hidden");
-    $("#lava-height").text(Math.floor(lava.position.y));
+    updateLavaHeightStat()
 }
 
-
+function initiateWonGame() {
+    lavaSpeed = 0;
+    $("#won").removeAttr("hidden");
+    updateLavaHeightStat();
+}
 
 //For FPS
 var lastTime = new Date();
@@ -241,9 +248,14 @@ var hearts = $(".heart");
 var healthCount = hearts.length;
 var isInLava = false;
 var startTimeInLava;
+
+var lavaFlushedOut = false;
 function update() {
-    if (!gameLost) {
-        translateBefore(lava, 0, lavaSpeed, 0);
+    translateBefore(lava, 0, lavaSpeed, 0);
+    
+    if (gameState == GameStateEnum.won && lava.position.y < ground.position.y && !lavaFlushedOut) {
+        lavaFlushedOut = true;
+        initiateWonGame();
     }
     //Compute FPS
     if (numFrames < thresholdFrames) {
@@ -265,7 +277,6 @@ function update() {
     var diff = firstPersonCamera.position.y - lava.position.y;
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
     detectCollision();
-    pickRay();
     
     var diffThreshold = 0.5;
     // Update health
@@ -273,12 +284,12 @@ function update() {
         if (isInLava == false) {
             isInLava = true;
             if (healthCount == 0) {
-                if (gameLost != true) {
+                if (gameState == GameStateEnum.playing) {
                     initiateLostGame();
-                    gameLost = true;
+                    gameState = GameStateEnum.lost;
                     return;
                 }
-            } else {
+            } else if (gameState != GameStateEnum.won) {
                 healthCount--;
                 hearts[healthCount].remove();
             }
@@ -294,19 +305,21 @@ function update() {
         var secondsPassedInLava = secondsPassedInLava/1000;
         if (secondsPassedInLava > secondsBeforeHealthDecrease) {
             if (healthCount == 0) {
-                if (gameLost != true) {
+                if (gameState == GameStateEnum.playing) {
                     initiateLostGame();
-                    gameLost = true;
+                    gameState = GameStateEnum.lost;
                     return;
                 }
-            } else {
+            } else if (gameState != GameStateEnum.won) {
                 startTimeInLava = currentTimeInLava;
                 healthCount--;
                 hearts[healthCount].remove();
             }
         }
         isFalling = false;
-        translateBefore(firstPersonCamera, 0, lavaSpeed, 0);
+        if (firstPersonCamera.position.y > ground.position.y + groundHeight/2 + playerHeight/2) {
+            translateBefore(firstPersonCamera, 0, lavaSpeed, 0);
+        }
     } else {
         //check if we're on a flat surface
         isFalling = firstPersonCamera.constraints.filter(function(constraint) {

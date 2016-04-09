@@ -1,3 +1,12 @@
+var GameStateEnum = {
+    playing: 0,
+    won: 1,
+    lost: 2
+}
+
+var gameState = GameStateEnum.playing;
+
+var groundHeight = 1;
 var sidePanDamper = 300;
 var panSensitivity = 0.001;
 var levelLength = 100;
@@ -209,7 +218,7 @@ function makeRoomSurface(width, height, length, transformMatrix) {
 
 
 function addRoom() {
-    var box = makeRoomSurface(levelWidth, 1, levelLength, new THREE.Matrix4());
+    var box = makeRoomSurface(levelWidth, groundHeight, levelLength, new THREE.Matrix4());
     ground = box;
 
     var leftTransform = new THREE.Matrix4().makeTranslation(-levelWidth / 2, levelHeight / 2, 0);
@@ -231,7 +240,6 @@ addRoom();
 var meshMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity:0});
 
 function makeWheel(){
-    // console.log("ey wat");
     var ringGeometry = new THREE.TorusGeometry(0.25, 0.1, 16, 100);
     var ringMesh = new THREE.Mesh(ringGeometry, toonMaterial2);
     var transformMatrix = new THREE.Matrix4().makeTranslation(0, 1.5, -49);
@@ -242,7 +250,6 @@ function makeWheel(){
     ringColliderMesh.setMatrix(transformMatrix);
     obstacles.push(ringColliderMesh);
     interactables.push(ringColliderMesh);
-    // console.log(interactables);
     scene.add(ringColliderMesh);
     scene.add(ringMesh);
 }
@@ -556,9 +563,9 @@ function detectCollision(){
 }
 
 var mouse = new THREE.Vector2(), INTERSECTED;
-var lavaReverse = false;
-var objectDrag = false;
-var mouseDrag = false;
+
+// var objectDrag = false;
+// var mouseDrag = false;
 //picking ray
 function pickRay(){
     var pickRayCaster = new THREE.Raycaster();
@@ -566,7 +573,7 @@ function pickRay(){
 
     //Change this number in order to change the distance at which you can interact with the object
     pickRayCaster.far = 3;
-    var intersects  = pickRayCaster.intersectObjects(interactables);
+    var intersects = pickRayCaster.intersectObjects(interactables);
     //Grab the 1st intersected object's type
     if(intersects.length >  0)
         takeAction(intersects[0].object);
@@ -577,9 +584,8 @@ function takeAction(obj){
     switch(type){
         case "wheel":
             //Reverse Lava flow
-            if(lavaReverse){
-                translateBefore(lava, 0, -lavaSpeed*10, 0);
-            }
+            gameState = GameStateEnum.won;
+            lavaSpeed *= -10;
             break;
         case "ladder":
             //climb the ladder to the wheel

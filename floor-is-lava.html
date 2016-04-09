@@ -62,7 +62,7 @@
         color: #dbc994;
       }
 
-      #reload {
+      .reload {
         border-radius: 1em;
         border-color: #ffff00;
         background: #000000;
@@ -80,9 +80,9 @@
         color: #888888;
       }
 
-      #lost {
+      #lost, #won {
         position: absolute;
-        bottom: 1em;
+        bottom: 10%;
         width: 100%;
         padding-top: 15%;
         padding-bottom: 15%;
@@ -94,7 +94,7 @@
         opacity: 0.8;
       }
 
-      #lava-height {
+      .lava-height {
         display: inline-block;
       }
       </style>
@@ -118,9 +118,14 @@
     </div>
     <div id="canvas"></div>
     <div hidden id="lost">
-        You lost :( 
-        The lava got to a height of <div id="lava-height"></div>!
-        <p><button id="reload" onclick="window.location.reload()">Restart Game</button></p>
+        You died a fiery death surrounded by fire-proof Ikea furniture :( <br>
+        The lava got to a height of <div class="lava-height"></div>!
+        <p><button class="reload" onclick="window.location.reload()">Restart Game</button></p>
+    </div>
+    <div hidden id="won">
+        You managed to flush out all the lava! Congrats :D <br>
+        The lava got to a height of <div class="lava-height"></div>!
+        <p><button class="reload" onclick="window.location.reload()">Restart Game</button></p>
     </div>
     <script src="js/three.js"></script>
     <script src="js/OBJLoader.js"></script>
