@@ -18,6 +18,18 @@ var playerHeight = 0.5;
 var lavaSpeed = 0.0002;
 var secondsBeforeHealthDecrease = 0500;
 
+var ground;
+var lava;
+
+var matSpec = {
+    transparent: true,
+    opacity: 0
+};
+if (debug) {
+    matSpec.opacity = 0.5;
+}
+var transparentMaterial = new THREE.MeshBasicMaterial(matSpec);
+
 //INITIATE OBSTACLES
 var obstacles = [];
 
@@ -28,6 +40,25 @@ var interactables = [];
 THREE.Object3D.prototype.setMatrix = function(a) {
     this.matrix = a;
     this.matrix.decompose(this.position, this.quaternion, this.scale);
+}
+
+// Requires a matrix name to print
+function printMatrix(matName, mat) {
+    console.log(matName + ":");
+    if (mat == null) {
+        console.log("null")
+    } else {
+        for (var row = 0; row < 4; row++) {
+            var rowStart = row * 4;
+            var st = [];
+            for (var col = 0; col < 4; col++) {
+                st.push(mat.elements[rowStart + col]);
+            }
+
+            var str = (row == 0 ? "[" : "") + st.join(", ") + (row == 3 ? "]" : "") + "\n";
+            console.log(str);
+        }
+    }
 }
 
 var scene = new THREE.Scene();
@@ -211,8 +242,6 @@ function addGrid() {
     scene.add(grid);
 }
 
-var ground;
-
 function makeRoomSurface(width, height, length, transformMatrix) {
     var boxGeometry = new THREE.BoxGeometry(width, height, length);
     var box = new THREE.Mesh(boxGeometry, toonMaterial);
@@ -243,19 +272,6 @@ function makeRoom() {
     ground.add(frontWall);
     return ground;
 }
-addGrid();
-addAxes();
-var room = makeRoom();
-scene.add(room);
-
-var matSpec = {
-    transparent: true,
-    opacity: 0
-};
-if (debug) {
-    matSpec.opacity = 0.5;
-}
-var transparentMaterial = new THREE.MeshBasicMaterial(matSpec);
 
 function makeWheel(){
     var radius = 0.5; // radius of wheel
@@ -296,10 +312,6 @@ function makeInteractable(){
     scene.add(objMesh);
 }
 
-makeInteractable();
-makeWheel();
-
-
 //Adds lava to the floor and deforms it as necessary.
 function addLava() {
     var lavaGeometry =  new THREE.PlaneGeometry(levelWidth, levelWidth, 129, 129);  //100 segments each 
@@ -328,7 +340,6 @@ function addLava() {
     scene.add(lavaPlane);
 
 }
-
 
 //where the real magic happens
 function generateTerrain(){
@@ -387,9 +398,6 @@ function generateTerrain(){
     return lavaTerrain;
 }
 
-var lava;
-
-
 function addLavaSub() {
     var planeGeometry = new THREE.PlaneGeometry(levelWidth, levelLength, 1);
     var plane = new THREE.Mesh(planeGeometry, blinnPhongMaterial);
@@ -400,28 +408,6 @@ function addLavaSub() {
     plane.setMatrix(final);
     scene.add(plane);
     lava = plane;
-}
-
-addLavaSub();
-
-// addLava();
-
-function printMatrix(matName, mat) {
-    console.log(matName + ":");
-    if (mat == null) {
-        console.log("null")
-    } else {
-        for (var row = 0; row < 4; row++) {
-            var rowStart = row * 4;
-            var st = [];
-            for (var col = 0; col < 4; col++) {
-                st.push(mat.elements[rowStart + col]);
-            }
-
-            var str = (row == 0 ? "[" : "") + st.join(", ") + (row == 3 ? "]" : "") + "\n";
-            console.log(str);
-        }
-    }
 }
 
 function addToruses() {
@@ -446,7 +432,6 @@ function addStartPlatform() {
     obstacles.push(cube);
     scene.add(cube);
 }
-
 
 function addShelf(width, height, length, thickness) {
     var box = makeRoomSurface(width + 1, thickness, length + 1, new THREE.Matrix4());
@@ -475,7 +460,6 @@ function addShelf(width, height, length, thickness) {
     box.applyMatrix(new THREE.Matrix4().multiplyMatrices(box.matrix, rot));
     var rot2 = new THREE.Matrix4().makeRotationY(Math.PI/4);
     //box.applyMatrix(new THREE.Matrix4().multiplyMatrices(box.matrix, rot2));
-    
 }
 
 function translateBefore(obj, x, y, z) {
@@ -589,16 +573,29 @@ function makeChairPyramid() {
     return pyramid;
 }
 
-// var chairPyra = makeChairPyramid();
-// scene.add(chairPyra);
+// ADD PROPS TO GAME
+if (debug) {
+    addGrid();
+    addAxes();
+}
+var room = makeRoom();
+scene.add(room);
+makeInteractable();
+makeWheel();
+addLavaSub();
+// addLava();
 
-// var chairPyra2 = makeChairPyramid();
-// chairPyra2.position.z = 40;
-// scene.add(chairPyra2);
+var chairPyra = makeChairPyramid();
+scene.add(chairPyra);
+
+var chairPyra2 = makeChairPyramid();
+chairPyra2.position.z = 40;
+scene.add(chairPyra2);
 
 addShelf(1, 2, 3, 0.1);
 addStartPlatform();
 // addToruses();
+
 player.constraints = [];
 for (var i = 0; i < 8; i++) {
     player.constraints[i] = null;
