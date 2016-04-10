@@ -477,11 +477,11 @@ function addStartPlatform() {
     scene.add(cube);
 }
 
-function addShelf(width, height, length, thickness) {
+function addShelf(width, height, length, thickness, numLevels, material) {
     var shelf = new THREE.Object3D();
 
-    var left = makeCube(thickness, height + 1, width + 1, blinnPhongMaterial);
-    var right = makeCube(thickness, height + 1, width + 1, blinnPhongMaterial);
+    var left = makeCube(thickness, height + 1, width + 1, material);
+    var right = makeCube(thickness, height + 1, width + 1, material);
     translateBefore(left, length/2, 0, 0);
     shelf.add(left);
     translateBefore(right, -length/2, 0, 0);
@@ -489,10 +489,14 @@ function addShelf(width, height, length, thickness) {
     obstacles.push(left);
     obstacles.push(right);
 
-    var levels = [-2, -1, 0, 1, 2];
+    var levels = [];
+    for (var i = 0; i < numLevels; i++) {
+        levels.push(i - (numLevels / 2));
+    }
+    
     levels.forEach(function(level) {
         var y = (level * height / (levels.length - 1));
-        var wall = makeCube(length, thickness, width * (1 + levels[levels.length - 1] - level) / levels.length, blinnPhongMaterial);
+        var wall = makeCube(length, thickness, width * (1 + levels[levels.length - 1] - level) / levels.length, material);
         translateBefore(wall, 0, y, 0);
         shelf.add(wall);
         obstacles.push(wall);
@@ -500,9 +504,8 @@ function addShelf(width, height, length, thickness) {
 
     
     scene.add(shelf);
-    rotateAfter(shelf, 'y', Math.PI/2)
     obstacles.push(shelf);
-    translateAfter(shelf, (levelWidth / 2) - (width / 2), height / 2, 0);
+    return shelf;
 }
 
 function getRotMatrix(axis, angle) {
@@ -665,7 +668,19 @@ var chairPyra2 = makeChairPyramid();
 chairPyra2.position.z = 40;
 scene.add(chairPyra2);
 
-addShelf(4, 5, 6, 0.2);
+var width1 = 4;
+var height1 = 5;
+var shelf1 = addShelf(width1, height1, 6, 0.2, 5, marbleMaterial);
+rotateAfter(shelf1, 'y', Math.PI/3);
+translateAfter(shelf1, (levelWidth / 2) - (width1 / 2), height1 / 2, 0);
+
+var width2 = 3;
+var height2 = 9;
+var shelf2 = addShelf(width2, height2, 6, 0.3, 7, crackleMaterial);
+rotateAfter(shelf2, 'y', -Math.PI/3);
+translateAfter(shelf2, (levelWidth / 2) - (width2 / 2), height2 / 2, 0);
+
+
 addStartPlatform();
 // addToruses();
 
