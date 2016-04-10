@@ -254,16 +254,7 @@ function animateShaders(currentTime) {
 
     //slide textures
     var wave2 = Math.sin(currentTime / 50) / 10 + currentTime / 6000 + wave;
-    // su1 += wave2;
-    // sv1 += wave;
-    // su2 += wave;
-    // sv2 += wave2;
-
-    uvOffset1.x++;
-    uvOffset1.y++;
-    uvOffset2.x++;
-    uvOffset2.y++;
-
+    time++;
 }
 
 //For FPS

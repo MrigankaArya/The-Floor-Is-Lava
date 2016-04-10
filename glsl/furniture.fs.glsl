@@ -123,5 +123,7 @@ void main() {
 	//^this line inspired by photoshop's screen blending mode
 	//http://www.deepskycolors.com/archive/2010/04/21/formulas-for-Photoshop-blending-modes.html
 
+	finalIllumination = vec3(slideUv2, 0.0);
+
 	gl_FragColor = vec4(finalIllumination, 1.0);
 }

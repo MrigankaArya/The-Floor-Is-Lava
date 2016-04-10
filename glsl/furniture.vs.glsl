@@ -7,8 +7,7 @@ uniform vec3 kDiffuse;
 uniform vec3 kSpecular;
 uniform float u_scale;
 uniform float v_scale;
-uniform vec2 uvOffset1;
-uniform vec2 uvOffset2;
+uniform float time;
 uniform float shininess;
 uniform sampler2D surfaceTexture;
 uniform sampler2D slideTex1;
@@ -27,8 +26,8 @@ void main() {
 	vUv = vec2(u_scale, v_scale) * uv;
 	//slider textures need to be pretty big
 	//we want them to light up surface with weird shapes
-	slideUv1 = vec2(u_scale / 10.0, v_scale / 10.0) * uv + uvOffset1;
-	slideUv2 = vec2(u_scale / 10.0, v_scale / 10.0) * uv + uvOffset2;
+	slideUv1 = vec2(u_scale / 10.0, v_scale / 10.0) * uv + time / 20.0;
+	slideUv2 = vec2(u_scale / 10.0, v_scale / 10.0) * uv + time / 20.0;
 	
     interpolatedNormal = normalize(normalMatrix * normal);
     interpolatedPosition = position;
