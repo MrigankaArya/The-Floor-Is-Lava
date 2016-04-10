@@ -11,7 +11,7 @@ varying vec2 vUv;
 void main(){
 	vec2 position = -1.0 + 2.0 *vUv;
 
-	vec4 noise = texture2D(textureCloud, vUv);
+	vec4 noise = texture2D(textureCloud, position);
 
 	vec2 T1 = vUv + vec2(1.5, -1.5) *time *0.02;
 	vec2 T2 = vUv + vec2( -0.5, 2.0 ) * time * 0.01;
@@ -41,7 +41,14 @@ void main(){
 	gl_FragColor = temp;
 	float depth = gl_FragCoord.z / gl_FragCoord.w;
 	const float LOG2 = 1.442695;
-	float fogFactor = exp2( - fogDensity * fogDensity * depth * depth * LOG2 );
+	float fogFactor = exp2( - fogDensity * fogDensity * pow(depth, 0.65) * LOG2 );
+	float fogGlowFactor = exp2( - fogDensity * fogDensity * pow(depth, 0.4) * LOG2 );
+
 	fogFactor = 1.0 - clamp( fogFactor, 0.0, 1.0 );
-	gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );
+	fogGlowFactor = 1.0 - clamp( fogGlowFactor, 0.0, 1.0 );
+
+	vec4 fog = vec4( fogColor, gl_FragColor.w );
+	vec4 fogGlow = vec4( vec3(1, 0.5, 0), gl_FragColor.w );
+	vec4 finalColor = mix( gl_FragColor, fog, fogFactor ) + fogGlow * fogGlowFactor;
+	gl_FragColor = finalColor;
 }

@@ -277,6 +277,7 @@ function update() {
 
     lavaUniforms.uniforms.time.value += 0.005;
     move(player);
+    console.log(player.velocity);
 
     var currentTime = new Date();
     doAnimations(currentTime);
@@ -306,7 +307,9 @@ function update() {
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
     minimapRenderer.render(scene, minimapCamera);
+    minimapCamera.position.x = player.position.x;
     minimapCamera.position.z = player.position.z;
+
 
     animateShaders(currentTime);
 

@@ -7,6 +7,7 @@ uniform vec3 kAmbient;
 uniform vec3 kDiffuse;
 uniform vec3 kSpecular;
 uniform float shininess;
+uniform float lavaReflectIntensity;
 uniform sampler2D surfaceTexture;
 uniform sampler2D slideTex1;
 uniform sampler2D slideTex2;
@@ -100,10 +101,11 @@ void main() {
 		finalIllumination -= shadowAmount / 2.0;
 	}
 
-	float outlineDeterminant = dot(interpolatedEyeDirection, interpolatedNormal);
-	if (outlineDeterminant < 0.1) {
-		finalIllumination = vec3(1, 0, 0);
-	}
+	//not good for flat surfaces
+	// float outlineDeterminant = dot(interpolatedEyeDirection, interpolatedNormal);
+	// if (outlineDeterminant < 0.1) {
+	// 	finalIllumination = vec3(1, 0, 0);
+	// }
 
 	//ADD FLASHLIGHT
 	vec3 toSurface = normalize(interpolatedPosition - (viewMatrix * vec4(flashlightPosition, 1.0)).xyz);
@@ -129,8 +131,7 @@ void main() {
 	//^this line inspired by photoshop's screen blending mode
 	//http://www.deepskycolors.com/archive/2010/04/21/formulas-for-Photoshop-blending-modes.html
 
-	float opacityOfLava = 0.6;
-	finalIllumination = finalIllumination * (1.0 - (lightFromBelowAmount + opacityOfLava)) + lavaIllumination * (lightFromBelowAmount + opacityOfLava);
+	finalIllumination = finalIllumination * (1.0 - (lightFromBelowAmount + lavaReflectIntensity)) + lavaIllumination * (lightFromBelowAmount + lavaReflectIntensity);
 
 	gl_FragColor = vec4(finalIllumination, 1.0);
 }

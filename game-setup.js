@@ -63,10 +63,10 @@ function printMatrix(matName, mat) {
 
 var scene = new THREE.Scene();
 var renderer = new THREE.WebGLRenderer({antialias: true});
-renderer.setClearColor(0xFFFFFF); // white background colour
+renderer.setClearColor(0x000000);
 
 var minimapRenderer = new THREE.WebGLRenderer({antialias:true});
-minimapRenderer.setClearColor(0xFFFFFF); // white background colour
+minimapRenderer.setClearColor(0x000000);
 
 // SETUP CAMERA
 var playerView = {
@@ -113,7 +113,7 @@ function addGravity(obj) {
     }
 }
 
-function addHorizontalAccel(obj) {
+function addHorizontalAccel(obj, maxVelocity) {
     if (obj.velocity == null) {
         obj.velocity = new THREE.Vector3(0, 0, 0);
     }
@@ -127,6 +127,11 @@ function addHorizontalAccel(obj) {
             this.horizontalAccelX = -Math.abs(this.horizontalAccelX);
         }
         this.velocity.x += this.horizontalAccelX;
+        if (this.velocity.x < 0) {
+            this.velocity.x = Math.max(this.velocity.x, -maxVelocity);
+        } else {
+            this.velocity.x = Math.min(this.velocity.x, maxVelocity);
+        }
     }
     obj.slideZ = function(isForward) {
         if (isForward) {
@@ -135,6 +140,11 @@ function addHorizontalAccel(obj) {
             this.horizontalAccelZ = -Math.abs(this.horizontalAccelZ);
         }
         this.velocity.z += this.horizontalAccelZ;
+        if (this.velocity.z < 0) {
+            this.velocity.z = Math.max(this.velocity.z, -maxVelocity);
+        } else {
+            this.velocity.z = Math.min(this.velocity.z, maxVelocity);
+        }
     }
 }
 
@@ -147,17 +157,15 @@ var player = new THREE.Mesh(geometry, basicMaterial);
 player.add(firstPersonCamera);
 
 addGravity(player);
-addHorizontalAccel(player);
+addHorizontalAccel(player, 0.1);
 player.setMatrix(new THREE.Matrix4().makeTranslation(0, 6, levelLength / 2 - 40));
 
 scene.add(player);
 
-var minimapCamera = new THREE.OrthographicCamera(levelWidth / -2, levelWidth / 2, levelWidth / 2, levelWidth / -2, 1, 1000);
-minimapCamera.position.set(0, 20, 0);
+var minimapCamera = new THREE.OrthographicCamera(levelWidth / -4, levelWidth / 4, levelWidth / 4, levelWidth / -4, 1, 1000);
+minimapCamera.position.set(player.position.x, 20, player.position.z);
 minimapCamera.up = new THREE.Vector3(0, 0, -1);
-minimapCamera.lookAt(scene.position);
-minimapCamera.position.z = player.position.z;
-
+minimapCamera.lookAt(player.position);
 scene.add(minimapCamera);
 
 
@@ -242,32 +250,32 @@ function addGrid() {
     scene.add(grid);
 }
 
-function makeRoomSurface(width, height, length, transformMatrix) {
+function makeRoomSurface(width, height, length, transformMatrix, material) {
     var boxGeometry = new THREE.BoxGeometry(width, height, length);
-    var box = new THREE.Mesh(boxGeometry, toonMaterial);
+    var box = new THREE.Mesh(boxGeometry, material);
     box.setMatrix(transformMatrix);
     obstacles.push(box);
     return box;
 }
 
 function makeRoom() {
-    var box = makeRoomSurface(levelWidth + 1, groundHeight, levelLength + 1, new THREE.Matrix4());
+    var box = makeRoomSurface(levelWidth + 1, groundHeight, levelLength + 1, new THREE.Matrix4(), toonMaterial2);
     ground = box;
 
     var leftTransform = new THREE.Matrix4().makeTranslation(-levelWidth / 2, levelHeight / 2, 0);
-    var leftWall = makeRoomSurface(1, levelHeight, levelLength, leftTransform);
+    var leftWall = makeRoomSurface(1, levelHeight, levelLength, leftTransform, wallMaterial);
     ground.add(leftWall);
 
     var rightTransform = new THREE.Matrix4().makeTranslation(levelWidth / 2, levelHeight / 2, 0);
-    var rightWall = makeRoomSurface(1, levelHeight, levelLength, rightTransform);
+    var rightWall = makeRoomSurface(1, levelHeight, levelLength, rightTransform, wallMaterial);
     ground.add(rightWall);
 
     var backTransform = new THREE.Matrix4().makeTranslation(0, levelHeight / 2, -levelLength / 2);
-    var backWall = makeRoomSurface(levelWidth, levelHeight, 1, backTransform);
+    var backWall = makeRoomSurface(levelWidth, levelHeight, 1, backTransform, wallMaterial);
     ground.add(backWall);
 
     var frontTransform = new THREE.Matrix4().makeTranslation(0, levelHeight / 2, levelLength / 2);
-    var frontWall = makeRoomSurface(levelWidth, levelHeight, 1, frontTransform);
+    var frontWall = makeRoomSurface(levelWidth, levelHeight, 1, frontTransform, wallMaterial);
     ground.add(frontWall);
     return ground;
 }
@@ -594,7 +602,7 @@ function makeChair(height, legsize, floorToSeatHeight, seatWidth, seatHeight, ma
     return chair;
 }
 
-function makeChairPyramid() {
+function makeChairPyramid(material, material2) {
     var pyramid = new THREE.Object3D();
 
     var height = 2;
@@ -602,8 +610,6 @@ function makeChairPyramid() {
     var floorToSeatHeight = height/2;
     var seatWidth = 1;
     var seatHeight = 0.25
-    var material = blinnPhongMaterial;
-    var material2 = blinnPhongMaterial2;
     function make2ChairUnit(verticalDisplacement, hDisplace1, hDisplace2, makeSecond) {
         var chair = makeChair(height, legsize, floorToSeatHeight, seatWidth, seatHeight, material2);
         translateAfter(chair, hDisplace2, height/2 + verticalDisplacement, hDisplace1 + verticalDisplacement/20);
@@ -663,10 +669,10 @@ var wheel = makeWheel();
 addLavaSub();
 // addLava();
 
-var chairPyra = makeChairPyramid();
+var chairPyra = makeChairPyramid(blinnPhongMaterial, blinnPhongMaterial2);
 scene.add(chairPyra);
 
-var chairPyra2 = makeChairPyramid();
+var chairPyra2 = makeChairPyramid(blinnPhongMaterial2, blinnPhongMaterial);
 chairPyra2.position.z = 40;
 scene.add(chairPyra2);
 
