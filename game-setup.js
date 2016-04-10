@@ -148,7 +148,7 @@ player.add(firstPersonCamera);
 
 addGravity(player);
 addHorizontalAccel(player);
-player.setMatrix(new THREE.Matrix4().makeTranslation(0, 2, levelLength / 2 - 40));
+player.setMatrix(new THREE.Matrix4().makeTranslation(0, 6, levelLength / 2 - 40));
 
 scene.add(player);
 
@@ -296,6 +296,7 @@ function makeWheel(){
     interactables.push(ringColliderMesh);
     scene.add(ringColliderMesh);
     scene.add(ringMesh);
+    return ringMesh;
 }
 
 function makeInteractable(){
@@ -478,11 +479,11 @@ function addStartPlatform() {
     scene.add(cube);
 }
 
-function addShelf(width, height, length, thickness) {
+function addShelf(width, height, length, thickness, numLevels, material) {
     var shelf = new THREE.Object3D();
 
-    var left = makeCube(thickness, height + 1, width + 1, blinnPhongMaterial);
-    var right = makeCube(thickness, height + 1, width + 1, blinnPhongMaterial);
+    var left = makeCube(thickness, height + 1, width + 1, material);
+    var right = makeCube(thickness, height + 1, width + 1, material);
     translateBefore(left, length/2, 0, 0);
     shelf.add(left);
     translateBefore(right, -length/2, 0, 0);
@@ -490,10 +491,14 @@ function addShelf(width, height, length, thickness) {
     obstacles.push(left);
     obstacles.push(right);
 
-    var levels = [-2, -1, 0, 1, 2];
+    var levels = [];
+    for (var i = 0; i < numLevels; i++) {
+        levels.push(i - (numLevels / 2));
+    }
+    
     levels.forEach(function(level) {
         var y = (level * height / (levels.length - 1));
-        var wall = makeCube(length, thickness, width * (1 + levels[levels.length - 1] - level) / levels.length, blinnPhongMaterial);
+        var wall = makeCube(length, thickness, width * (1 + levels[levels.length - 1] - level) / levels.length, material);
         translateBefore(wall, 0, y, 0);
         shelf.add(wall);
         obstacles.push(wall);
@@ -501,9 +506,8 @@ function addShelf(width, height, length, thickness) {
 
     
     scene.add(shelf);
-    rotateAfter(shelf, 'y', Math.PI/2)
     obstacles.push(shelf);
-    translateAfter(shelf, (levelWidth / 2) - (width / 2), height / 2, 0);
+    return shelf;
 }
 
 function getRotMatrix(axis, angle) {
@@ -655,7 +659,7 @@ if (debug) {
 var room = makeRoom();
 scene.add(room);
 makeInteractable();
-makeWheel();
+var wheel = makeWheel();
 addLavaSub();
 // addLava();
 
@@ -666,7 +670,19 @@ var chairPyra2 = makeChairPyramid();
 chairPyra2.position.z = 40;
 scene.add(chairPyra2);
 
-addShelf(4, 5, 6, 0.2);
+var width1 = 4;
+var height1 = 5;
+var shelf1 = addShelf(width1, height1, 6, 0.2, 5, marbleMaterial);
+rotateAfter(shelf1, 'y', Math.PI/3);
+translateAfter(shelf1, (levelWidth / 2) - (width1 / 2), height1 / 2, 0);
+
+var width2 = 3;
+var height2 = 9;
+var shelf2 = addShelf(width2, height2, 6, 0.3, 7, crackleMaterial);
+rotateAfter(shelf2, 'y', -Math.PI/3);
+translateAfter(shelf2, (levelWidth / 2) - (width2 / 2), height2 / 2, 0);
+
+
 addStartPlatform();
 // addToruses();
 
@@ -706,6 +722,10 @@ function detectCollision(){
 
 var mouse = new THREE.Vector2(), INTERSECTED;
 
+function updateLavaHeightStat() {
+    $(".lava-height").text(Math.floor(lava.position.y));
+}
+
 // var objectDrag = false;
 // var mouseDrag = false;
 //picking ray
@@ -727,6 +747,9 @@ function takeAction(obj){
         case "wheel":
             //Reverse Lava flow
             gameState = GameStateEnum.won;
+            updateLavaHeightStat();
+            startWheelAnimation();
+            console.log("updated");
             lavaSpeed *= -10;
             break;
         case "ladder":
@@ -740,6 +763,18 @@ function takeAction(obj){
             //do nothing
             break;
     }
+}
+
+var animations = {};
+
+// Creates an animation.
+function Animation(t_length) {
+  this.timeLength = t_length;
+  this.startTime = new Date();
+}
+
+function startWheelAnimation() {
+    animations.wheelRotation = new Animation(2);
 }
 
 //For later.

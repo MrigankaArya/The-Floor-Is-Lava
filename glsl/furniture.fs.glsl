@@ -8,10 +8,21 @@ uniform vec3 kDiffuse;
 uniform vec3 kSpecular;
 uniform float shininess;
 uniform sampler2D surfaceTexture;
+uniform sampler2D slideTex1;
+uniform sampler2D slideTex2;
 uniform float u_scale;
 uniform float v_scale;
+uniform float sliderU1;
+uniform float sliderV1;
+uniform float sliderU2;
+uniform float sliderV2;
+uniform vec3 flashlightColor;
+uniform vec3 flashlightPosition;
+uniform vec3 flashlightDirection;
 
 varying vec2 vUv;
+varying vec2 slideUv1;
+varying vec2 slideUv2;
 varying vec3 interpolatedNormal;
 varying vec3 interpolatedPosition;
 varying vec3 interpolatedEyeDirection;
@@ -87,6 +98,30 @@ void main() {
 	if (outlineDeterminant < 0.1) {
 		finalIllumination = vec3(1, 0, 0);
 	}
+
+	//ADD FLASHLIGHT
+	vec3 toSurface = normalize(interpolatedPosition - (viewMatrix * vec4(flashlightPosition, 1.0)).xyz);
+	float spotInterpolator = max(dot(toSurface, flashlightDirection), 0.0);
 	
+	// if (spotInterpolator > 0.6) {
+	// 	finalIllumination += flashlightColor;
+	// }
+
+	//TODO: Replace this with an actual spot light
+	vec3 flashlightIllumination = flashlightColor * vec3(max(dot(-toSurface, interpolatedNormal), 0.0));
+	finalIllumination += flashlightIllumination;
+
+	//add sliding
+	vec3 slide1TextureColor = vec3(texture2D(slideTex1, slideUv1));
+	vec3 slide2TextureColor = vec3(texture2D(slideTex2, slideUv2));
+	vec3 combined = slide1TextureColor * slide2TextureColor;
+	
+	vec3 white = vec3(1, 1, 1);
+	finalIllumination += combined * 0.2; //multiply slightly to bring out colour
+
+	finalIllumination = white - (white - finalIllumination) * (white - combined);
+	//^this line inspired by photoshop's screen blending mode
+	//http://www.deepskycolors.com/archive/2010/04/21/formulas-for-Photoshop-blending-modes.html
+
 	gl_FragColor = vec4(finalIllumination, 1.0);
 }

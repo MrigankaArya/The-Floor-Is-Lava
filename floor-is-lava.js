@@ -194,7 +194,6 @@ function move(obj) {
 
             var playerNormalMatrix = new THREE.Matrix4().copy(player.matrixWorld).transpose();
             var pConstraint = constraint.clone().applyMatrix4(playerNormalMatrix);
-            console.log(constraint);
 
             if (pConstraint.dot(velocity) < 0) {
              
@@ -210,10 +209,6 @@ function move(obj) {
     translateAfter(player, obj.velocity.x, obj.velocity.y, obj.velocity.z);
 }
 
-function updateLavaHeightStat() {
-    $(".lava-height").text(Math.floor(lava.position.y));
-}
-
 function initiateLostGame() {
     removeListeners();
 
@@ -226,7 +221,49 @@ function initiateLostGame() {
 function initiateWonGame() {
     lavaSpeed = 0;
     $("#won").removeAttr("hidden");
-    updateLavaHeightStat();
+}
+
+function doAnimations(currentTime) {
+    if (animations.wheelRotation != null) {
+        var wheelAnimation = animations.wheelRotation;
+        var timeElapsed = (currentTime - wheelAnimation.startTime)/1000;
+        if (timeElapsed > wheelAnimation.timeLength) {
+            animations.wheelRotation = null;
+        } else if (timeElapsed < wheelAnimation.timeLength/4) {
+            rotateAfter(wheel, "z", timeElapsed / 30);
+        } else if (timeElapsed < wheelAnimation.timeLength/3) {
+            rotateAfter(wheel, "z", - timeElapsed / 100);
+        } else if (timeElapsed < wheelAnimation.timeLength/2) {
+            rotateAfter(wheel, "z", timeElapsed / 30);
+        } else {
+            rotateAfter(wheel, "z", -timeElapsed / 20);
+        }
+
+        //jiggles the wheel a little because why not
+        if (timeElapsed < wheelAnimation.timeLength / 3) {
+            translateBefore(wheel, 0, 0, Math.sin(timeElapsed * 20) / 100);
+        }
+    }
+}
+
+function animateShaders(currentTime) {
+    // move lights slightly
+    var wave = Math.sin(currentTime / 1000) / 10 + Math.sin(currentTime/200)/50;
+    lightPositions[0] += wave;
+    lightPositions[3] += wave;
+
+    //slide textures
+    var wave2 = Math.sin(currentTime / 50) / 10 + currentTime / 6000 + wave;
+    // su1 += wave2;
+    // sv1 += wave;
+    // su2 += wave;
+    // sv2 += wave2;
+
+    uvOffset1.x++;
+    uvOffset1.y++;
+    uvOffset2.x++;
+    uvOffset2.y++;
+
 }
 
 //For FPS
@@ -241,12 +278,18 @@ var isInLava = false;
 var startTimeInLava;
 
 var lavaFlushedOut = false;
+
+
 function update() {
 
     lavaUniforms.uniforms.time.value += 0.0005;
     move(player);
+
     var currentTime = new Date();
+    doAnimations(currentTime);
+
     translateBefore(lava, 0, lavaSpeed, 0);
+    move(player);
 
     if (gameState == GameStateEnum.won && lava.position.y < ground.position.y && !lavaFlushedOut) {
         lavaFlushedOut = true;
@@ -263,16 +306,16 @@ function update() {
         lastTime = currentTime;
     }    
 
+    flashlightPosition.copy(player.position);
+    flashlightDirection.copy(new THREE.Vector3(0, 0, -1).applyQuaternion(firstPersonCamera.quaternion));
+    // console.log(flashlightDirection);
+
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
     minimapRenderer.render(scene, minimapCamera);
     minimapCamera.position.z = player.position.z;
 
-    // move lights slightly
-    var wave = Math.sin(currentTime / 1000) / 10 + Math.sin(currentTime/200)/50;
-    lightPositions[0] += wave;
-    lightPositions[3] += wave;
-
+    animateShaders(currentTime);
 
     var diff = player.position.y - lava.position.y;
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
