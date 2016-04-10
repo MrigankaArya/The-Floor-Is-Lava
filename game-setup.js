@@ -82,7 +82,7 @@ var playerView = {
 };
 
 if (debug) {
-    playerView.eye = [0, 4, 4];
+    playerView.eye = [0, 10, 10];
 }
 
 function resetCamera(camera, view) {
@@ -250,7 +250,6 @@ function makeRoomSurface(width, height, length, transformMatrix) {
     return box;
 }
 
-
 function makeRoom() {
     var box = makeRoomSurface(levelWidth + 1, groundHeight, levelLength + 1, new THREE.Matrix4());
     ground = box;
@@ -400,8 +399,12 @@ function generateTerrain(){
 
 function addLavaSub() {
     var planeGeometry = new THREE.PlaneGeometry(levelWidth, levelLength, 1);
-    var plane = new THREE.Mesh(planeGeometry, blinnPhongMaterial);
-    
+    var plane;
+    if (debug) {
+        plane = new THREE.Mesh(planeGeometry, transparentMaterial);
+    } else {
+        plane = new THREE.Mesh(planeGeometry, blinnPhongMaterial);
+    }
     var rot = new THREE.Matrix4().makeRotationX(3*Math.PI / 2);
     var translateUp = new THREE.Matrix4().makeTranslation(0, 1, 0);
     var final = new THREE.Matrix4().multiplyMatrices(translateUp, rot);
@@ -427,39 +430,68 @@ function makeCube(xscale, yscale, zscale, material) {
 }
 
 function addStartPlatform() {
-    var cube = makeCube(4, playerView.eye[1] - 0.5, 4, toonMaterial2);
-    translateBefore(cube, playerView.eye[0], 0, playerView.eye[2]);
+    var cube = makeCube(4, player.position.y - 0.5, 4, toonMaterial2);
+    translateBefore(cube, player.position.x, 0, player.position.z);
     obstacles.push(cube);
     scene.add(cube);
 }
 
 function addShelf(width, height, length, thickness) {
-    var box = makeRoomSurface(width + 1, thickness, length + 1, new THREE.Matrix4());
+    var shelf = new THREE.Object3D();
 
-    var levels = [0, 1, 2, 3];
+    var left = makeCube(thickness, height + 1, width + 1, blinnPhongMaterial);
+    var right = makeCube(thickness, height + 1, width + 1, blinnPhongMaterial);
+    translateBefore(left, length/2, 0, 0);
+    shelf.add(left);
+    translateBefore(right, -length/2, 0, 0);
+    shelf.add(right);
+    obstacles.push(left);
+    obstacles.push(right);
+
+    var levels = [-2, -1, 0, 1, 2];
     levels.forEach(function(level) {
-        var x = (-width / 2) + (level * width / (levels.length - 1));
-        var transform = new THREE.Matrix4().makeTranslation(x, height / 2, 0);
-        var wall = makeRoomSurface(1, height, length, transform);
-        box.add(wall);
+        var y = (level * height / (levels.length - 1));
+        var wall = makeCube(length, thickness, width * (1 + levels[levels.length - 1] - level) / levels.length, blinnPhongMaterial);
+        translateBefore(wall, 0, y, 0);
+        shelf.add(wall);
         obstacles.push(wall);
     })
 
-    var backTransform = new THREE.Matrix4().makeTranslation(0, height / 2, -length / 2);
-    var backWall = makeRoomSurface(width + 1, height, 1, backTransform);
-    box.add(backWall);
-    obstacles.push(backWall);
-    var frontTransform = new THREE.Matrix4().makeTranslation(0, height / 2, length / 2);
-    var frontWall = makeRoomSurface(width + 1, height, 1, frontTransform);
-    box.add(frontWall);
-    obstacles.push(frontWall);
-    scene.add(box);
-    obstacles.push(box);
-    translateAfter(box, 0, height/2, 20);
-    var rot = new THREE.Matrix4().makeRotationZ(Math.PI/2);
-    box.applyMatrix(new THREE.Matrix4().multiplyMatrices(box.matrix, rot));
-    var rot2 = new THREE.Matrix4().makeRotationY(Math.PI/4);
-    //box.applyMatrix(new THREE.Matrix4().multiplyMatrices(box.matrix, rot2));
+    
+    scene.add(shelf);
+    rotateAfter(shelf, 'y', Math.PI/2)
+    obstacles.push(shelf);
+    translateAfter(shelf, (levelWidth / 2) - (width / 2), height / 2, 0);
+}
+
+function getRotMatrix(axis, angle) {
+    switch(axis) {
+        case 'x':
+        return new THREE.Matrix4().makeRotationX(angle);
+        break;
+        case 'y':
+        return new THREE.Matrix4().makeRotationY(angle);
+        break;
+        case 'z':
+        return new THREE.Matrix4().makeRotationZ(angle);
+        break;
+        default: 
+        console.log("This is not an axis: " + axis);
+        return null;
+    }
+}
+
+function rotateBefore(obj, axis, angle) {
+    var rot = getRotMatrix(axis, angle);
+    
+    var finalMatrix = new THREE.Matrix4().multiplyMatrices(rot, obj.matrix);
+    obj.setMatrix(finalMatrix);
+}
+
+function rotateAfter(obj,axis, angle) {
+    var rot = getRotMatrix(axis, angle);
+    var finalMatrix = new THREE.Matrix4().multiplyMatrices(obj.matrix, rot);
+    obj.setMatrix(finalMatrix);
 }
 
 function translateBefore(obj, x, y, z) {
@@ -592,7 +624,7 @@ var chairPyra2 = makeChairPyramid();
 chairPyra2.position.z = 40;
 scene.add(chairPyra2);
 
-addShelf(1, 2, 3, 0.1);
+addShelf(4, 5, 6, 0.2);
 addStartPlatform();
 // addToruses();
 
@@ -619,7 +651,10 @@ function detectCollision(){
         if(collisions.length > 0 && collisions[0].distance < 0.5){
             var normal = collisions[0].face.normal;
             if (player.constraints.indexOf(normal) == -1) { //only add if not already there
-                player.constraints[vertex] = normal;
+                //normal matrix of M(object->world), aka matrixWorld, is inverse(transpose(matrixWorld))
+                //need to normalize again (possibly because of scaling?)
+                var objectToWorldNormalMatrix = new THREE.Matrix4().getInverse(collisions[0].object.matrixWorld).transpose();
+                player.constraints[vertex] = normal.clone().applyMatrix4(objectToWorldNormalMatrix).normalize();
             }
        } else {
             player.constraints[vertex] = null
