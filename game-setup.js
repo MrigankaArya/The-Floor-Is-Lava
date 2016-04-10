@@ -148,7 +148,7 @@ player.add(firstPersonCamera);
 
 addGravity(player);
 addHorizontalAccel(player);
-player.setMatrix(new THREE.Matrix4().makeTranslation(0, 2, levelLength / 2 - 40));
+player.setMatrix(new THREE.Matrix4().makeTranslation(0, 6, levelLength / 2 - 40));
 
 scene.add(player);
 
@@ -704,6 +704,10 @@ function detectCollision(){
 
 var mouse = new THREE.Vector2(), INTERSECTED;
 
+function updateLavaHeightStat() {
+    $(".lava-height").text(Math.floor(lava.position.y));
+}
+
 // var objectDrag = false;
 // var mouseDrag = false;
 //picking ray
@@ -725,6 +729,8 @@ function takeAction(obj){
         case "wheel":
             //Reverse Lava flow
             gameState = GameStateEnum.won;
+            updateLavaHeightStat();
+            console.log("updated");
             lavaSpeed *= -10;
             break;
         case "ladder":

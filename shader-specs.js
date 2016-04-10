@@ -115,7 +115,7 @@ var toonSpec2 = {
     },
 };
 
-function makeSpec(tex, colors, ambColor, litePositions, kAmb, kDiff, kSpec, shineFactor, uScale, vScale) {
+function makeSpec(tex, colors, ambColor, litePositions, kAmb, kDiff, kSpec, shineFactor, uScale, vScale, flColor, flPos, flDir) {
     var spec = {
         uniforms: {
             surfaceTexture: {
@@ -133,6 +133,18 @@ function makeSpec(tex, colors, ambColor, litePositions, kAmb, kDiff, kSpec, shin
             lightPositions: {
                 type: 'fv',
                 value: litePositions
+            },
+            flashlightColor: {
+                type: 'v3',
+                value: flColor
+            },
+            flashlightPosition: {
+                type: 'v3',
+                value: flPos
+            },
+            flashlightDirection: {
+                type: 'v3',
+                value: flDir
             },
             kAmbient: {
                 type: 'c',
@@ -165,9 +177,12 @@ function makeSpec(tex, colors, ambColor, litePositions, kAmb, kDiff, kSpec, shin
 }
 
 var lightPositions = [70, 100, 70, -70, -100, -70];
+var flashlightColor = new THREE.Vector3(0, 0, 1);
+var flashlightPosition = new THREE.Vector3(0, 0, 0); // will be replaced with player position
+var flashlightDirection = new THREE.Vector3(0, 0, 0); // will be replaced with camera's direction
 
-var blinnPhongSpec = makeSpec(chairTex, [0.1, 0.3, 0.8, 1, 1, 0.7], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair1, kSpecularChair1, shininess, 2, 2)
-var blinnPhongSpec2 = makeSpec(chairTex, [0.6, 0.6, 1, 1, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair2, kDiffuseChair2, kSpecularChair2, shininess, 2, 2)
+var blinnPhongSpec = makeSpec(chairTex, [0.1, 0.3, 0.8, 1, 1, 0.7], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair1, kSpecularChair1, shininess, 2, 2, flashlightColor, flashlightPosition, flashlightDirection);
+var blinnPhongSpec2 = makeSpec(chairTex, [0.6, 0.6, 1, 1, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair2, kDiffuseChair2, kSpecularChair2, shininess, 2, 2, flashlightColor, flashlightPosition, flashlightDirection);
 
 chairTex.wrapS = chairTex.wrapT = THREE.RepeatWrapping;
 

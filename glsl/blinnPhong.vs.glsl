@@ -9,6 +9,9 @@ uniform float u_scale;
 uniform float v_scale;
 uniform float shininess;
 uniform sampler2D surfaceTexture;
+uniform vec3 flashlightColor;
+uniform vec3 flashlightPosition;
+uniform vec3 flashlightDirection;
 
 varying vec2 vUv;
 varying vec3 interpolatedNormal;

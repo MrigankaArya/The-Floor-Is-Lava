@@ -194,7 +194,6 @@ function move(obj) {
 
             var playerNormalMatrix = new THREE.Matrix4().copy(player.matrixWorld).transpose();
             var pConstraint = constraint.clone().applyMatrix4(playerNormalMatrix);
-            console.log(constraint);
 
             if (pConstraint.dot(velocity) < 0) {
              
@@ -210,10 +209,6 @@ function move(obj) {
     translateAfter(player, obj.velocity.x, obj.velocity.y, obj.velocity.z);
 }
 
-function updateLavaHeightStat() {
-    $(".lava-height").text(Math.floor(lava.position.y));
-}
-
 function initiateLostGame() {
     removeListeners();
 
@@ -226,7 +221,6 @@ function initiateLostGame() {
 function initiateWonGame() {
     lavaSpeed = 0;
     $("#won").removeAttr("hidden");
-    updateLavaHeightStat();
 }
 
 //For FPS
@@ -242,9 +236,9 @@ var startTimeInLava;
 
 var lavaFlushedOut = false;
 function update() {
-    move(player);
     var currentTime = new Date();
     translateBefore(lava, 0, lavaSpeed, 0);
+    move(player);
 
     if (gameState == GameStateEnum.won && lava.position.y < ground.position.y && !lavaFlushedOut) {
         lavaFlushedOut = true;
@@ -261,6 +255,10 @@ function update() {
         lastTime = currentTime;
     }    
 
+    flashlightPosition.copy(player.position);
+    flashlightDirection.copy(new THREE.Vector3(0, 0, -1).applyQuaternion(firstPersonCamera.quaternion));
+    // console.log(flashlightDirection);
+
     requestAnimationFrame(update);
     renderer.render(scene, firstPersonCamera);
     minimapRenderer.render(scene, minimapCamera);
@@ -270,7 +268,6 @@ function update() {
     var wave = Math.sin(currentTime / 1000) / 10 + Math.sin(currentTime/200)/50;
     lightPositions[0] += wave;
     lightPositions[3] += wave;
-
 
     var diff = player.position.y - lava.position.y;
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
