@@ -37,18 +37,56 @@ void main() {
 		vec3 specularIllumination = lightColors[i] * vec3(textureColor * kSpecular * pow(max(dot(halfwayVector, interpolatedNormal), 0.0), shininess));
 		finalIllumination += (ambientIllumination + diffuseIllumination + specularIllumination);
 
-		vec3 shadow = vec3(0, 0.2, 0.2);
+		vec3 shadow = vec3(0, 0.2, 0.1);
+		vec3 shadowByLightIntensity = shadow * length(lightColors[i]);
 
-		float dotResult = dot(halfwayVector, interpolatedNormal);
-		if (dotResult < -0.5) {
-			finalIllumination -= shadow;
-		} else {
+		vec3 saturatedLineColor = vec3(0, 0.3, 0.3);
+		vec3 saturatedByLightIntensity = saturatedLineColor * length(lightColors[i]);
 
+		vec3 shadowAmount;
+		float dotResult = dot(lightDirection, interpolatedNormal);
+		
+		float shadowLimit = 0.38;
+		float maxSaturationLimit = shadowLimit + 0.05;
+		float lightAreaLimit = maxSaturationLimit + 0.03;
+		float highlightLimit = 1.0 - pow(0.1, shininess * 3.0);
+		if (dotResult < shadowLimit) {
+			shadowAmount = shadowByLightIntensity;
+		} else if (dotResult >= shadowLimit && dotResult < maxSaturationLimit) {
+			//linearly create saturation line
+			//mx
+			float mx = (1.0 / (maxSaturationLimit - shadowLimit)) * dotResult;
+			
+			//b
+			float b = - shadowLimit / (maxSaturationLimit - shadowLimit);
+
+			//y
+			float interpolator = mx + b;
+
+			shadowAmount = shadowByLightIntensity * (1.0 - interpolator) + interpolator * saturatedByLightIntensity;
+		} else if (dotResult >= maxSaturationLimit && dotResult < lightAreaLimit) {
+			//linearly end saturation line
+			//mx
+			float mx = (1.0 / (lightAreaLimit - maxSaturationLimit)) * dotResult;
+			
+			//b
+			float b = - maxSaturationLimit / (lightAreaLimit - maxSaturationLimit);
+
+			//y
+			float interpolator = mx + b;
+
+			shadowAmount = saturatedByLightIntensity * (1.0 - interpolator);
+		} else if (dotResult < highlightLimit) {
+			shadowAmount = vec3(-0.1, -0.1, 0); //this will be "added", creating an additional highlight
 		}
+
+		finalIllumination -= shadowAmount / 2.0;
 	}
+
 	float outlineDeterminant = dot(interpolatedEyeDirection, interpolatedNormal);
 	if (outlineDeterminant < 0.1) {
 		finalIllumination = vec3(1, 0, 0);
 	}
+	
 	gl_FragColor = vec4(finalIllumination, 1.0);
 }

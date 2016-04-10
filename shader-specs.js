@@ -18,7 +18,7 @@ var kSpecularChair2 = new THREE.Color(1, 1, 1);
 
 var kAmbientChair1 = new THREE.Color(0.6, 0.3, 0.7);
 var kDiffuseChair1 = new THREE.Color(0.6, 0.3, 0.7);
-var kSpecularChair1 = new THREE.Color(1, 0, 1);
+var kSpecularChair1 = new THREE.Color(1, 1, 1);
 var shininess = 10.0;
 
 var textureLoader = new THREE.TextureLoader();
@@ -166,8 +166,8 @@ function makeSpec(tex, colors, ambColor, litePositions, kAmb, kDiff, kSpec, shin
 
 var lightPositions = [70, 100, 70, -70, -100, -70];
 
-var blinnPhongSpec = makeSpec(chairTex, [0.1, 0.3, 0.8, 1, 1, 0.7], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair1, kSpecularChair1, shininess, 1, 1)
-var blinnPhongSpec2 = makeSpec(chairTex, [0.6, 0.6, 1, 1, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair2, kDiffuseChair2, kSpecularChair2, shininess, 1, 1)
+var blinnPhongSpec = makeSpec(chairTex, [0.1, 0.3, 0.8, 1, 1, 0.7], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair1, kSpecularChair1, shininess, 2, 2)
+var blinnPhongSpec2 = makeSpec(chairTex, [0.6, 0.6, 1, 1, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair2, kDiffuseChair2, kSpecularChair2, shininess, 2, 2)
 
 chairTex.wrapS = chairTex.wrapT = THREE.RepeatWrapping;
 
