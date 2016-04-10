@@ -31,6 +31,8 @@ void main() {
 	vec3 finalIllumination = vec3(0.0, 0.0, 0.0);
 	vec3 textureColor = vec3(texture2D(surfaceTexture, vUv));
 
+	float lightFromBelowAmount;
+
 	for (int i = 0; i < NUM_LIGHTS; i++) {
 		//Used in Specular and Diffuse. l = Plight - Pvertex
 		vec3 lightDirection = normalize((viewMatrix * vec4(lightPositions[i], 1.0)).xyz - interpolatedPosition);
@@ -42,8 +44,12 @@ void main() {
 		vec3 ambientIllumination = textureColor * kAmbient * ambientColor;
 		
 		//Diffuse: kd*Il*(n*l)
-		vec3 diffuseIllumination = lightColors[i] * vec3(textureColor * kDiffuse * max(dot(lightDirection, interpolatedNormal), 0.0));
-		
+		float diffuseAmount = max(dot(lightDirection, interpolatedNormal), 0.0);
+		vec3 diffuseIllumination = lightColors[i] * vec3(textureColor * kDiffuse * diffuseAmount);
+		if (i == 1) {
+			lightFromBelowAmount = diffuseAmount;
+		}
+
 		//Specular: ks*Il*(h*n)^kse
 		vec3 specularIllumination = lightColors[i] * vec3(textureColor * kSpecular * pow(max(dot(halfwayVector, interpolatedNormal), 0.0), shininess));
 		finalIllumination += (ambientIllumination + diffuseIllumination + specularIllumination);
@@ -117,13 +123,14 @@ void main() {
 	vec3 combined = slide1TextureColor * slide2TextureColor;
 	
 	vec3 white = vec3(1, 1, 1);
-	finalIllumination += combined * 0.2; //multiply slightly to bring out colour
+	vec3 lavaIllumination = finalIllumination + combined * 0.2; //multiply slightly to bring out colour
 
-	finalIllumination = white - (white - finalIllumination) * (white - combined);
+	lavaIllumination = (white - (white - lavaIllumination) * (white - combined));
 	//^this line inspired by photoshop's screen blending mode
 	//http://www.deepskycolors.com/archive/2010/04/21/formulas-for-Photoshop-blending-modes.html
 
-	finalIllumination = vec3(slideUv2, 0.0);
+	float opacityOfLava = 0.6;
+	finalIllumination = finalIllumination * (1.0 - (lightFromBelowAmount + opacityOfLava)) + lavaIllumination * (lightFromBelowAmount + opacityOfLava);
 
 	gl_FragColor = vec4(finalIllumination, 1.0);
 }

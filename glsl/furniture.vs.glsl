@@ -26,8 +26,8 @@ void main() {
 	vUv = vec2(u_scale, v_scale) * uv;
 	//slider textures need to be pretty big
 	//we want them to light up surface with weird shapes
-	slideUv1 = vec2(u_scale / 10.0, v_scale / 10.0) * uv + time / 20.0;
-	slideUv2 = vec2(u_scale / 10.0, v_scale / 10.0) * uv + time / 20.0;
+	slideUv1 = vec2(u_scale / 10.0, v_scale / 10.0) * uv + sin(time / 20.0) + sin(time / 90.0);
+	slideUv2 = vec2(u_scale / 10.0, v_scale / 10.0) * uv + sin(time / 30.0);
 	
     interpolatedNormal = normalize(normalMatrix * normal);
     interpolatedPosition = position;

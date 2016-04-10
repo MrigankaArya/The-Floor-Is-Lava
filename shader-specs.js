@@ -49,7 +49,7 @@ var lavaUniforms = {
         },
         uvScale: {
             type: "v2",
-            value: new THREE.Vector2(0.5, 0.2)
+            value: new THREE.Vector2(15, 20)
         },
         textureCloud: {
             type: "t",
@@ -212,7 +212,7 @@ var crackleShininess = 5.0;
 var kSpecularCrackle = new THREE.Vector3(0.4, 0.9, 0.7);
 var crackleSpec = makeSpec(crackleTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, crackleShininess, 4, 4, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time);
 
-var texturesToWrap = [chairTex, marbleTex, crackleTex, water1Tex, water2Tex];
+var texturesToWrap = [chairTex, marbleTex, crackleTex, water1Tex, water2Tex, lavaTex, cloudTex];
 texturesToWrap.forEach(function(tex) {
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
 })
@@ -243,18 +243,22 @@ var shaderFiles = [
 
 var shaderDetails = [{
     mat: blinnPhongMaterial,
+    spec: blinnPhongSpec,
     vs: 'glsl/furniture.vs.glsl',
     fs: 'glsl/furniture.fs.glsl'
 }, {
     mat: blinnPhongMaterial2,
+    spec: blinnPhongSpec2,
     vs: 'glsl/furniture.vs.glsl',
     fs: 'glsl/furniture.fs.glsl'
 }, {
     mat: marbleMaterial,
+    spec: marbleSpec,
     vs: 'glsl/furniture.vs.glsl',
     fs: 'glsl/furniture.fs.glsl'
 }, {
     mat: crackleMaterial,
+    spec: crackleSpec,
     vs: 'glsl/furniture.vs.glsl',
     fs: 'glsl/furniture.fs.glsl'
 },

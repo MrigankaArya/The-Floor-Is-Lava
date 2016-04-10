@@ -254,7 +254,9 @@ function animateShaders(currentTime) {
 
     //slide textures
     var wave2 = Math.sin(currentTime / 50) / 10 + currentTime / 6000 + wave;
-    time++;
+    shaderDetails.forEach(function(shader) {
+        shader.spec.uniforms.time.value += 0.005;
+    })
 }
 
 //For FPS
@@ -273,7 +275,7 @@ var lavaFlushedOut = false;
 
 function update() {
 
-    lavaUniforms.uniforms.time.value += 0.0005;
+    lavaUniforms.uniforms.time.value += 0.005;
     move(player);
 
     var currentTime = new Date();
