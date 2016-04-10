@@ -1,6 +1,6 @@
 // LIGHTING UNIFORMS
 var lightColor = new THREE.Color(1, 0.3, 0.3);
-var ambientColor = new THREE.Color(0.4, 0.5, 0.6);
+var ambientColor = new THREE.Color(0.6, 0.5, 0.4);
 var lightPosition = new THREE.Vector3(70, 100, 70);
 
 var lightColor2 = new THREE.Color(0, 0.3, 1);
@@ -12,9 +12,13 @@ var unLitColor2 = new THREE.Color(0.7, 0.32, 0.6);
 
 var outlineColor = new THREE.Color(0.04, 0.1, 0.15);
 
-var kAmbient = new THREE.Color(1, 1, 0.7);
-var kDiffuse = new THREE.Color(0.6, 0.6, 0.7);
-var kSpecular = new THREE.Color(1, 1, 1);
+var kAmbientChair2 = new THREE.Color(1, 1, 0.7);
+var kDiffuseChair2 = new THREE.Color(0.6, 0.6, 0.7);
+var kSpecularChair2 = new THREE.Color(1, 1, 1);
+
+var kAmbientChair1 = new THREE.Color(0.6, 0.3, 0.7);
+var kDiffuseChair1 = new THREE.Color(0.6, 0.3, 0.7);
+var kSpecularChair1 = new THREE.Color(1, 0, 1);
 var shininess = 10.0;
 
 var textureLoader = new THREE.TextureLoader();
@@ -162,9 +166,10 @@ function makeSpec(tex, colors, ambColor, litePositions, kAmb, kDiff, kSpec, shin
 
 var lightPositions = [70, 100, 70, -70, -100, -70];
 
-var blinnPhongSpec = makeSpec(chairTex, [0.1, 0.3, 0.8, 1, 1, 0.7], ambientColor, lightPositions, kAmbient, kDiffuse, kSpecular, shininess, 1, 1)
-var blinnPhongSpec2 = makeSpec(chairTex, [1, 0.6, 1, 0, 0, 1], ambientColor, lightPositions, kAmbient, kDiffuse, kSpecular, shininess, 1, 1)
+var blinnPhongSpec = makeSpec(chairTex, [0.1, 0.3, 0.8, 1, 1, 0.7], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair1, kSpecularChair1, shininess, 1, 1)
+var blinnPhongSpec2 = makeSpec(chairTex, [0.6, 0.6, 1, 1, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair2, kDiffuseChair2, kSpecularChair2, shininess, 1, 1)
 
+chairTex.wrapS = chairTex.wrapT = THREE.RepeatWrapping;
 
 //MATERIALS
 var basicMaterial = new THREE.MeshBasicMaterial({
