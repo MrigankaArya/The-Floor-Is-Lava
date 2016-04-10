@@ -29,6 +29,10 @@ var crackleTex = textureLoader.load("textures/crackles.jpg");
 var cloudTex = textureLoader.load("textures/cloud.png");
 var lavaTex = textureLoader.load("textures/lavatile.jpg");
 
+var water1Tex = textureLoader.load("textures/water_1.jpg");
+var water2Tex = textureLoader.load("textures/water_2.jpg");
+
+
 var lavaUniforms = {
     uniforms:{
         fogDensity: {
@@ -116,12 +120,20 @@ var toonSpec2 = {
     },
 };
 
-function makeSpec(tex, colors, ambColor, litePositions, kAmb, kDiff, kSpec, shineFactor, uScale, vScale, flColor, flPos, flDir) {
+function makeSpec(tex, colors, ambColor, litePositions, kAmb, kDiff, kSpec, shineFactor, uScale, vScale, flColor, flPos, flDir, slideTex1, slideTex2) {
     var spec = {
         uniforms: {
             surfaceTexture: {
                 type: "t",
                 value: tex
+            },
+            slideTex1: {
+                type: "t",
+                value: slideTex1
+            },
+            slideTex2: {
+                type: "t",
+                value: slideTex2
             },
             lightColors: {
                 type: 'fv',
@@ -182,21 +194,22 @@ var flashlightColor = new THREE.Vector3(0, 0, 1);
 var flashlightPosition = new THREE.Vector3(0, 0, 0); // will be replaced with player position
 var flashlightDirection = new THREE.Vector3(0, 0, 0); // will be replaced with camera's direction
 
-var blinnPhongSpec = makeSpec(chairTex, [0.1, 0.3, 0.8, 1, 1, 0.7], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair1, kSpecularChair1, shininess, 2, 2, flashlightColor, flashlightPosition, flashlightDirection);
-var blinnPhongSpec2 = makeSpec(chairTex, [0.6, 0.6, 1, 1, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair2, kDiffuseChair2, kSpecularChair2, shininess, 2, 2, flashlightColor, flashlightPosition, flashlightDirection);
+var blinnPhongSpec = makeSpec(chairTex, [0.1, 0.3, 0.8, 1, 1, 0.7], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair1, kSpecularChair1, shininess, 2, 2, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex);
+var blinnPhongSpec2 = makeSpec(chairTex, [0.6, 0.6, 1, 1, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair2, kDiffuseChair2, kSpecularChair2, shininess, 2, 2, flashlightColor, flashlightPosition, flashlightDirection, water2Tex, water1Tex);
 
 var marbleAmbientColor = new THREE.Color(0.7, 0.7, 0.8);
 var marbleShininess = 20.0;
-var marbleSpec = makeSpec(marbleTex, [0.6, 0.6, 1, 1, 0.5, 0.2], marbleAmbientColor, lightPositions, kAmbientChair2, kDiffuseChair2, kSpecularChair2, marbleShininess, 2, 2, flashlightColor, flashlightPosition, flashlightDirection);
+var marbleSpec = makeSpec(marbleTex, [0.6, 0.6, 1, 1, 0.5, 0.2], marbleAmbientColor, lightPositions, kAmbientChair2, kDiffuseChair2, kSpecularChair2, marbleShininess, 2, 2, flashlightColor, flashlightPosition, flashlightDirection, water2Tex, water1Tex);
 
 var crackleShininess = 5.0;
 
 var kSpecularCrackle = new THREE.Vector3(0.4, 0.9, 0.7);
-var crackleSpec = makeSpec(crackleTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, crackleShininess, 4, 4, flashlightColor, flashlightPosition, flashlightDirection);
+var crackleSpec = makeSpec(crackleTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, crackleShininess, 4, 4, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex);
 
-chairTex.wrapS = chairTex.wrapT = THREE.RepeatWrapping;
-marbleTex.wrapS = marbleTex.wrapT = THREE.RepeatWrapping;
-crackleTex.wrapS = crackleTex.wrapT = THREE.RepeatWrapping;
+var texturesToWrap = [chairTex, marbleTex, crackleTex, water1Tex, water2Tex];
+texturesToWrap.forEach(function(tex) {
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+})
 
 //MATERIALS
 var basicMaterial = new THREE.MeshBasicMaterial({
@@ -211,10 +224,11 @@ var blinnPhongMaterial2 = new THREE.ShaderMaterial(blinnPhongSpec2);
 var marbleMaterial = new THREE.ShaderMaterial(marbleSpec);
 var crackleMaterial = new THREE.ShaderMaterial(crackleSpec);
 var lavaMaterial = new THREE.ShaderMaterial(lavaUniforms);
+
 // LOAD SHADERS
 var shaderFiles = [
-    'glsl/blinnPhong.vs.glsl',
-    'glsl/blinnPhong.fs.glsl',
+    'glsl/furniture.vs.glsl',
+    'glsl/furniture.fs.glsl',
     'glsl/toon.vs.glsl',
     'glsl/toon.fs.glsl',
     'glsl/lava.vs.glsl',
@@ -223,20 +237,20 @@ var shaderFiles = [
 
 var shaderDetails = [{
     mat: blinnPhongMaterial,
-    vs: 'glsl/blinnPhong.vs.glsl',
-    fs: 'glsl/blinnPhong.fs.glsl'
+    vs: 'glsl/furniture.vs.glsl',
+    fs: 'glsl/furniture.fs.glsl'
 }, {
     mat: blinnPhongMaterial2,
-    vs: 'glsl/blinnPhong.vs.glsl',
-    fs: 'glsl/blinnPhong.fs.glsl'
+    vs: 'glsl/furniture.vs.glsl',
+    fs: 'glsl/furniture.fs.glsl'
 }, {
     mat: marbleMaterial,
-    vs: 'glsl/blinnPhong.vs.glsl',
-    fs: 'glsl/blinnPhong.fs.glsl'
+    vs: 'glsl/furniture.vs.glsl',
+    fs: 'glsl/furniture.fs.glsl'
 }, {
     mat: crackleMaterial,
-    vs: 'glsl/blinnPhong.vs.glsl',
-    fs: 'glsl/blinnPhong.fs.glsl'
+    vs: 'glsl/furniture.vs.glsl',
+    fs: 'glsl/furniture.fs.glsl'
 },
 ]
 
