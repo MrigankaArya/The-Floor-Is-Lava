@@ -10,6 +10,7 @@ uniform float v_scale;
 uniform float time;
 uniform float shininess;
 uniform float lavaReflectIntensity;
+uniform float outlineIntensity;
 uniform sampler2D surfaceTexture;
 uniform sampler2D slideTex1;
 uniform sampler2D slideTex2;

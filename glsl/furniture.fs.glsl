@@ -8,6 +8,7 @@ uniform vec3 kDiffuse;
 uniform vec3 kSpecular;
 uniform float shininess;
 uniform float lavaReflectIntensity;
+uniform float outlineIntensity;
 uniform sampler2D surfaceTexture;
 uniform sampler2D slideTex1;
 uniform sampler2D slideTex2;
@@ -101,11 +102,12 @@ void main() {
 		finalIllumination -= shadowAmount / 2.0;
 	}
 
-	//not good for flat surfaces
-	// float outlineDeterminant = dot(interpolatedEyeDirection, interpolatedNormal);
-	// if (outlineDeterminant < 0.1) {
-	// 	finalIllumination = vec3(1, 0, 0);
-	// }
+	float outlineDeterminant = dot(interpolatedEyeDirection, interpolatedNormal);
+	if (outlineDeterminant < 0.1 && outlineIntensity > 0.0) {
+		vec3 outlineColor = (vec3(1, 0, 0) * 5.0 * (0.1 - outlineDeterminant)) * outlineIntensity;
+		finalIllumination *= outlineColor * 0.3;
+		finalIllumination += outlineColor;
+	}
 
 	//ADD FLASHLIGHT
 	vec3 toSurface = normalize(interpolatedPosition - (viewMatrix * vec4(flashlightPosition, 1.0)).xyz);

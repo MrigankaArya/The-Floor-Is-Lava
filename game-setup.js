@@ -421,9 +421,6 @@ function addLavaSub() {
     scene.add(plane);
     lava = plane;
 }
-
-addLavaSub();
-
 //-----------------------------------------------------------------------------
 //------------------------------Particle System--------------------------------
 //                      ABANDON ALL HOPE YE WHO ENTER HERE

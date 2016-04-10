@@ -122,7 +122,7 @@ var toonSpec2 = {
     },
 };
 
-function makeSpec(tex, colors, ambColor, litePositions, kAmb, kDiff, kSpec, shineFactor, uScale, vScale, flColor, flPos, flDir, slideTex1, slideTex2, time, lavaReflectIntensity) {
+function makeSpec(tex, colors, ambColor, litePositions, kAmb, kDiff, kSpec, shineFactor, uScale, vScale, flColor, flPos, flDir, slideTex1, slideTex2, time, lavaReflectIntensity, outlineIntensity) {
     var spec = {
         uniforms: {
             surfaceTexture: {
@@ -192,6 +192,10 @@ function makeSpec(tex, colors, ambColor, litePositions, kAmb, kDiff, kSpec, shin
             lavaReflectIntensity: {
                 type: 'f',
                 value: lavaReflectIntensity
+            },
+            outlineIntensity: {
+                type: 'f',
+                value: outlineIntensity
             }
         },
     };
@@ -206,19 +210,19 @@ var flashlightDirection = new THREE.Vector3(0, 0, 0); // will be replaced with c
 
 var time = 0;
 
-var blinnPhongSpec = makeSpec(chairTex, [0.1, 0.3, 0.8, 1, 1, 0.7], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair1, kSpecularChair1, shininess, 2, 2, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.6);
-var blinnPhongSpec2 = makeSpec(chairTex, [0.6, 0.6, 1, 1, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair2, kDiffuseChair2, kSpecularChair2, shininess, 2, 2, flashlightColor, flashlightPosition, flashlightDirection, water2Tex, water1Tex, time, 0.6);
+var blinnPhongSpec = makeSpec(chairTex, [0.1, 0.3, 0.8, 1, 1, 0.7], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair1, kSpecularChair1, shininess, 2, 2, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.6, 1);
+var blinnPhongSpec2 = makeSpec(chairTex, [0.6, 0.6, 1, 1, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair2, kDiffuseChair2, kSpecularChair2, shininess, 2, 2, flashlightColor, flashlightPosition, flashlightDirection, water2Tex, water1Tex, time, 0.6, 1);
 
 var marbleAmbientColor = new THREE.Color(0.7, 0.7, 0.8);
 var marbleShininess = 20.0;
-var marbleSpec = makeSpec(marbleTex, [0.6, 0.6, 1, 1, 0.5, 0.2], marbleAmbientColor, lightPositions, kAmbientChair2, kDiffuseChair2, kSpecularChair2, marbleShininess, 2, 2, flashlightColor, flashlightPosition, flashlightDirection, water2Tex, water1Tex, time, 0.6);
+var marbleSpec = makeSpec(marbleTex, [0.6, 0.6, 1, 1, 0.5, 0.2], marbleAmbientColor, lightPositions, kAmbientChair2, kDiffuseChair2, kSpecularChair2, marbleShininess, 2, 2, flashlightColor, flashlightPosition, flashlightDirection, water2Tex, water1Tex, time, 0.6, 0);
 
 var crackleShininess = 5.0;
 
 var kSpecularCrackle = new THREE.Vector3(0.4, 0.9, 0.7);
-var crackleSpec = makeSpec(crackleTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, crackleShininess, 4, 4, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.6);
+var crackleSpec = makeSpec(crackleTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, crackleShininess, 4, 4, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.6, 0);
 
-var wallSpec = makeSpec(wallTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, crackleShininess, 15, 5, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.2);
+var wallSpec = makeSpec(wallTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, crackleShininess, 15, 5, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.2, 0);
 
 var texturesToWrap = [chairTex, marbleTex, crackleTex, water1Tex, water2Tex, lavaTex, cloudTex, wallTex];
 texturesToWrap.forEach(function(tex) {

@@ -277,12 +277,13 @@ function update() {
 
     lavaUniforms.uniforms.time.value += 0.005;
     move(player);
-    console.log(player.velocity);
 
     var currentTime = new Date();
     doAnimations(currentTime);
 
     translateBefore(lava, 0, lavaSpeed, 0);
+    translateBefore(wheel, 0, lavaSpeed, 0);
+    
     move(player);
 
     if (gameState == GameStateEnum.won && lava.position.y < ground.position.y && !lavaFlushedOut) {
