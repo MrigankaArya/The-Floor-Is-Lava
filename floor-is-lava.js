@@ -246,6 +246,26 @@ function doAnimations(currentTime) {
     }
 }
 
+function animateShaders(currentTime) {
+    // move lights slightly
+    var wave = Math.sin(currentTime / 1000) / 10 + Math.sin(currentTime/200)/50;
+    lightPositions[0] += wave;
+    lightPositions[3] += wave;
+
+    //slide textures
+    var wave2 = Math.sin(currentTime / 50) / 10 + currentTime / 6000 + wave;
+    // su1 += wave2;
+    // sv1 += wave;
+    // su2 += wave;
+    // sv2 += wave2;
+
+    uvOffset1.x++;
+    uvOffset1.y++;
+    uvOffset2.x++;
+    uvOffset2.y++;
+
+}
+
 //For FPS
 var lastTime = new Date();
 var numFrames = 0;
@@ -258,6 +278,8 @@ var isInLava = false;
 var startTimeInLava;
 
 var lavaFlushedOut = false;
+
+
 function update() {
     var currentTime = new Date();
     doAnimations(currentTime);
@@ -289,10 +311,7 @@ function update() {
     minimapRenderer.render(scene, minimapCamera);
     minimapCamera.position.z = player.position.z;
 
-    // move lights slightly
-    var wave = Math.sin(currentTime / 1000) / 10 + Math.sin(currentTime/200)/50;
-    lightPositions[0] += wave;
-    lightPositions[3] += wave;
+    animateShaders(currentTime);
 
     var diff = player.position.y - lava.position.y;
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
