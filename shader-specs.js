@@ -43,7 +43,7 @@ var lavaUniforms = {
         },
         uvScale: {
             type: "v2",
-            value: new THREE.Vector2(3.0, 1.0)
+            value: new THREE.Vector2(0.06, 0.03)
         },
         textureCloud: {
             type: "t",
@@ -204,8 +204,6 @@ var blinnPhongSpec2 = {
     },
 };
 
-lavaUniforms.cloudTex.value.wrapS = lavaUniforms.cloudTex.value.wrapT = THREE.RepeatWrapping;
-lavaUniforms.lavaTex.value.wrapS = lavaUniforms.lavaTex.value.wrapT = THREE.RepeatWrapping;
 //MATERIALS
 var basicMaterial = new THREE.MeshBasicMaterial({
     color: 0x333333,

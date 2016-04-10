@@ -16,7 +16,7 @@ void main(){
 	vec2 T1 = vUv + vec2(1.5, -1.5) *time *0.02;
 	vec2 T2 = vUv + vec2( -0.5, 2.0 ) * time * 0.01;
 	
-	//Move the cloud
+	//Move the cloud to give a semblance of movement
 	T1.x += noise.x * 2.0;
 	T1.y += noise.y * 2.0;
 	T2.x -= noise.y * 0.2;
@@ -25,6 +25,7 @@ void main(){
 	float p = texture2D(textureCloud, T1 * 2.0).a;
 
 	vec4 color = texture2D(textureLava, T2 * 2.0);
+
 	vec4 temp = color*(vec4( p, p, p, p ) * 2.0) + (color * color - 0.1);
 		
 	if(temp.r > 1.0){

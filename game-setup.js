@@ -403,7 +403,7 @@ function addLavaSub() {
     if (debug) {
         plane = new THREE.Mesh(planeGeometry, transparentMaterial);
     } else {
-        plane = new THREE.Mesh(planeGeometry, blinnPhongMaterial);
+        plane = new THREE.Mesh(planeGeometry, lavaMaterial);
     }
     var rot = new THREE.Matrix4().makeRotationX(3*Math.PI / 2);
     var translateUp = new THREE.Matrix4().makeTranslation(0, 1, 0);
