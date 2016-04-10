@@ -242,6 +242,8 @@ var startTimeInLava;
 
 var lavaFlushedOut = false;
 function update() {
+
+    lavaUniforms.uniforms.time.value += 0.0005;
     move(player);
     var currentTime = new Date();
     translateBefore(lava, 0, lavaSpeed, 0);

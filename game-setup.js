@@ -426,7 +426,9 @@ addLavaSub();
 //     }
 //     this.life = life;
 
-//     var
+//     this.velocity = {
+//         x: speed*
+//     }
 
 // }
 

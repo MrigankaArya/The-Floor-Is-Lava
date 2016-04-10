@@ -44,7 +44,7 @@ var lavaUniforms = {
         },
         uvScale: {
             type: "v2",
-            value: new THREE.Vector2(0.06, 0.03)
+            value: new THREE.Vector2(0.5, 0.2)
         },
         textureCloud: {
             type: "t",
