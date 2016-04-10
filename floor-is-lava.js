@@ -54,8 +54,6 @@ function removeListeners() {
     keys.s = false;
     keys.d = false;
     isMouseDown = false;
-    console.log("removed listeners");
-
 }
 
 var keys = {
@@ -97,10 +95,6 @@ function onKeyDown(event) {
     } else if (match(" ")) {
         if (!isFalling) {
             player.velocity.y = 0.1;
-            var translateUpSlightly = new THREE.Matrix4().makeTranslation(0, 1, 0);
-            //need to do this because diff in update() function will not prevent us from sinking into the floor slightly
-            var jumpStartMatrix = new THREE.Matrix4().multiplyMatrices(player.matrix, translateUpSlightly);
-            player.setMatrix(jumpStartMatrix);
             isFalling = true;
         }
     } else if (match("t")) {
@@ -189,30 +183,30 @@ function onMouseMove(event) {
 
 function move(obj) {
     var velocity = obj.velocity;
+
     obj.constraints.forEach(function(constraint) {
-        
         if (constraint != null) {
             //First we have to get the constraint, which is a normal, in the coordinates of the player. 
             //Constraints are defined in world coordinates and player velocity is defined in player coordinates. 
             //The matrix for normals (Q) is transpose(inverse(<matrix for vertices>(M)))
             //We want to have a matrix Q(world->player), so we should use M(world->player). This means inverse(player.matrix).
             //Therefore, the matrix to convert the constraints into player coordinates is transpose(inverse(inverse(player.matrix))) = transpose(player.matrix)
-            
+
             var playerNormalMatrix = new THREE.Matrix4().copy(player.matrixWorld).transpose();
             var pConstraint = constraint.clone().applyMatrix4(playerNormalMatrix);
-            
+            console.log(constraint);
+
             if (pConstraint.dot(velocity) < 0) {
+             
                 //This code adjust the velocity to slide along faces we've collided with
                 var negaVelocity = velocity.clone().negate();
                 var cosTheta = negaVelocity.dot(pConstraint);
                 var newConstraint = pConstraint.multiplyScalar(cosTheta);
 
                 obj.velocity.add(newConstraint);
-                // console.log(obj.velocity);
             }
         }
     })
-    
     translateAfter(player, obj.velocity.x, obj.velocity.y, obj.velocity.z);
 }
 
@@ -248,6 +242,8 @@ var startTimeInLava;
 
 var lavaFlushedOut = false;
 function update() {
+    move(player);
+
     translateBefore(lava, 0, lavaSpeed, 0);
 
     if (gameState == GameStateEnum.won && lava.position.y < ground.position.y && !lavaFlushedOut) {
@@ -347,8 +343,6 @@ function update() {
     if (keys.d) {
         player.slideX(true);
     }
-
-    move(player);
 
     if (isOutBounds && mouseMoving) {
         //DO NOT modify player.rotation.y manually. It will not rotate past -90 or 90 degrees. 
