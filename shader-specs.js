@@ -24,6 +24,38 @@ var chairTex = textureLoader.load("textures/checkerboard.jpg");
 chairTex.wrapS = THREE.RepeatWrapping;
 chairTex.wrapT = THREE.RepeatWrapping;
 
+var cloudTex = textureLoader.load("textures/cloud.png");
+var lavaTex = textureLoader.load("textures/lavatile.jpg");
+
+var lavaUniforms = {
+    uniforms:{
+        fogDensity: {
+            type:"f",
+            value: 0.5
+        },
+        fogColor: {
+            type: "v3",
+            value: new THREE.Vector3(0,0,0)
+        },
+        time: {
+            type: "f",
+            value: 1.0
+        },
+        uvScale: {
+            type: "v2",
+            value: new THREE.Vector2(3.0, 1.0)
+        },
+        textureCloud: {
+            type: "t",
+            value: cloudTex
+        },
+        textureLava: {
+            type: "t",
+            value: lavaTex
+        }
+    }
+}
+
 var toonSpec = {
     uniforms: {
         litColor: {
@@ -172,6 +204,8 @@ var blinnPhongSpec2 = {
     },
 };
 
+lavaUniforms.cloudTex.value.wrapS = lavaUniforms.cloudTex.value.wrapT = THREE.RepeatWrapping;
+lavaUniforms.lavaTex.value.wrapS = lavaUniforms.lavaTex.value.wrapT = THREE.RepeatWrapping;
 //MATERIALS
 var basicMaterial = new THREE.MeshBasicMaterial({
     color: 0x333333,
@@ -183,12 +217,15 @@ var toonMaterial2 = new THREE.ShaderMaterial(toonSpec2);
 var blinnPhongMaterial = new THREE.ShaderMaterial(blinnPhongSpec);
 var blinnPhongMaterial2 = new THREE.ShaderMaterial(blinnPhongSpec2);
 
+var lavaMaterial = new THREE.ShaderMaterial(lavaUniforms);
 // LOAD SHADERS
 var shaderFiles = [
     'glsl/blinnPhong.vs.glsl',
     'glsl/blinnPhong.fs.glsl',
     'glsl/toon.vs.glsl',
-    'glsl/toon.fs.glsl'
+    'glsl/toon.fs.glsl',
+    'glsl/lava.vs.glsl',
+    'glsl/lava.fs.glsl'
 ];
 
 new THREE.SourceLoader().load(shaderFiles, function(shaders) {
@@ -207,4 +244,8 @@ new THREE.SourceLoader().load(shaderFiles, function(shaders) {
     toonMaterial2.vertexShader = shaders['glsl/toon.vs.glsl'];
     toonMaterial2.fragmentShader = shaders['glsl/toon.fs.glsl'];
     toonMaterial2.needsUpdate = true;
+
+    lavaMaterial.vertexShader = shaders['glsl/lava.vs.glsl'];
+    lavaMaterial.fragmentShader = shaders['glsl/lava.fs.glsl'];
+    lavaMaterial.needsUpdate = true;
 })

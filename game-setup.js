@@ -404,6 +404,24 @@ function addLavaSub() {
 
 addLavaSub();
 
+//-----------------------------------------------------------------------------
+//------------------------------Particle System--------------------------------
+//                      ABANDON ALL HOPE YE WHO ENTER HERE
+// function particle(x, y, z, life, angle, speed){
+//     this.position = {
+//         x:x,
+//         y:y,
+//         z:z
+//     }
+//     this.life = life;
+
+//     var
+
+// }
+
+// addLavaParticles();
+
+//----------------------------------------------------------------------------
 // addLava();
 
 function printMatrix(matName, mat) {
