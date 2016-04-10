@@ -243,7 +243,7 @@ var startTimeInLava;
 var lavaFlushedOut = false;
 function update() {
     move(player);
-
+    var currentTime = new Date();
     translateBefore(lava, 0, lavaSpeed, 0);
 
     if (gameState == GameStateEnum.won && lava.position.y < ground.position.y && !lavaFlushedOut) {
@@ -255,7 +255,6 @@ function update() {
         numFrames++;
     } else {
         numFrames = 0;
-        var currentTime = new Date();
         var timePassed = currentTime - lastTime;
         var fps = thresholdFrames/(timePassed/1000);
         document.getElementById("fps-count").innerHTML = Math.floor(fps);
@@ -266,6 +265,12 @@ function update() {
     renderer.render(scene, firstPersonCamera);
     minimapRenderer.render(scene, minimapCamera);
     minimapCamera.position.z = player.position.z;
+
+    // move lights slightly
+    var wave = Math.sin(currentTime / 1000) / 10 + Math.sin(currentTime/200)/50;
+    lightPositions[0] += wave;
+    lightPositions[3] += wave;
+
 
     var diff = player.position.y - lava.position.y;
     //the +1 is to prevent the near plane of the camera from intersecting with the ground plane
