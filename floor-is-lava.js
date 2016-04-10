@@ -223,6 +223,29 @@ function initiateWonGame() {
     $("#won").removeAttr("hidden");
 }
 
+function doAnimations(currentTime) {
+    if (animations.wheelRotation != null) {
+        var wheelAnimation = animations.wheelRotation;
+        var timeElapsed = (currentTime - wheelAnimation.startTime)/1000;
+        if (timeElapsed > wheelAnimation.timeLength) {
+            animations.wheelRotation = null;
+        } else if (timeElapsed < wheelAnimation.timeLength/4) {
+            rotateAfter(wheel, "z", timeElapsed / 30);
+        } else if (timeElapsed < wheelAnimation.timeLength/3) {
+            rotateAfter(wheel, "z", - timeElapsed / 100);
+        } else if (timeElapsed < wheelAnimation.timeLength/2) {
+            rotateAfter(wheel, "z", timeElapsed / 30);
+        } else {
+            rotateAfter(wheel, "z", -timeElapsed / 20);
+        }
+
+        //jiggles the wheel a little because why not
+        if (timeElapsed < wheelAnimation.timeLength / 3) {
+            translateBefore(wheel, 0, 0, Math.sin(timeElapsed * 20) / 100);
+        }
+    }
+}
+
 //For FPS
 var lastTime = new Date();
 var numFrames = 0;
@@ -237,6 +260,8 @@ var startTimeInLava;
 var lavaFlushedOut = false;
 function update() {
     var currentTime = new Date();
+    doAnimations(currentTime);
+
     translateBefore(lava, 0, lavaSpeed, 0);
     move(player);
 

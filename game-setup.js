@@ -296,6 +296,7 @@ function makeWheel(){
     interactables.push(ringColliderMesh);
     scene.add(ringColliderMesh);
     scene.add(ringMesh);
+    return ringMesh;
 }
 
 function makeInteractable(){
@@ -653,7 +654,7 @@ if (debug) {
 var room = makeRoom();
 scene.add(room);
 makeInteractable();
-makeWheel();
+var wheel = makeWheel();
 addLavaSub();
 // addLava();
 
@@ -730,6 +731,7 @@ function takeAction(obj){
             //Reverse Lava flow
             gameState = GameStateEnum.won;
             updateLavaHeightStat();
+            startWheelAnimation();
             console.log("updated");
             lavaSpeed *= -10;
             break;
@@ -744,6 +746,18 @@ function takeAction(obj){
             //do nothing
             break;
     }
+}
+
+var animations = {};
+
+// Creates an animation.
+function Animation(t_length) {
+  this.timeLength = t_length;
+  this.startTime = new Date();
+}
+
+function startWheelAnimation() {
+    animations.wheelRotation = new Animation(2);
 }
 
 //For later.
