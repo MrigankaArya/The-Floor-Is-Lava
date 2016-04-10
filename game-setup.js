@@ -574,7 +574,7 @@ function makeChair(height, legsize, floorToSeatHeight, seatWidth, seatHeight, ma
     
     
 
-    var modifier = new THREE.SubdivisionModifier(3); //# subdivides
+    var modifier = new THREE.SubdivisionModifier(2); //# subdivides
     seat.mergeVertices();
     if (!debug) {
         modifier.modify(seat);

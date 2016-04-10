@@ -1,10 +1,9 @@
 // LIGHTING UNIFORMS
 var lightColor = new THREE.Color(1, 0.3, 0.3);
-var ambientColor = new THREE.Color(0.4, 0.4, 0.4);
+var ambientColor = new THREE.Color(0.4, 0.5, 0.6);
 var lightPosition = new THREE.Vector3(70, 100, 70);
 
 var lightColor2 = new THREE.Color(0, 0.3, 1);
-var lightPosition2 = new THREE.Vector3(40, 20, 10);
 
 var litColor = new THREE.Color(0.7, 0.4, 0.6);
 var unLitColor = new THREE.Color(0.15, 0.2, 0.6);
@@ -14,15 +13,13 @@ var unLitColor2 = new THREE.Color(0.7, 0.32, 0.6);
 var outlineColor = new THREE.Color(0.04, 0.1, 0.15);
 
 var kAmbient = new THREE.Color(1, 1, 0.7);
-var kDiffuse = new THREE.Color(1, 0.6, 0.7);
+var kDiffuse = new THREE.Color(0.6, 0.6, 0.7);
 var kSpecular = new THREE.Color(1, 1, 1);
 var shininess = 10.0;
 
 var textureLoader = new THREE.TextureLoader();
 
-var chairTex = textureLoader.load("textures/checkerboard.jpg");
-chairTex.wrapS = THREE.RepeatWrapping;
-chairTex.wrapT = THREE.RepeatWrapping;
+var chairTex = textureLoader.load("textures/smooth-wood.jpg");
 
 var cloudTex = textureLoader.load("textures/cloud.png");
 var lavaTex = textureLoader.load("textures/lavatile.jpg");
@@ -114,95 +111,60 @@ var toonSpec2 = {
     },
 };
 
-var blinnPhongSpec = {
-    uniforms: {
-        surfaceTexture: {
-            type: "t",
-            value: chairTex
+function makeSpec(tex, colors, ambColor, litePositions, kAmb, kDiff, kSpec, shineFactor, uScale, vScale) {
+    var spec = {
+        uniforms: {
+            surfaceTexture: {
+                type: "t",
+                value: tex
+            },
+            lightColors: {
+                type: 'fv',
+                value: colors
+            },
+            ambientColor: {
+                type: 'c',
+                value: ambColor
+            },
+            lightPositions: {
+                type: 'fv',
+                value: litePositions
+            },
+            kAmbient: {
+                type: 'c',
+                value: kAmb
+            },
+            kDiffuse: {
+                type: 'c',
+                value: kDiff
+            },
+            kSpecular: {
+                type: 'c',
+                value: kSpec
+            },
+            shininess: {
+                type: 'f',
+                value: shineFactor
+            },
+            u_scale: {
+                type: 'f',
+                value: uScale
+            },
+            v_scale: {
+                type: 'f',
+                value: vScale
+            }
         },
-        lightColors: {
-            type: 'fv',
-            value: [1, 0, 0, 0, 0.5, 0.6]
-        },
-        ambientColor: {
-            type: 'c',
-            value: ambientColor
-        },
-        lightPositions: {
-            type: 'fv',
-            value: [70, 100, 70, -70, -100, -70]
-        },
-        kAmbient: {
-            type: 'c',
-            value: kAmbient
-        },
-        kDiffuse: {
-            type: 'c',
-            value: kDiffuse
-        },
-        kSpecular: {
-            type: 'c',
-            value: kSpecular
-        },
-        shininess: {
-            type: 'f',
-            value: shininess
-        },
-        u_scale: {
-            type: 'f',
-            value: 6
-        },
-        v_scale: {
-            type: 'f',
-            value: 2
-        }
-    },
-};
+    };
 
-var blinnPhongSpec2 = {
-    uniforms: {
-        surfaceTexture: {
-            type: "t",
-            value: chairTex
-        },
-        lightColors: {
-            type: 'fv',
-            value: [1, 0, 1, 0, 0, 0.2]
-        },
-        ambientColor: {
-            type: 'c',
-            value: ambientColor
-        },
-        lightPositions: {
-            type: 'fv',
-            value: [70, 100, 70, -70, -100, -70]
-        },
-        kAmbient: {
-            type: 'c',
-            value: kAmbient
-        },
-        kDiffuse: {
-            type: 'c',
-            value: kDiffuse
-        },
-        kSpecular: {
-            type: 'c',
-            value: kSpecular
-        },
-        shininess: {
-            type: 'f',
-            value: shininess
-        },
-        u_scale: {
-            type: 'f',
-            value: 5
-        },
-        v_scale: {
-            type: 'f',
-            value: 2
-        }
-    },
-};
+    return spec;
+}
+
+var lightPositions = [70, 100, 70, -70, -100, -70];
+
+var blinnPhongSpec = makeSpec(chairTex, [0.1, 0.3, 0.8, 1, 1, 0.7], ambientColor, lightPositions, kAmbient, kDiffuse, kSpecular, shininess, 1, 1)
+var blinnPhongSpec2 = makeSpec(chairTex, [1, 0.6, 1, 0, 0, 1], ambientColor, lightPositions, kAmbient, kDiffuse, kSpecular, shininess, 1, 1)
+
 
 //MATERIALS
 var basicMaterial = new THREE.MeshBasicMaterial({
@@ -226,14 +188,25 @@ var shaderFiles = [
     'glsl/lava.fs.glsl'
 ];
 
-new THREE.SourceLoader().load(shaderFiles, function(shaders) {
-    blinnPhongMaterial.vertexShader = shaders['glsl/blinnPhong.vs.glsl'];
-    blinnPhongMaterial.fragmentShader = shaders['glsl/blinnPhong.fs.glsl'];
-    blinnPhongMaterial.needsUpdate = true;
+var shaderDetails = [{
+    mat: blinnPhongMaterial,
+    vs: 'glsl/blinnPhong.vs.glsl',
+    fs: 'glsl/blinnPhong.fs.glsl'
+}, {
+    mat: blinnPhongMaterial2,
+    vs: 'glsl/blinnPhong.vs.glsl',
+    fs: 'glsl/blinnPhong.fs.glsl'
+}]
 
-    blinnPhongMaterial2.vertexShader = shaders['glsl/blinnPhong.vs.glsl'];
-    blinnPhongMaterial2.fragmentShader = shaders['glsl/blinnPhong.fs.glsl'];
-    blinnPhongMaterial2.needsUpdate = true;
+
+new THREE.SourceLoader().load(shaderFiles, function(shaders) {
+
+    shaderDetails.forEach(function(shaderDetail) {
+        var material = shaderDetail.mat;
+        material.vertexShader = shaders[shaderDetail.vs];
+        material.fragmentShader = shaders[shaderDetail.fs];
+        material.needsUpdate = true;
+    })
 
     toonMaterial.vertexShader = shaders['glsl/toon.vs.glsl'];
     toonMaterial.fragmentShader = shaders['glsl/toon.fs.glsl'];
