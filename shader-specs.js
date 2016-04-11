@@ -36,6 +36,7 @@ var carpetTex = textureLoader.load("textures/carpet.jpg");
 var water1Tex = textureLoader.load("textures/water_1.jpg");
 var water2Tex = textureLoader.load("textures/water_2.jpg");
 
+var silverTex = textureLoader.load("textures/silver mode.jpg");
 
 var lavaUniforms = {
     uniforms:{
@@ -206,7 +207,7 @@ function makeSpec(tex, colors, ambColor, litePositions, kAmb, kDiff, kSpec, shin
 }
 
 var lightPositions = [70, 100, 70, -70, -100, -70];
-var flashlightColor = new THREE.Vector3(0, 0, 1);
+var flashlightColor = new THREE.Vector3(0, 0.1, 0.3);
 var flashlightPosition = new THREE.Vector3(0, 0, 0); // will be replaced with player position
 var flashlightDirection = new THREE.Vector3(0, 0, 0); // will be replaced with camera's direction
 
@@ -226,7 +227,9 @@ var crackleSpec = makeSpec(crackleTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor,
 
 var wallSpec = makeSpec(wallTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, crackleShininess, 15, 5, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.2, 0);
 var metalSpec = makeSpec(metalTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, marbleShininess, 1, 1, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.2, 1);
-var carpetSpec = makeSpec(carpetTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, crackleShininess, 600, 4000, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.2, 0);
+var carpetSpec = makeSpec(carpetTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, crackleShininess, 100, 600, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.2, 0);
+
+var silverSpec = makeSpec(silverTex, [0.1, 0.3, 0.8, 1, 1, 0.7], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair1, kSpecularChair1, shininess, 1, 1, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.6, 1);
 
 var texturesToWrap = [chairTex, marbleTex, crackleTex, water1Tex, water2Tex, lavaTex, cloudTex, wallTex, metalTex, carpetTex];
 texturesToWrap.forEach(function(tex) {
@@ -249,7 +252,7 @@ var lavaMaterial = new THREE.ShaderMaterial(lavaUniforms);
 var wallMaterial = new THREE.ShaderMaterial(wallSpec);
 var metalMaterial = new THREE.ShaderMaterial(metalSpec);
 var carpetMaterial = new THREE.ShaderMaterial(carpetSpec);
-
+var silverMaterial = new THREE.ShaderMaterial(silverSpec);
 // LOAD SHADERS
 var shaderFiles = [
     'glsl/furniture.vs.glsl',
@@ -293,6 +296,11 @@ var shaderDetails = [{
 },{
     mat: carpetMaterial,
     spec: carpetSpec,
+    vs: 'glsl/furniture.vs.glsl',
+    fs: 'glsl/furniture.fs.glsl'
+},{
+    mat: silverMaterial,
+    spec: silverSpec,
     vs: 'glsl/furniture.vs.glsl',
     fs: 'glsl/furniture.fs.glsl'
 }

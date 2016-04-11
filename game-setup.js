@@ -1,4 +1,5 @@
 var debug = false;
+var modifier = new THREE.SubdivisionModifier(3); //# subdivides
 
 var GameStateEnum = {
     playing: 0,
@@ -281,13 +282,20 @@ function makeRoom() {
 }
 
 function makeWheel(){
-    var radius = 0.5; // radius of wheel
+    var radius = 0.7; // radius of wheel
     var tube = 0.05; // radius of wheel's tube
+
+    var silver = new THREE.SphereGeometry(0.3, 32, 32);
+    var silverMesh = new THREE.Mesh(silver, silverMaterial);
+
     var ringGeometry = new THREE.TorusGeometry(radius, tube, 16, 100);
-    var innerRingGeometry = new THREE.TorusGeometry(radius / 3, tube / 3, 16, 100);
+    var innerRingGeometry = new THREE.TorusGeometry(radius * 2 / 3, tube / 2, 16, 100);
     var ringMesh = new THREE.Mesh(ringGeometry, metalMaterial);
-    var innerRingMesh = new THREE.Mesh(ringGeometry, metalMaterial);
+    var innerRingMesh = new THREE.Mesh(innerRingGeometry, metalMaterial);
     ringMesh.add(innerRingMesh);
+    
+    ringMesh.add(silverMesh);
+
     var spokes = [1, 2, 3, 4, 5];
     spokes.forEach(function(spokeNumber) {
         var wheelSpoke = new THREE.Mesh(new THREE.CylinderGeometry(tube, tube, radius * 2, 8), metalMaterial);
@@ -530,12 +538,27 @@ function addShelf(width, height, length, thickness, numLevels, material) {
 
     var left = makeCube(thickness, height + 1, width + 1, material);
     var right = makeCube(thickness, height + 1, width + 1, material);
+    if (!debug) {
+        modifier.modify(left.geometry);
+        modifier.modify(right.geometry);
+    }
+
+    var leftCollider = makeCube(thickness, height + 1, width + 1, transparentMaterial);
+    var rightCollider = makeCube(thickness, height + 1, width + 1, transparentMaterial);
+    
     translateBefore(left, length/2, 0, 0);
-    shelf.add(left);
+    translateBefore(leftCollider, length/2, 0, 0);
+    
     translateBefore(right, -length/2, 0, 0);
+    translateBefore(rightCollider, -length/2, 0, 0);
+    obstacles.push(leftCollider);
+    obstacles.push(rightCollider);
+
+    shelf.add(left);
     shelf.add(right);
-    obstacles.push(left);
-    obstacles.push(right);
+
+    shelf.add(leftCollider);
+    shelf.add(rightCollider);
 
     var levels = [];
     for (var i = 0; i < numLevels; i++) {
@@ -625,8 +648,6 @@ function makeChair(height, legsize, floorToSeatHeight, seatWidth, seatHeight, ma
     obstacles.push(backCollider);
     
     
-
-    var modifier = new THREE.SubdivisionModifier(3); //# subdivides
     seat.mergeVertices();
     if (!debug) {
         modifier.modify(seat);
@@ -708,6 +729,7 @@ addLavaSub();
 // addLava();
 
 var chairPyra = makeChairPyramid(blinnPhongMaterial, blinnPhongMaterial2);
+rotateBefore(chairPyra, 'y', Math.PI/4);
 scene.add(chairPyra);
 
 var chairPyra2 = makeChairPyramid(blinnPhongMaterial2, blinnPhongMaterial);
@@ -792,15 +814,17 @@ function takeAction(obj){
     switch(type){
         case "wheel":
             //Reverse Lava flow
-            gameState = GameStateEnum.won;
-            updateLavaHeightStat();
             startWheelAnimation();
-            if (lavaWinHeight == null) {
-                lavaWinHeight = lava.position.y;
+            if (gameState == GameStateEnum.playing) {
+                gameState = GameStateEnum.won;
+                updateLavaHeightStat();
+                if (lavaWinHeight == -1) {
+                    lavaWinHeight = lava.position.y;
+
+                }
+                startLavaReflectionDiminishAnimation();
+                lavaSpeed *= -10;                
             }
-            //startLavaReflectionDiminishAnimation();
-            console.log("updated");
-            lavaSpeed *= -10;
             break;
         case "ladder":
             //climb the ladder to the wheel
