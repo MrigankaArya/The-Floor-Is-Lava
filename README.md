@@ -16,7 +16,7 @@ What this game is:
 		Collision detection was implemented via raycasting
 	
 	2. Animation
-		The wheel that turns off the lava is animated. We also have a animated lava texture that mimics lava flow. The lights are also animated in a sinusoidal pattern.
+		The wheel that turns off the lava is animated. We also have a animated lava texture that mimics lava flow. The lights are also animated in a sinusoidal pattern. The wheel animation has a bunch of if statements that serve to reproduce keyframes, and we interpolate between positions to achieve movement. 
 
 	3. Particle Systems
 		Fire plumes randomly appear through the lava field.
@@ -26,17 +26,19 @@ What this game is:
 
 How was this made?:
 	
-	Camera: The camera used is a perspective camera that also doubles as the player model. We also have a overheard orthographic camera for the minimap.
+	Shelves: Created a function to make shelves of any size with any # shelf levels. 
 
-	Movement: Movement is done by translating the player along a direction vector, which is multiplied into the camera matrix. The direction vector is calculated from the direction the player is facing in. Pressing the arrow keys accelerates you in directions respective to the camera's facing
+	Camera: The camera used is a perspective camera that follows the player model. We also have a overhead orthographic camera for the minimap.
 
-	Camera Panning: Camera panning is done by calculating the last speed which the mouse moved at in the last update tick and using that as a pan velocity for the edges to turn around and up and down.
+	Movement (Interactivity): Movement is done by accelerating the player along a direction vector. The direction vector is calculated from the direction the player is facing in. Gravity also is in place for the player.
 
-	Collision Detection: Done by raycasting from the vertices of the player model to a array of obstacles and then sliding along the intersected surface by projecting the player velocity onto the intersected plane and using the resultant vector as the new velocity vector.
+	Camera Panning (Interactivity): Camera panning is done by calculating the last speed which the mouse moved at in the last update tick and using that as a pan velocity for the edges to turn around and up and down.
+
+	Collision Detection: Done by raycasting from the vertices of the player model to a array of obstacles and then sliding along the intersected surface by projecting the player velocity onto the intersected plane and using the resultant vector as the new velocity vector. This handles any objects in any orientation with any geometric complexity. We also optimized this by taking advantage of the fact that most of the collidable objects are static (in terms of their z coordinate, at least), and the level is a hallway. We sorted the collidable objects by z coordinate and only tested collision for objects a maximum of 2 units away from the player's z coordinate. This way we do not do the calculation for faraway objects. It also means that the maximum collidable object size is 4. 
 
 	Picking: Also done using raycasting. The ray is casted from the camera using the pointer coordinates and is checked against a array of interactable objects.
 
-	Lava reflections: We use 2 textures that move against each other in a sinuosoidal pattern and apply that on top using an algorithm that reproduces photoshop's screen algorithm.
+	Lava reflections: We use 2 textures that move against each other in a sinuosoidal pattern, multiply them with each other, and apply that on top using an algorithm that reproduces photoshop's screen algorithm.
 
 	Lava texture: We use a lava texture that is overlaid with a fog layer that is multiplied into the lava to provide a moving effect.
 
@@ -44,10 +46,13 @@ How was this made?:
 
 	Particle Systems: Uses the three.js sprites class to create and move the fire particles on the screen. The particles are removed from the particle system object when they reach a certain height randomized to 1.5 units above lava height. The systems spawn randomly every 10 game ticks provided that the previous system has finished it's life.
 
+	On-screen control panel: This is mostly HTML and JQuery stuff.
+
+	Gameplay: Also HTML and JQuery stuff. We update counts in various events in the code. 
 
 
 How do you play?:
-	Players move with the WASD keys and jump using Spacebar. The panning is done using the mouse, and the lava flow is turned off by clicking on the wheel at the other end of the room using the mouse cursor.
+	Players move with the WASD keys and jump using Spacebar. The panning is done using the mouse (drag it to the left or right edge of the screen to turn the player's head), and the lava flow is turned off by finding the wheel at the other end of the room, centering it on the screen, and clicking. 
 
 	The aim of the game is to reach the other end of the room and activate the lava wheel while avoiding the lava.
 
