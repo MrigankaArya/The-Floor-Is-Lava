@@ -286,16 +286,14 @@ var startTimeInLava;
 
 var lavaFlushedOut = false;
 
-
 function update() {
 
     lavaUniforms.uniforms.time.value += 0.005;
     move(player);
     var currentTime = new Date();
 
-    console.log(currentTime);
-
     addLavaParticles(currentTime);
+
     animateParticles(currentTime);
 
     doAnimations(currentTime);

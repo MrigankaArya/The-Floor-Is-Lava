@@ -434,27 +434,36 @@ function addLavaSub() {
 //-----------------------------------------------------------------------------
 //------------------------------Particle System--------------------------------
 //                      ABANDON ALL HOPE YE WHO ENTER HERE
+var listOfFire = [];
 
-var particleTexture = new THREE.TextureLoader().load('textures/fireball.png');
+for(var i=0; i<4; i++){
+    var fName = 'textures/fireball';
+    fName += i+1 +'.png';
+    var particleTexture = new THREE.TextureLoader().load(fName);
+    listOfFire.push(particleTexture);
+}
+
 var particleGroup = new THREE.Object3D();
-
+var isAlive = false;
 function addLavaParticles(currentTime){
-    if(currentTime%30 != 0){
+    if((currentTime%10 != 0)||isAlive){
         return;
     }
-    console.log("!!");
-    var spriteMaterial = new THREE.SpriteMaterial({
-            map: particleTexture,
-            fog: true
-        });
-        
+
+
     var totalParticles = 10;
     var radiusRange = 2.5;
     for( var i = 0; i < totalParticles; i++ ) 
     {
-
+        var randomSpriteNum = Math.floor(Math.random()*3);
+        var particleTexture = listOfFire[randomSpriteNum];
+        var spriteMaterial = new THREE.SpriteMaterial({
+            map: particleTexture,
+            fog: true
+        });
+        
         var sprite = new THREE.Sprite(spriteMaterial);
-        sprite.position.set( Math.random() - 3, Math.random() - 0.5, Math.random() - 0.5 );
+        sprite.position.set( Math.random() - 3, Math.random()*0.5 - 0.25, Math.random() - 0.5 );
         sprite.rotation.y = (Math.random()*45);        
         sprite.opacity = 0.80; // translucent particles
         sprite.material.blending = THREE.AdditiveBlending; // "glowing" particles
@@ -466,6 +475,7 @@ function addLavaParticles(currentTime){
     particleGroup.position.z = Math.random()*levelLength - levelLength/2;
 
     scene.add(particleGroup);
+    isAlive = true;
 }
 
 
@@ -473,12 +483,16 @@ function animateParticles(currentTime){
         for(var i =0; i<particleGroup.children.length; i++){
             var sprite = particleGroup.children[i];
             sprite.position.x += Math.sin(currentTime)*0.0001;
-            sprite.rotation.x = currentTime*0.5;
+            sprite.rotation.x = currentTime*45;
             sprite.position.y += Math.random(currentTime)*0.03+0.01;
 
-            if(sprite.position.y > 2)
+            var randomHeight = Math.random()*1+0.25;
+            if(sprite.position.y > lava.position.y+randomHeight)
                 particleGroup.remove(sprite);
         }
+        if (particleGroup.children.length==0)
+            isAlive = false;
+
 }
 
 //----------------------------------------------------------------------------
