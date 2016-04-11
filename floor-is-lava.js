@@ -259,16 +259,16 @@ function animateShaders(currentTime) {
     })
 
     if (animations.lavaReflectionDiminish != null) {
-        //linearly diminish
-        //x
+    //     //linearly diminish
+    //     //x
         var diffFromWin = lavaWinHeight - lava.position.y;
-        var m = -1 / lavaWinHeight;
-        var b = 1;
+        var mVal = -1 / lavaWinHeight;
+        var bVal = 1;
 
-        var y = m * x + b;
+        var yVal = mVal * diffFromWin + bVal;
 
         shaderDetails.forEach(function(shader) {
-            shader.spec.uniforms.lavaReflectIntensity.value = shader.lavaWinIntensity * y;
+            shader.spec.uniforms.lavaReflectIntensity.value = shader.lavaWinIntensity * yVal;
         })
     }
 }
