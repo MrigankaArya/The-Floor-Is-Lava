@@ -404,6 +404,7 @@ function addSpheres() {
     translateAfter(sphereMesh, 0, 0, 25);
     obstacles.push(sphereMesh);
     scene.add(sphereMesh);
+
 }
 
 function makeRoomSurface(width, height, length, transformMatrix, material) {
@@ -571,10 +572,17 @@ function generateTerrain(){
     return lavaTerrain;
 }
 var wheelPlatformSize = 3;
+var metalPlatformSize = 4;
 var platform = makeCube(wheelPlatformSize, 0.5, wheelPlatformSize, metalMaterial);
 obstacles.push(platform);
+
+var platform2 = makeCube(metalPlatformSize, 0.5, metalPlatformSize, metalMaterial);
+obstacles.push(platform2);
+
 translateBefore(platform, 0, 1, -levelLength/2 + wheelPlatformSize/2);
+translateBefore(platform2, 4 , 1.5, -levelLength/2+5 );
 scene.add(platform);
+scene.add(platform2);
 function addLavaSub() {
     var planeGeometry = new THREE.PlaneGeometry(levelWidth, levelLength, 1);
     var plane;
