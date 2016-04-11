@@ -452,9 +452,7 @@ function addLavaParticles(x, y, z){
 
         var sprite = new THREE.Sprite(spriteMaterial);
         sprite.position.set( Math.random() - 3, Math.random() - 0.5, Math.random() - 0.5 );
-        // sprite.position.setLength( radiusRange * (Math.random() * 0.1 + 0.9) );
-        // sprite.material.color.setHSL( Math.random(), 0.9, 0.7 ); 
-        
+        sprite.rotation.y = (Math.random()*45);        
         sprite.opacity = 0.80; // translucent particles
         sprite.material.blending = THREE.AdditiveBlending; // "glowing" particles
         
@@ -484,8 +482,8 @@ function animateParticles(currentTime){
             sprite.rotation.x = currentTime*0.5;
             sprite.position.y += Math.random(currentTime)*0.03+0.01;
 
-            // if(sprite.position.y > 1.5)
-            //     particleGroup.remove(sprite);
+            if(sprite.position.y > 2)
+                particleGroup.remove(sprite);
         }
     }
 }
