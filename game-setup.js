@@ -15,7 +15,7 @@ var levelLength = 100;
 var levelWidth = 30;
 var levelHeight = 15;
 var playerHeight = 0.5;
-var lavaSpeed = 0.0002;
+var lavaSpeed = 0.0000;
 var secondsBeforeHealthDecrease = 0500;
 
 var ground;
@@ -158,7 +158,7 @@ player.add(firstPersonCamera);
 
 addGravity(player);
 addHorizontalAccel(player, 0.1);
-var playerStartMatrix = new THREE.Matrix4().makeTranslation(levelWidth / 2 - 4, 6, levelLength / 2 - 10);
+var playerStartMatrix = new THREE.Matrix4().makeTranslation(-(levelWidth / 2 - 4), 6, -(levelLength / 2 - 10));
 
 player.setMatrix(playerStartMatrix);
 
@@ -286,6 +286,7 @@ function loadOBJ(objName, file, material, scale,
         object.scale.set(scale, scale, scale);
         obj.add(object);
 
+        //ALWAYS ADD COLLIDER SECOND SO WE CAN USE OBJ.CHILDREN[1] TO ACCESS IT
         if (collider != null) {
             collider.position.set(cXOff, cYOff, cZOff);
             collider.scale.x *= cXScale;
@@ -320,6 +321,29 @@ function placeSubwoofer() {
     }
 }
 
+var angleTableCollider = makeCube(1, 1, 1, transparentMaterial);
+var aTableverts = angleTableCollider.geometry.vertices;
+//mold the cube to fit the angle table
+aTableverts[1].x += 0.3;
+aTableverts[3].x += 0.3;
+aTableverts[4].x -= 0.3;
+aTableverts[6].x -= 0.3;
+angleTableCollider.geometry.verticesNeedUpdate = true; // need this to update geometry
+
+loadOBJ('angletable', 'obj/side_table.obj', blinnPhongMaterial, 0.02,
+    0, 5.5, - levelLength/2 + 7,
+    0.97, 0, 0,
+    1, 1, 1.9,
+    0, Math.PI/2, 0, angleTableCollider, placeAngleTable
+    );
+
+function placeAngleTable() {
+    var table = loadedObjs.angletable;
+    table.rotation.z += Math.PI/2; // make it upright
+    table.rotation.y += Math.PI*5/6;
+    table.scale.set(3, 3, 3);
+    table.position.y = 0.5;
+}
 
 function makeRoomSurface(width, height, length, transformMatrix, material) {
     var boxGeometry = new THREE.BoxGeometry(width, height, length);
