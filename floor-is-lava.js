@@ -389,6 +389,10 @@ function update() {
         isFalling = player.constraints.filter(function(constraint) {
             return constraint != null && (constraint.y > 0.5);
         }).length == 0;
+
+        if (gameState != GameStateEnum.won && onWheelPlatform) {
+            translateBefore(player, 0, lavaSpeed, 0);
+        }
     }
 
     player.fall(isFalling);

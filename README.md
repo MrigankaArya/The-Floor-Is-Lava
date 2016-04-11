@@ -6,6 +6,7 @@ Mriganka Arya
 53131124
 i6r8
 
+We're using all of our grace days that we both saved up.
 
 What this game is:
 	The Floor is Lava is a platform puzzle game where the objective is to travel from one end of the room to the other while avoiding the lava and using the environment to your advantage.

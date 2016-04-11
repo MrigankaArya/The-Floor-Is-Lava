@@ -574,6 +574,7 @@ function generateTerrain(){
 var wheelPlatformSize = 3;
 var metalPlatformSize = 4;
 var platform = makeCube(wheelPlatformSize, 0.5, wheelPlatformSize, metalMaterial);
+platform.type = "wheelplatform";
 obstacles.push(platform);
 
 var platform2 = makeCube(metalPlatformSize, 0.5, metalPlatformSize, metalMaterial);
@@ -943,6 +944,7 @@ for (var i = 0; i < 8; i++) {
     player.constraints[i] = null;
 }
 
+var onWheelPlatform = false;
 //Detects collision between the player and the objects. Replace toruses with boxes because this is an awkward hitbox
 function detectCollision(){
     var geometry = new THREE.BoxGeometry(playerHeight, playerHeight, playerHeight);
@@ -968,6 +970,12 @@ function detectCollision(){
                 //need to normalize again (possibly because of scaling?)
                 var objectToWorldNormalMatrix = new THREE.Matrix4().getInverse(collisions[0].object.matrixWorld).transpose();
                 player.constraints[vertex] = normal.clone().applyMatrix4(objectToWorldNormalMatrix).normalize();
+
+                if (collisions[0].object.type == "wheelplatform") {
+                    onWheelPlatform = true;
+                } else {
+                    onWheelPlatform = false;
+                }
             }
        } else {
             player.constraints[vertex] = null
