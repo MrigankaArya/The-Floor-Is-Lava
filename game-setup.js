@@ -16,7 +16,7 @@ var levelWidth = 30;
 var levelHeight = 15;
 var playerHeight = 0.5;
 var lavaSpeed = 0.0002;
-var secondsBeforeHealthDecrease = 10;
+var secondsBeforeHealthDecrease = 5;
 
 var ground;
 var lava;
