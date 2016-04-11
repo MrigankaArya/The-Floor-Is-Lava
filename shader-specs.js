@@ -206,7 +206,7 @@ function makeSpec(tex, colors, ambColor, litePositions, kAmb, kDiff, kSpec, shin
 }
 
 var lightPositions = [70, 100, 70, -70, -100, -70];
-var flashlightColor = new THREE.Vector3(0, 0, 1);
+var flashlightColor = new THREE.Vector3(0, 0.1, 0.3);
 var flashlightPosition = new THREE.Vector3(0, 0, 0); // will be replaced with player position
 var flashlightDirection = new THREE.Vector3(0, 0, 0); // will be replaced with camera's direction
 

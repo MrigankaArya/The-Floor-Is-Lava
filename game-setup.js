@@ -284,9 +284,9 @@ function makeWheel(){
     var radius = 0.5; // radius of wheel
     var tube = 0.05; // radius of wheel's tube
     var ringGeometry = new THREE.TorusGeometry(radius, tube, 16, 100);
-    var innerRingGeometry = new THREE.TorusGeometry(radius / 3, tube / 3, 16, 100);
+    var innerRingGeometry = new THREE.TorusGeometry(radius / 2, tube / 2, 16, 100);
     var ringMesh = new THREE.Mesh(ringGeometry, metalMaterial);
-    var innerRingMesh = new THREE.Mesh(ringGeometry, metalMaterial);
+    var innerRingMesh = new THREE.Mesh(innerRingGeometry, metalMaterial);
     ringMesh.add(innerRingMesh);
     var spokes = [1, 2, 3, 4, 5];
     spokes.forEach(function(spokeNumber) {

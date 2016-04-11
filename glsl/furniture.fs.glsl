@@ -33,8 +33,6 @@ void main() {
 	vec3 finalIllumination = vec3(0.0, 0.0, 0.0);
 	vec3 textureColor = vec3(texture2D(surfaceTexture, vUv));
 
-	float lightFromBelowAmount;
-
 	for (int i = 0; i < NUM_LIGHTS; i++) {
 		//Used in Specular and Diffuse. l = Plight - Pvertex
 		vec3 lightDirection = normalize((viewMatrix * vec4(lightPositions[i], 1.0)).xyz - interpolatedPosition);
@@ -48,9 +46,6 @@ void main() {
 		//Diffuse: kd*Il*(n*l)
 		float diffuseAmount = max(dot(lightDirection, interpolatedNormal), 0.0);
 		vec3 diffuseIllumination = lightColors[i] * vec3(textureColor * kDiffuse * diffuseAmount);
-		if (i == 1) {
-			lightFromBelowAmount = diffuseAmount;
-		}
 
 		//Specular: ks*Il*(h*n)^kse
 		vec3 specularIllumination = lightColors[i] * vec3(textureColor * kSpecular * pow(max(dot(halfwayVector, interpolatedNormal), 0.0), shininess));
@@ -111,15 +106,18 @@ void main() {
 
 	//ADD FLASHLIGHT
 	vec3 toSurface = normalize(interpolatedPosition - (viewMatrix * vec4(flashlightPosition, 1.0)).xyz);
-	float spotInterpolator = max(dot(toSurface, flashlightDirection), 0.0);
+	//TODO: Replace this with an actual spot light
+
+	//float spotInterpolator = max(dot(toSurface, flashlightDirection), 0.0);
 	
 	// if (spotInterpolator > 0.6) {
 	// 	finalIllumination += flashlightColor;
 	// }
 
-	//TODO: Replace this with an actual spot light
 	vec3 flashlightIllumination = flashlightColor * vec3(max(dot(-toSurface, interpolatedNormal), 0.0));
 	finalIllumination += flashlightIllumination;
+
+
 
 	//add sliding
 	vec3 slide1TextureColor = vec3(texture2D(slideTex1, slideUv1));
@@ -133,7 +131,7 @@ void main() {
 	//^this line inspired by photoshop's screen blending mode
 	//http://www.deepskycolors.com/archive/2010/04/21/formulas-for-Photoshop-blending-modes.html
 
-	finalIllumination = finalIllumination * (1.0 - (lightFromBelowAmount + lavaReflectIntensity)) + lavaIllumination * (lightFromBelowAmount + lavaReflectIntensity);
+	finalIllumination = finalIllumination * (1.0 - lavaReflectIntensity) + (lavaIllumination * lavaReflectIntensity);
 
 	gl_FragColor = vec4(finalIllumination, 1.0);
 }
