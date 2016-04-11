@@ -298,7 +298,7 @@ function update() {
 
     doAnimations(currentTime);
     translateBefore(lava, 0, lavaSpeed, 0);
-
+    translateBefore(platform, 0, lavaSpeed, 0);
     if (gameState != GameStateEnum.won) {
         translateBefore(wheel, 0, lavaSpeed, 0);
     }

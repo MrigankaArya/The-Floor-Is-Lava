@@ -397,6 +397,13 @@ function addSpheres() {
         obstacles.push(sphereMesh);
         scene.add(sphereMesh);
     }
+
+    var radius = 4;
+    var sphere = new THREE.SphereGeometry(radius, 32, 32);
+    var sphereMesh = new THREE.Mesh(sphere, blinnPhongMaterial);
+    translateAfter(sphereMesh, 0, 0, 25);
+    obstacles.push(sphereMesh);
+    scene.add(sphereMesh);
 }
 
 function makeRoomSurface(width, height, length, transformMatrix, material) {
@@ -442,7 +449,6 @@ function makeWheel(){
     var innerRingMesh = new THREE.Mesh(innerRingGeometry, metalMaterial);
     ringMesh.add(innerRingMesh);
     
-    ringMesh.add(platform);    
     ringMesh.add(silverMesh);
 
     var spokes = [1, 2, 3, 4, 5];
@@ -564,7 +570,11 @@ function generateTerrain(){
     console.log(lavaTerrain);
     return lavaTerrain;
 }
-
+var wheelPlatformSize = 3;
+var platform = makeCube(wheelPlatformSize, 0.5, wheelPlatformSize, metalMaterial);
+obstacles.push(platform);
+translateBefore(platform, 0, 1, -levelLength/2 + wheelPlatformSize/2);
+scene.add(platform);
 function addLavaSub() {
     var planeGeometry = new THREE.PlaneGeometry(levelWidth, levelLength, 1);
     var plane;
@@ -580,6 +590,7 @@ function addLavaSub() {
     scene.add(plane);
     lava = plane;
 }
+
 //-----------------------------------------------------------------------------
 //------------------------------Particle System--------------------------------
 //                      ABANDON ALL HOPE YE WHO ENTER HERE
