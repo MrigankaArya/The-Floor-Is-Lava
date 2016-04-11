@@ -1,4 +1,5 @@
 var debug = false;
+var modifier = new THREE.SubdivisionModifier(3); //# subdivides
 
 var GameStateEnum = {
     playing: 0,
@@ -491,12 +492,27 @@ function addShelf(width, height, length, thickness, numLevels, material) {
 
     var left = makeCube(thickness, height + 1, width + 1, material);
     var right = makeCube(thickness, height + 1, width + 1, material);
+    if (!debug) {
+        modifier.modify(left.geometry);
+        modifier.modify(right.geometry);
+    }
+
+    var leftCollider = makeCube(thickness, height + 1, width + 1, transparentMaterial);
+    var rightCollider = makeCube(thickness, height + 1, width + 1, transparentMaterial);
+    
     translateBefore(left, length/2, 0, 0);
-    shelf.add(left);
+    translateBefore(leftCollider, length/2, 0, 0);
+    
     translateBefore(right, -length/2, 0, 0);
+    translateBefore(rightCollider, -length/2, 0, 0);
+    obstacles.push(leftCollider);
+    obstacles.push(rightCollider);
+
+    shelf.add(left);
     shelf.add(right);
-    obstacles.push(left);
-    obstacles.push(right);
+
+    shelf.add(leftCollider);
+    shelf.add(rightCollider);
 
     var levels = [];
     for (var i = 0; i < numLevels; i++) {
@@ -586,8 +602,6 @@ function makeChair(height, legsize, floorToSeatHeight, seatWidth, seatHeight, ma
     obstacles.push(backCollider);
     
     
-
-    var modifier = new THREE.SubdivisionModifier(3); //# subdivides
     seat.mergeVertices();
     if (!debug) {
         modifier.modify(seat);
