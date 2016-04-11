@@ -330,7 +330,7 @@ translateBefore(softSofaBackCollider, 0, 0.5, -0.5);
 
 loadOBJ('softsofa', 'obj/Soft Sofa free 01.obj', camoMaterial, 0.0035,
     0, 0, - levelLength/2 + 20,
-    1.15, 0, 1.7 ,
+    1.15, 0.2, 1.7 ,
     5.2, 4.5, 2,
     0, Math.PI/2, 0, softSofaCollider, placeSoftSofa
     );
@@ -340,6 +340,17 @@ function placeSoftSofa() {
     var softSofa = loadedObjs.softsofa;
     softSofa.children[0].scale.y = 0.005; // make it taller
 
+    for (var i = 0; i < 3; i++) {
+        var clone = softSofa.clone();
+        loadedObjs["softsofa" + (i + 2)] = clone;
+        obstacles.push(clone.children[1]);
+        //back
+        obstacles.push(clone.children[1].children[0]);
+        scene.add(clone);
+        clone.position.z += i*9;
+        clone.position.x += Math.sin(i);
+    }
+    
 }
 
 var angleTableCollider = makeCube(1, 1, 1, transparentMaterial);

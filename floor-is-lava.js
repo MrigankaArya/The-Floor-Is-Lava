@@ -94,7 +94,7 @@ function onKeyDown(event) {
         }
     } else if (match(" ")) {
         if (!isFalling) {
-            player.velocity.y = 0.1;
+            player.velocity.y = 0.12;
             isFalling = true;
         }
     } else if (match("t")) {
