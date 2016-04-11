@@ -312,6 +312,12 @@ loadOBJ('subwoofer', 'obj/subwoofer_obj.obj', subwooferMaterial, 0.02,
     0, Math.PI, 0, subwooferCollider, placeSubwoofer);
 
 function placeSubwoofer() {
+    for (var i = 0; i < 3; i++) {
+        var clone = loadedObjs.subwoofer.clone();
+        clone.position.x -= 1 * (i + 1);
+        loadedObjs["subwoofer" + (i + 2)] = clone;
+        scene.add(clone);
+    }
 }
 
 
