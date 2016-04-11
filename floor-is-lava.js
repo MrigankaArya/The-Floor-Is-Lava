@@ -259,17 +259,16 @@ function animateShaders(currentTime) {
     })
 
     if (animations.lavaReflectionDiminish != null) {
-    //     //linearly diminish
-    //     //x
+        //linearly diminish
+        //x
         var diffFromWin = lavaWinHeight - lava.position.y;
- 
-        var mVal = -1 / lavaWinHeight;
+        var m = -1 / lavaWinHeight;
+        var b = 1;
 
-        var bVal = 1;
+        var y = m * x + b;
 
-        var yVal = mVal * diffFromWin + bVal;
         shaderDetails.forEach(function(shader) {
-            shader.spec.uniforms.lavaReflectIntensity.value = shader.lavaWinIntensity * yVal;
+            shader.spec.uniforms.lavaReflectIntensity.value = shader.lavaWinIntensity * y;
         })
     }
 }
@@ -292,9 +291,11 @@ function update() {
 
     lavaUniforms.uniforms.time.value += 0.005;
     move(player);
-
     var currentTime = new Date();
 
+    console.log(currentTime);
+
+    addLavaParticles(currentTime);
     animateParticles(currentTime);
 
     doAnimations(currentTime);
