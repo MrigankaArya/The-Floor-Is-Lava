@@ -1,4 +1,4 @@
-var debug = true;
+var debug = false;
 var modifier = new THREE.SubdivisionModifier(3); //# subdivides
 
 var GameStateEnum = {
@@ -779,11 +779,11 @@ function takeAction(obj){
             if (gameState == GameStateEnum.playing) {
                 gameState = GameStateEnum.won;
                 updateLavaHeightStat();
-                if (lavaWinHeight == null) {
+                if (lavaWinHeight == -1) {
                     lavaWinHeight = lava.position.y;
+
                 }
                 startLavaReflectionDiminishAnimation();
-                console.log("updated");
                 lavaSpeed *= -10;                
             }
             break;

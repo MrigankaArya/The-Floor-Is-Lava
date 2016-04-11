@@ -262,11 +262,12 @@ function animateShaders(currentTime) {
     //     //linearly diminish
     //     //x
         var diffFromWin = lavaWinHeight - lava.position.y;
+ 
         var mVal = -1 / lavaWinHeight;
+
         var bVal = 1;
 
         var yVal = mVal * diffFromWin + bVal;
-
         shaderDetails.forEach(function(shader) {
             shader.spec.uniforms.lavaReflectIntensity.value = shader.lavaWinIntensity * yVal;
         })
