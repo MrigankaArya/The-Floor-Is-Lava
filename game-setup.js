@@ -1,4 +1,4 @@
-var debug = false;
+var debug = true;
 var modifier = new THREE.SubdivisionModifier(3); //# subdivides
 var GameStateEnum = {
     playing: 0,
@@ -337,12 +337,22 @@ loadOBJ('angletable', 'obj/side_table.obj', blinnPhongMaterial, 0.02,
     0, Math.PI/2, 0, angleTableCollider, placeAngleTable
     );
 
+var angletableClone;
+
 function placeAngleTable() {
     var table = loadedObjs.angletable;
     table.rotation.z += Math.PI/2; // make it upright
     table.rotation.y += Math.PI*5/6;
     table.scale.set(3, 3, 3);
     table.position.y = 0.5;
+
+    var clone1 = table.clone();
+    clone1.scale.x = 1.5;
+    clone1.position.x -= 5.5;
+    clone1.rotation.y += Math.PI/3;
+    scene.add(clone1);
+    obstacles.push(clone1.children[1])
+    angletableClone= clone1
 }
 
 function makeRoomSurface(width, height, length, transformMatrix, material) {
@@ -870,6 +880,9 @@ function detectCollision(){
 
         var ray = new THREE.Raycaster(playerPos, directionVector.clone().normalize());
 
+        var toCheck = obstacles.filter(function(obstacle) {
+            return Math.abs(player.position.z - obstacle.position.z) < 1;
+        })
         var collisions = ray.intersectObjects(obstacles);
         if(collisions.length > 0 && collisions[0].distance < 0.5){
             var normal = collisions[0].face.normal;
