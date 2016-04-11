@@ -857,6 +857,13 @@ var shelf2 = addShelf(width2, height2, 6, 0.3, 7, crackleMaterial);
 rotateAfter(shelf2, 'y', -Math.PI/3);
 translateAfter(shelf2, (levelWidth / 2) - (width2 / 2), height2 / 2, 0);
 
+var width3 = 6;
+var height3 = 7;
+var shelf3 = addShelf(width3, height3, 7, 0.4, 5, metalMaterial);
+rotateAfter(shelf3, 'y', -Math.PI*2/3);
+translateBefore(shelf3, -(levelWidth/2) + 10, 0, -(levelLength /2.5));
+
+translateAfter(shelf3, (levelWidth / 2) - (width3 / 2), height3 / 2, 0);
 
 addStartPlatform();
 // addToruses();
