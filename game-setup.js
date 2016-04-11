@@ -1,4 +1,4 @@
-var debug = true;
+var debug = false;
 var modifier = new THREE.SubdivisionModifier(3); //# subdivides
 var GameStateEnum = {
     playing: 0,
@@ -158,7 +158,7 @@ player.add(firstPersonCamera);
 
 addGravity(player);
 addHorizontalAccel(player, 0.1);
-var playerStartMatrix = new THREE.Matrix4().makeTranslation(-(levelWidth / 2 - 4), 6, -(levelLength / 2 - 10));
+var playerStartMatrix = new THREE.Matrix4().makeTranslation((levelWidth / 2 - 4), 6, (levelLength / 2 - 10));
 
 player.setMatrix(playerStartMatrix);
 
@@ -313,10 +313,11 @@ loadOBJ('subwoofer', 'obj/subwoofer_obj.obj', subwooferMaterial, 0.02,
     0, Math.PI, 0, subwooferCollider, placeSubwoofer);
 
 function placeSubwoofer() {
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < 5; i++) {
         var clone = loadedObjs.subwoofer.clone();
         clone.position.x -= 1 * (i + 1);
         loadedObjs["subwoofer" + (i + 2)] = clone;
+        obstacles.push(clone.children[1]);
         scene.add(clone);
     }
 }
@@ -888,6 +889,10 @@ var chairPyra2 = makeChairPyramid(blinnPhongMaterial2, blinnPhongMaterial);
 chairPyra2.position.z = 40;
 scene.add(chairPyra2);
 
+var chairPyra3 = makeChairPyramid(camoMaterial, silverMaterial);
+translateBefore(chairPyra3, -5, 0, 20);
+scene.add(chairPyra3);
+
 var width1 = 4;
 var height1 = 5;
 var shelf1 = addShelf(width1, height1, 6, 0.2, 5, marbleMaterial);
@@ -899,6 +904,7 @@ var height2 = 9;
 var shelf2 = addShelf(width2, height2, 6, 0.3, 7, crackleMaterial);
 rotateAfter(shelf2, 'y', -Math.PI/3);
 translateAfter(shelf2, (levelWidth / 2) - (width2 / 2), height2 / 2, 0);
+translateBefore(shelf2, -12, 0, 0);
 
 var width3 = 6;
 var height3 = 7;
