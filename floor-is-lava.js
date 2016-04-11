@@ -293,8 +293,10 @@ function update() {
     move(player);
 
     var currentTime = new Date();
-    doAnimations(currentTime);
 
+    animateParticles(currentTime);
+
+    doAnimations(currentTime);
     translateBefore(lava, 0, lavaSpeed, 0);
 
     if (gameState != GameStateEnum.won) {

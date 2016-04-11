@@ -20,7 +20,7 @@ var secondsBeforeHealthDecrease = 0500;
 
 var ground;
 var lava;
-
+var lavaParticles = [];
 var matSpec = {
     transparent: true,
     opacity: 0
@@ -426,24 +426,63 @@ function addLavaSub() {
 //-----------------------------------------------------------------------------
 //------------------------------Particle System--------------------------------
 //                      ABANDON ALL HOPE YE WHO ENTER HERE
-// function particle(x, y, z, life, angle, speed){
-//     this.position = {
-//         x:x,
-//         y:y,
-//         z:z
-//     }
-//     this.life = life;
 
-//     this.velocity = {
-//         x: speed*
-//     }
+var particleTexture = new THREE.TextureLoader().load('textures/fireball.png');
+var particleGroup = new THREE.Object3D();
+var particleAttributes = { startSize: [], startPosition: [], randomness: [] };
 
-// }
+function addLavaParticles(x, y, z){
+    var spriteMaterial = new THREE.SpriteMaterial({
+            map: particleTexture,
+            fog: true
+        });
+        
+    var totalParticles = 10;
+    var radiusRange = 2.5;
+    for( var i = 0; i < totalParticles; i++ ) 
+    {
 
-// addLavaParticles();
+        var sprite = new THREE.Sprite(spriteMaterial);
+        sprite.position.set( Math.random() - 3, Math.random() - 0.5, Math.random() - 0.5 );
+        // sprite.position.setLength( radiusRange * (Math.random() * 0.1 + 0.9) );
+        // sprite.material.color.setHSL( Math.random(), 0.9, 0.7 ); 
+        
+        sprite.opacity = 0.80; // translucent particles
+        sprite.material.blending = THREE.AdditiveBlending; // "glowing" particles
+        
+        particleGroup.add(sprite);
+        // add variable qualities to arrays, if they need to be accessed later
+        particleAttributes.startPosition.push( sprite.position.clone() );
+        particleAttributes.randomness.push( Math.random() );
+    }
+    particleGroup.position.x = x;
+    particleGroup.position.y = y;
+    particleGroup.position.z = z;
+    
+    lavaParticles.push(particleGroup);
+    for(var i=0; i<lavaParticles.length; i++){
+        scene.add(lavaParticles[i]);
+    }
+}
+
+addLavaParticles(0,1,-20);
+
+function animateParticles(currentTime){
+    for(var j=0; j< lavaParticles.length; j++){
+        var particleGroup = lavaParticles[j];
+        for(var i =0; i<particleGroup.children.length; i++){
+            var sprite = particleGroup.children[i];
+            sprite.position.x += Math.sin(currentTime)*0.0001;
+            sprite.rotation.x = currentTime*0.5;
+            sprite.position.y += Math.random(currentTime)*0.03+0.01;
+
+            // if(sprite.position.y > 1.5)
+            //     particleGroup.remove(sprite);
+        }
+    }
+}
 
 //----------------------------------------------------------------------------
-// addLava();
 
 function printMatrix(matName, mat) {
     console.log(matName + ":");
