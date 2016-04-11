@@ -15,8 +15,8 @@ var levelLength = 100;
 var levelWidth = 30;
 var levelHeight = 15;
 var playerHeight = 0.5;
-var lavaSpeed = 0.0000;
-var secondsBeforeHealthDecrease = 0500;
+var lavaSpeed = 0.0002;
+var secondsBeforeHealthDecrease = 10;
 
 var ground;
 var lava;
@@ -442,6 +442,7 @@ function makeWheel(){
     var innerRingMesh = new THREE.Mesh(innerRingGeometry, metalMaterial);
     ringMesh.add(innerRingMesh);
     
+    ringMesh.add(platform);    
     ringMesh.add(silverMesh);
 
     var spokes = [1, 2, 3, 4, 5];
@@ -889,7 +890,7 @@ var chairPyra2 = makeChairPyramid(blinnPhongMaterial2, blinnPhongMaterial);
 chairPyra2.position.z = 40;
 scene.add(chairPyra2);
 
-var chairPyra3 = makeChairPyramid(camoMaterial, silverMaterial);
+var chairPyra3 = makeChairPyramid(camoMaterial, blinnPhongMaterial);
 translateBefore(chairPyra3, -5, 0, 20);
 scene.add(chairPyra3);
 
@@ -992,7 +993,7 @@ function takeAction(obj){
 
                 }
                 startLavaReflectionDiminishAnimation();
-                lavaSpeed *= -10;                
+                lavaSpeed *= -20;                
             }
             break;
         case "ladder":
