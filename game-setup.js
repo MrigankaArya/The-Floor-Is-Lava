@@ -1,6 +1,5 @@
 var debug = false;
 var modifier = new THREE.SubdivisionModifier(3); //# subdivides
-
 var GameStateEnum = {
     playing: 0,
     won: 1,
@@ -159,7 +158,9 @@ player.add(firstPersonCamera);
 
 addGravity(player);
 addHorizontalAccel(player, 0.1);
-player.setMatrix(new THREE.Matrix4().makeTranslation(0, 6, levelLength / 2 - 40));
+var playerStartMatrix = new THREE.Matrix4().makeTranslation(levelWidth / 2 - 4, 6, levelLength / 2 - 10);
+
+player.setMatrix(playerStartMatrix);
 
 scene.add(player);
 
@@ -250,6 +251,69 @@ function addGrid() {
     grid.position.y += 0.1
     scene.add(grid);
 }
+
+var loadedObjs = {};
+
+function loadOBJ(objName, file, material, scale, 
+    xOff, yOff, zOff, 
+    cXOff, cYOff, cZOff,
+    cXScale, cYScale, cZScale, 
+    xRot, yRot, zRot, collider, callback) {
+    var onProgress = function(query) {
+        if (query.lengthComputable) {
+            var percentComplete = query.loaded / query.total * 100;
+            console.log(Math.round(percentComplete, 2) + '% downloaded');
+        }
+    };
+
+    var onError = function() {
+        console.log('Failed to load ' + file);
+    };
+
+    var loader = new THREE.OBJLoader()
+    loader.load(file, function(object) {
+        object.traverse(function(child) {
+            if (child instanceof THREE.Mesh) {
+                child.material = material;
+            }
+        });
+
+        obj = new THREE.Object3D();
+        obj.position.set(xOff, yOff, zOff);
+        object.rotation.x = xRot;
+        object.rotation.y = yRot;
+        object.rotation.z = zRot;
+        object.scale.set(scale, scale, scale);
+        obj.add(object);
+
+        if (collider != null) {
+            collider.position.set(cXOff, cYOff, cZOff);
+            collider.scale.x *= cXScale;
+            collider.scale.y *= cYScale;
+            collider.scale.z *= cZScale;
+            
+            collider.rotation.x = xRot;
+            collider.rotation.y = yRot;
+            collider.rotation.z = zRot;
+            obj.add(collider);
+            obstacles.push(collider);
+        }
+        scene.add(obj);
+        loadedObjs[objName] = obj;
+        callback();
+    }, onProgress, onError);
+}
+
+var subwooferCollider = makeCube(1, 1, 1, transparentMaterial);
+loadOBJ('subwoofer', 'obj/subwoofer_obj.obj', subwooferMaterial, 0.02, 
+    levelWidth / 2 - 9, 0.5, levelLength / 2 - 7, //position of the object
+    0, 0.525, 0.1, //offset from object of collider to match obj file
+    1, 1.05, 0.65, //scale of collider to match obj file
+    0, Math.PI, 0, subwooferCollider, placeSubwoofer);
+
+function placeSubwoofer() {
+}
+
 
 function makeRoomSurface(width, height, length, transformMatrix, material) {
     var boxGeometry = new THREE.BoxGeometry(width, height, length);
@@ -532,7 +596,7 @@ function makeCube(xscale, yscale, zscale, material) {
 }
 
 function addStartPlatform() {
-    var cube = makeCube(4, player.position.y - 0.5, 4, toonMaterial2);
+    var cube = makeCube(4, player.position.y - 0.5, 4, crackleMaterial);
     translateBefore(cube, player.position.x, 0, player.position.z);
     obstacles.push(cube);
     scene.add(cube);

@@ -38,6 +38,10 @@ var water2Tex = textureLoader.load("textures/water_2.jpg");
 
 var silverTex = textureLoader.load("textures/silver mode.jpg");
 
+var tgaLoader = new THREE.TGALoader();
+
+var subwooferTex = tgaLoader.load('textures/zstudiolight.tga');
+
 var lavaUniforms = {
     uniforms:{
         fogDensity: {
@@ -231,6 +235,10 @@ var carpetSpec = makeSpec(carpetTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, l
 
 var silverSpec = makeSpec(silverTex, [0.1, 0.3, 0.8, 1, 1, 0.7], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair1, kSpecularChair1, shininess, 1, 1, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.6, 1);
 
+var subwooferAmbientColor = new THREE.Color(0.4, 0.7, 0.8);
+
+var subwooferSpec = makeSpec(subwooferTex, [0.1, 0.3, 0.8, 1, 1, 0.7], subwooferAmbientColor, lightPositions, kAmbientChair1, kDiffuseChair1, kSpecularChair1, 25.0, 1, 1, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.6, 1);
+
 var texturesToWrap = [chairTex, marbleTex, crackleTex, water1Tex, water2Tex, lavaTex, cloudTex, wallTex, metalTex, carpetTex];
 texturesToWrap.forEach(function(tex) {
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
@@ -253,6 +261,7 @@ var wallMaterial = new THREE.ShaderMaterial(wallSpec);
 var metalMaterial = new THREE.ShaderMaterial(metalSpec);
 var carpetMaterial = new THREE.ShaderMaterial(carpetSpec);
 var silverMaterial = new THREE.ShaderMaterial(silverSpec);
+var subwooferMaterial = new THREE.ShaderMaterial(subwooferSpec);
 // LOAD SHADERS
 var shaderFiles = [
     'glsl/furniture.vs.glsl',
@@ -301,6 +310,11 @@ var shaderDetails = [{
 },{
     mat: silverMaterial,
     spec: silverSpec,
+    vs: 'glsl/furniture.vs.glsl',
+    fs: 'glsl/furniture.fs.glsl'
+},{
+    mat: subwooferMaterial,
+    spec: subwooferSpec,
     vs: 'glsl/furniture.vs.glsl',
     fs: 'glsl/furniture.fs.glsl'
 }

@@ -14,3 +14,11 @@ http://www.textures.com/download/carpet0025/8255?q=carpet&filter=all
 Libraries used:
 Subdivision Modifier
 https://github.com/mrdoob/three.js/blob/master/examples/js/modifiers/SubdivisionModifier.js
+
+XHRLoader and DDSLoader from P2
+TGALoader from 
+https://github.com/mrdoob/three.js/blob/master/examples/js/loaders/TGALoader.js
+
+3D Models:
+Subwoofer
+http://www.turbosquid.com/FullPreview/Index.cfm/ID/527825
