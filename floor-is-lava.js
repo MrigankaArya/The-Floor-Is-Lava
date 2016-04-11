@@ -257,6 +257,20 @@ function animateShaders(currentTime) {
     shaderDetails.forEach(function(shader) {
         shader.spec.uniforms.time.value += 0.005;
     })
+
+    if (animations.lavaReflectionDiminish != null) {
+        //linearly diminish
+        //x
+        var diffFromWin = lavaWinHeight - lava.position.y;
+        var m = -1 / lavaWinHeight;
+        var b = 1;
+
+        var y = m * x + b;
+
+        shaderDetails.forEach(function(shader) {
+            shader.spec.uniforms.lavaReflectIntensity.value = shader.lavaWinIntensity * y;
+        })
+    }
 }
 
 //For FPS
@@ -282,8 +296,11 @@ function update() {
     doAnimations(currentTime);
 
     translateBefore(lava, 0, lavaSpeed, 0);
-    translateBefore(wheel, 0, lavaSpeed, 0);
-    
+
+    if (gameState != GameStateEnum.won) {
+        translateBefore(wheel, 0, lavaSpeed, 0);
+    }
+
     move(player);
 
     if (gameState == GameStateEnum.won && lava.position.y < ground.position.y && !lavaFlushedOut) {

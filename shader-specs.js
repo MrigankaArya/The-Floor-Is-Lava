@@ -30,6 +30,8 @@ var cloudTex = textureLoader.load("textures/cloud.png");
 var lavaTex = textureLoader.load("textures/lavatile.jpg");
 
 var wallTex = textureLoader.load("textures/wallpaper_40s.jpg");
+var metalTex = textureLoader.load("textures/metal.jpg");
+var carpetTex = textureLoader.load("textures/carpet.jpg");
 
 var water1Tex = textureLoader.load("textures/water_1.jpg");
 var water2Tex = textureLoader.load("textures/water_2.jpg");
@@ -223,8 +225,10 @@ var kSpecularCrackle = new THREE.Vector3(0.4, 0.9, 0.7);
 var crackleSpec = makeSpec(crackleTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, crackleShininess, 4, 4, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.6, 0);
 
 var wallSpec = makeSpec(wallTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, crackleShininess, 15, 5, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.2, 0);
+var metalSpec = makeSpec(metalTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, marbleShininess, 1, 1, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.2, 1);
+var carpetSpec = makeSpec(carpetTex, [0.1, 0.6, 1, 0, 0.5, 0.2], ambientColor, lightPositions, kAmbientChair1, kDiffuseChair2, kSpecularChair2, crackleShininess, 600, 4000, flashlightColor, flashlightPosition, flashlightDirection, water1Tex, water2Tex, time, 0.2, 0);
 
-var texturesToWrap = [chairTex, marbleTex, crackleTex, water1Tex, water2Tex, lavaTex, cloudTex, wallTex];
+var texturesToWrap = [chairTex, marbleTex, crackleTex, water1Tex, water2Tex, lavaTex, cloudTex, wallTex, metalTex, carpetTex];
 texturesToWrap.forEach(function(tex) {
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
 })
@@ -243,6 +247,9 @@ var marbleMaterial = new THREE.ShaderMaterial(marbleSpec);
 var crackleMaterial = new THREE.ShaderMaterial(crackleSpec);
 var lavaMaterial = new THREE.ShaderMaterial(lavaUniforms);
 var wallMaterial = new THREE.ShaderMaterial(wallSpec);
+var metalMaterial = new THREE.ShaderMaterial(metalSpec);
+var carpetMaterial = new THREE.ShaderMaterial(carpetSpec);
+
 // LOAD SHADERS
 var shaderFiles = [
     'glsl/furniture.vs.glsl',
@@ -276,6 +283,16 @@ var shaderDetails = [{
 },{
     mat: wallMaterial,
     spec: wallSpec,
+    vs: 'glsl/furniture.vs.glsl',
+    fs: 'glsl/furniture.fs.glsl'
+},{
+    mat: metalMaterial,
+    spec: metalSpec,
+    vs: 'glsl/furniture.vs.glsl',
+    fs: 'glsl/furniture.fs.glsl'
+},{
+    mat: carpetMaterial,
+    spec: carpetSpec,
     vs: 'glsl/furniture.vs.glsl',
     fs: 'glsl/furniture.fs.glsl'
 }

@@ -82,7 +82,7 @@ var playerView = {
 };
 
 if (debug) {
-    playerView.eye = [0, 10, 10];
+    playerView.eye = [0, 0, 0];
 }
 
 function resetCamera(camera, view) {
@@ -259,7 +259,7 @@ function makeRoomSurface(width, height, length, transformMatrix, material) {
 }
 
 function makeRoom() {
-    var box = makeRoomSurface(levelWidth + 1, groundHeight, levelLength + 1, new THREE.Matrix4(), toonMaterial2);
+    var box = makeRoomSurface(levelWidth + 1, groundHeight, levelLength + 1, new THREE.Matrix4(), carpetMaterial);
     ground = box;
 
     var leftTransform = new THREE.Matrix4().makeTranslation(-levelWidth / 2, levelHeight / 2, 0);
@@ -284,17 +284,19 @@ function makeWheel(){
     var radius = 0.5; // radius of wheel
     var tube = 0.05; // radius of wheel's tube
     var ringGeometry = new THREE.TorusGeometry(radius, tube, 16, 100);
-    var ringMesh = new THREE.Mesh(ringGeometry, toonMaterial2);
-
+    var innerRingGeometry = new THREE.TorusGeometry(radius / 3, tube / 3, 16, 100);
+    var ringMesh = new THREE.Mesh(ringGeometry, metalMaterial);
+    var innerRingMesh = new THREE.Mesh(ringGeometry, metalMaterial);
+    ringMesh.add(innerRingMesh);
     var spokes = [1, 2, 3, 4, 5];
     spokes.forEach(function(spokeNumber) {
-        var wheelSpoke = new THREE.Mesh(new THREE.CylinderGeometry(tube, tube, radius * 2, 8), toonMaterial2);
+        var wheelSpoke = new THREE.Mesh(new THREE.CylinderGeometry(tube, tube, radius * 2, 8), metalMaterial);
         var rotAmount = (spokeNumber / (spokes.length)) * Math.PI;
         wheelSpoke.applyMatrix(new THREE.Matrix4().makeRotationZ(rotAmount));
         ringMesh.add(wheelSpoke);
     })
 
-    var transformMatrix = new THREE.Matrix4().makeTranslation(0, 1.5, -49);
+    var transformMatrix = new THREE.Matrix4().makeTranslation(0, 2, - levelLength/2 + 1);
     ringMesh.setMatrix(transformMatrix);
     var ringCollider = new THREE.BoxGeometry(radius * 2 + 1, radius * 2 + 1, 0.4);
     var ringColliderMesh = new THREE.Mesh(ringCollider, transparentMaterial);
@@ -744,6 +746,8 @@ function pickRay(){
         takeAction(intersects[0].object);
 }
 
+var lavaWinHeight = -1;
+
 function takeAction(obj){
     var type = obj.type;
     switch(type){
@@ -752,6 +756,10 @@ function takeAction(obj){
             gameState = GameStateEnum.won;
             updateLavaHeightStat();
             startWheelAnimation();
+            if (lavaWinHeight == null) {
+                lavaWinHeight = lava.position.y;
+            }
+            //startLavaReflectionDiminishAnimation();
             console.log("updated");
             lavaSpeed *= -10;
             break;
@@ -779,6 +787,14 @@ function Animation(t_length) {
 function startWheelAnimation() {
     animations.wheelRotation = new Animation(2);
 }
+
+function startLavaReflectionDiminishAnimation() {
+    shaderDetails.forEach(function(shader) {
+        shader.lavaWinIntensity = shader.spec.uniforms.lavaReflectIntensity.value;
+        //need to save this value for diminishing in the animation loop;
+    })
+    animations.lavaReflectionDiminish = new Animation(0); // we will use the lava height to determine when to stop this animation instead
+};
 
 //For later.
 //Sort obstacles by y position for collision detection
