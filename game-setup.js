@@ -328,7 +328,7 @@ softSofaCollider.add(softSofaBackCollider);
 obstacles.push(softSofaBackCollider);
 translateBefore(softSofaBackCollider, 0, 0.5, -0.5);
 
-loadOBJ('softsofa', 'obj/Soft Sofa free 01.obj', blinnPhongMaterial, 0.0035,
+loadOBJ('softsofa', 'obj/Soft Sofa free 01.obj', camoMaterial, 0.0035,
     0, 0, - levelLength/2 + 20,
     1.15, 0, 1.7 ,
     5.2, 4.5, 2,

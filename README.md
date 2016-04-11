@@ -16,7 +16,7 @@ Subdivision Modifier
 https://github.com/mrdoob/three.js/blob/master/examples/js/modifiers/SubdivisionModifier.js
 
 XHRLoader and DDSLoader from P2
-TGALoader from 
+TGALoader:
 https://github.com/mrdoob/three.js/blob/master/examples/js/loaders/TGALoader.js
 
 3D Models:
