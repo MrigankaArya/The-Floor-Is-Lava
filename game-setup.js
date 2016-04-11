@@ -321,6 +321,27 @@ function placeSubwoofer() {
     }
 }
 
+
+var softSofaCollider = makeCube(1, 1, 1, transparentMaterial);
+var softSofaBackCollider = makeCube(0.85, 1, 0.4, transparentMaterial);
+softSofaCollider.add(softSofaBackCollider);
+obstacles.push(softSofaBackCollider);
+translateBefore(softSofaBackCollider, 0, 0.5, -0.5);
+
+loadOBJ('softsofa', 'obj/Soft Sofa free 01.obj', blinnPhongMaterial, 0.0035,
+    0, 0, - levelLength/2 + 20,
+    1.15, 0, 1.7 ,
+    5.2, 4.5, 2,
+    0, Math.PI/2, 0, softSofaCollider, placeSoftSofa
+    );
+
+
+function placeSoftSofa() {
+    var softSofa = loadedObjs.softsofa;
+    softSofa.children[0].scale.y = 0.005; // make it taller
+
+}
+
 var angleTableCollider = makeCube(1, 1, 1, transparentMaterial);
 var aTableverts = angleTableCollider.geometry.vertices;
 //mold the cube to fit the angle table
@@ -353,6 +374,17 @@ function placeAngleTable() {
     scene.add(clone1);
     obstacles.push(clone1.children[1])
     angletableClone= clone1
+}
+
+function addSpheres() {
+    for (var i = 1; i < 2.5; i += 0.5) {
+        var radius = i;
+        var sphere = new THREE.SphereGeometry(radius, 32, 32);
+        var sphereMesh = new THREE.Mesh(sphere, blinnPhongMaterial);
+        translateBefore(sphereMesh, i * 6, radius/2 + groundHeight/2, - (levelLength/2) + 15);
+        obstacles.push(sphereMesh);
+        scene.add(sphereMesh);
+    }
 }
 
 function makeRoomSurface(width, height, length, transformMatrix, material) {
@@ -866,6 +898,7 @@ translateBefore(shelf3, -(levelWidth/2) + 10, 0, -(levelLength /2.5));
 translateAfter(shelf3, (levelWidth / 2) - (width3 / 2), height3 / 2, 0);
 
 addStartPlatform();
+addSpheres();
 // addToruses();
 
 player.constraints = [];

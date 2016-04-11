@@ -25,3 +25,6 @@ http://www.turbosquid.com/FullPreview/Index.cfm/ID/527825
 
 Angle Table:
 http://www.turbosquid.com/FullPreview/Index.cfm/ID/644916
+
+Soft Sofa:
+http://www.turbosquid.com/FullPreview/Index.cfm/ID/758576
